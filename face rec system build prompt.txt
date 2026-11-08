@@ -1,0 +1,749 @@
+================================================================================
+TASK PROMPT - BUILD A FACE RECOGNITION / ACCESS-CONTROL SYSTEM WITH THE FEATURE
+SET BELOW
+(Hand this entire document to the implementing agent as the task specification.)
+================================================================================
+
+ROLE
+------
+You are the lead engineer of a small team. You are given a complete, feature-
+complete specification for a face recognition and access-control system that
+combines live camera monitoring, identity matching, an auditable event log and
+physical access control.
+
+YOUR JOB
+--------
+Build the whole thing: the running system, the operator interface, the helper
+tools, the data model, the tests and the setup documentation.
+
+RULES OF ENGAGEMENT
+-------------------
+1. You choose the entire technical stack yourself - language, framework,
+   database, UI toolkit, packaging, deployment. Nobody will tell you what to
+   use, and you must not ask the requester to choose. Pick what is best for
+   this workload and state your choices briefly in the README.
+2. Write real, running code. No pseudocode, no placeholders, no "TODO: implement".
+   Every feature listed below must work end to end.
+3. Treat every numbered requirement as mandatory. Items marked OPTIONAL are
+   genuinely optional; everything else must ship.
+4. The system must run on a single on-premise host on a local network with no
+   cloud dependency and no internet requirement at runtime.
+5. Deliver incrementally in the milestone order of section 12, and keep the
+   system runnable and demonstrable after every milestone.
+6. When two requirements conflict, prefer the one that keeps the system safe
+   and usable (fail closed on access control, never lose an audit record).
+7. You may reuse the data model in the accompanying schema export file that
+   sits next to this prompt in the project root. Treat it as a starting point:
+   keep the meaningful field names, but redesign the storage however you like.
+
+================================================================================
+1. PRODUCT OBJECTIVE
+================================================================================
+The system watches one or more network cameras, decides in near real time who
+each visible person is, keeps an auditable record of every appearance, and
+opens doors or gates for people who are approved for access. A control-room
+operator supervises everything from one console: live video, live detections,
+enrolled identities, reports, camera setup and engine tuning.
+
+What "working" means for the operator:
+- A person walks into view of a camera. Within about a second the live view
+  shows a labelled box around them with their name and a short confidence
+  value.
+- The same person stays in view: one appearance, one record - not one record
+  per frame.
+- A stranger appears: the view says unknown, and the operator can see the
+  captured frame, the cropped face and the person crop in the console.
+- An approved person appears at an entrance: the connected relay is pulsed
+  open, optionally only if the person was detected inside a designated zone.
+- The operator can filter yesterday's events by name, age band, gender,
+  approval state, date and time, export the result as a printable document,
+  and download or delete individual events.
+- The operator can enrol a new person in under a minute, including picking
+  exactly which face is registered when a photo contains several people.
+
+================================================================================
+2. SYSTEM SHAPE
+================================================================================
+2.1 One host, four cooperating parts
+  (a) RECOGNITION SERVICE
+      Long-running process that owns the cameras, the recognition pipeline,
+      the enrolled-identity index and the programmatic interface used by the
+      console and the helper tools.
+  (b) DATA STORE
+      Embedded, file-based, no external database server to install. Stores
+      identities, face references, detection events, cameras, users, settings
+      and the binary artefacts (images) of every event. Must support
+      pagination, filtered queries and change notifications to connected
+      clients.
+  (c) OPERATOR CONSOLE
+      Single-page application for the control room. Runs on the same host and
+      is served by the recognition service, and also usable on other machines
+      on the network. Must work at desktop resolutions and degrade gracefully
+      on smaller screens.
+  (d) HELPER TOOLS (desktop, launched on demand)
+      - Enrolment helper: a small desktop app for enrolling people and
+        managing enrolled identities when the console is not convenient.
+      - Zone editor: a small desktop app for drawing detection zones on a
+        camera snapshot.
+      - Service control: a launcher that starts/stops the service and the
+        data store and clears stale processes on the configured ports.
+
+2.2 Runtime behaviour
+  - Everything is reachable over the local network on configurable ports.
+  - The service must survive a camera going offline, a disk hiccup on the
+    data store, and one failing camera not affecting the others.
+  - The data store must be startable automatically by the service so a single
+    launch brings the whole system up.
+
+================================================================================
+3. CAMERA AND VIDEO REQUIREMENTS
+================================================================================
+3.1 Camera registry
+  - Register cameras with: display name, device address, device port, stream
+    profile name, full live-stream address, stream-type flag, gate/door
+    label, device credentials.
+  - Create, edit, delete, and list cameras.
+  - Deleting a camera must ask for confirmation and must not leave a broken
+    tile behind in the console.
+  - Credentials are stored so they are never displayed in plain text in
+    listings or exports.
+
+3.2 Camera discovery
+  - Scan the local network on demand and report devices as they are found,
+    streaming results to the console while the scan runs (not only at the end).
+  - For a discovered device, retrieve its live-stream address automatically
+    using the camera's own management interface and the operator's
+    credentials.
+  - One click turns a discovered device into a registered camera.
+  - The scan must be cancellable and must not block the service.
+
+3.3 Live video distribution
+  - Two stream flavours per camera:
+      * RAW: the camera picture only, no analysis, no overlays. Cheap; used
+        for observers and for cameras where analysis is not wanted.
+      * ANNOTATED: the picture with detection boxes, face boxes, identity
+        labels, zone outlines and a frame-rate readout.
+  - One camera must be captured and analysed once no matter how many viewers
+    are watching it; viewers are reference-counted and the camera is released
+    when the last viewer leaves.
+  - The console displays a mosaic of camera tiles; a tile can be expanded to
+    a large preview and collapsed again.
+  - Video must start quickly and recover automatically if the camera drops
+    (reconnect with backoff, without restarting the whole service).
+
+3.4 Connectivity health
+  - Before opening a raw feed, check that the camera host answers; if it does
+  not, fail fast with a clear message instead of hanging.
+  - Expose a service health view and a resource view (processor, memory,
+  accelerator if present, number of enrolled identities, depth of the internal
+  work queues, per-camera status). These must always answer correctly.
+
+================================================================================
+4. THE RECOGNITION PIPELINE (IMPLEMENT THIS EXACTLY)
+================================================================================
+4.1 Stage 0 - configuration
+  Runtime configuration (loaded at start and reloadable at runtime without a
+  restart) holds:
+    - face acceptance threshold
+    - person detection confidence threshold
+    - identity match similarity threshold
+    - face crop padding in pixels
+    - snapshot image quality
+    - detector/association overlap threshold
+    - ambiguity margin between the best and the second-best identity
+    - zone mode on/off
+    - access-control (relay) mode on/off, relay endpoint, relay channels
+    - number of samples required before an identity is committed
+    - fast re-sampling cadence while a track is undecided
+    - slow re-sampling cadence after a track is decided
+    - minimum face width and minimum face score for a sample to count
+    - processing device selection (accelerated when available, otherwise
+      fallback to the CPU)
+    - service port
+  Every one of these must be settable from the console and must affect the
+  running system, not just the next restart.
+
+4.2 Stage 1 - capture
+  - A dedicated capture worker per camera keeps only the newest frame (older
+    frames are dropped, never queued up).
+  - Use a small capture buffer so readers never block and never see a
+    half-written frame.
+  - On a read failure: release the capture, wait, and reopen it. After
+    repeated failures report the camera as offline and keep the other cameras
+    running.
+
+4.3 Stage 2 - zone masking (optional, per camera)
+  - Each camera may have named detection zones: polygons, rectangles or
+    lines, each with an id, name, description, colour, creation time and an
+    optional relay binding.
+  - Zone definitions are stored per camera address together with the image
+    size they were drawn on.
+  - In zone mode the frame is masked so only people inside the union of the
+    zones are detected.
+  - Each detection is attributed to the zone containing its centre point
+    (first match wins), and the attributed zone travels with the event so a
+    zone can own its own relay.
+  - Zone coordinates must be stored in a resolution-independent way and
+    rescaled to the live frame, otherwise zones silently drift.
+  - If a camera has no zones, zone mode must fall back to the whole frame
+    (never to a hard-coded rectangle).
+
+4.4 Stage 3 - person detection and tracking
+  - Detect people in the frame above the configured confidence threshold.
+  - Track each person across frames with a stable track id so the same person
+    keeps the same identity while visible.
+  - Drop degenerate boxes and clamp boxes to the frame.
+  - Draw the person box; draw the identity label above it; draw the face box
+    inside it when known.
+
+4.5 Stage 4 - face detection inside the person crop
+  - Detect faces in the person crop; discard faces below the face acceptance
+    threshold.
+  - If a track already has a committed identity, do not re-identify it - only
+    refresh its face box.
+  - If several faces are present, choose the best one with the rule
+    "detection confidence multiplied by face width" (a confident but tiny face
+    loses to a slightly less confident but large face).
+  - If no face is found, label the track as still analysing and keep sampling.
+
+4.6 Stage 5 - quality gate
+  A face may only influence a decision when
+      face width  >= minimum face width, and
+      face score  >= minimum face score
+  Small or low-quality faces produce unstable identity vectors, so they must
+  not be allowed to vote. When the gate fails: label the track as still
+  analysing and keep sampling until the person comes closer. This must be
+  visible in the operator console as an explicit "analysing" state, not as
+  "unknown".
+
+4.7 Stage 6 - identity vector and attributes
+  - From the accepted face produce one fixed-length numeric vector and two
+    attribute estimates (approximate age, apparent gender).
+  - Normalise the vector before comparison.
+
+4.8 Stage 7 - matching against enrolled identities
+  - Keep the enrolled set in memory as a matrix of vectors plus per-row
+    metadata (identity name, age, gender, approval role, national/ID number)
+    and an index from identity name to its rows (one row per reference photo).
+  - Rebuild the index whenever enrolment data changes - never require a
+    manual restart or a separate refresh call to make a new person matchable.
+  - Matching procedure:
+      1. normalise the query vector
+      2. compute the similarity of the query against every row in one
+         vectorised pass
+      3. for each identity take the best K rows (K = 3) and average them, so
+         one poor photo cannot lower an identity's score
+      4. rank identities by that score
+      5. if the best score is below the match threshold -> unknown
+      6. if the gap to the second-best identity is below the ambiguity margin
+         -> unknown (never force a choice between two similar people)
+      7. otherwise return the identity, the score and its metadata
+  - The similarity measure must be a normalised vector similarity (for
+    example the dot product of unit vectors).
+
+4.9 Stage 8 - temporal voting (the stabiliser)
+  - Every accepted sample appends a vote (identity, score, attributes,
+    approval role, national number) to that track's vote list.
+  - Do not commit an identity before the configured number of samples.
+  - Resolve the votes by weighted majority: the winner is the identity with
+    the largest total similarity (not merely the most votes), and the winner
+    must also hold a strict majority of the samples. Otherwise the result is
+    unknown.
+  - Report the average similarity of the winning samples.
+  - After committing, drop the vote list and only refresh geometry for that
+    track.
+
+4.10 Stage 9 - track lifecycle
+  - A track stays alive while it is seen; sweep stale tracks periodically and
+    drop them after the time-to-live, removing every piece of per-track state
+    (last-seen time, vote list, committed flag, processed flag, cached
+    vector, identity state).
+
+4.11 Stage 10 - event generation (once per appearance)
+  - On committing an identity for a track, emit exactly one event for that
+    appearance - not one per frame.
+  - Capture three artefacts from that moment: the full frame, the padded face
+    crop and the person crop.
+  - Push the event to a bounded write queue; if the queue is full, drop the
+    event with a visible warning instead of stalling the video path.
+
+4.12 Stage 11 - persistence of the event
+  - Save the three artefacts as image files with the configured quality.
+  - Store an event record with: identity name (or unknown), similarity score,
+    estimated age, estimated gender, approval role, national number, camera
+    source, date, time, track id, the artefact file names, and creation and
+    update timestamps.
+  - De-duplicate: suppress a second event for the same identity inside a
+    short window (default 10 s) so a person standing still does not flood the
+    log. Make the de-duplication scope explicit and configurable (per track
+    and/or per identity) and document the chosen behaviour.
+
+4.13 Stage 12 - access-control reaction
+  - When the matched identity's role is "approve" and access control is
+    enabled, pulse the relay:
+      * in zone mode: the relay bound to the zone where the person was seen
+      * otherwise: the globally configured relay; with two channels, pulse
+        channel 1 then channel 2 with a short delay
+  - Relay actuation must be reliable for every channel combination, must not
+    abort the remaining channels when one fails, and must never crash the
+    pipeline. Log every attempt and every outcome.
+  - Relays default to fail-closed and have a bounded pulse duration.
+
+4.14 Stage 13 - operator notification
+  - When the alarm is enabled, raise an audible alarm in the console for a
+    new detection and send an e-mail-style notification containing the
+    identity, the date and the time to the configured recipient.
+  - Notification failures must be logged and must never break recognition.
+
+4.15 Stage 14 - annotated output
+  - The annotated frame shows person boxes, face boxes, identity label plus
+    track id, zone outlines in their configured colours, active zone names
+    and a frame-rate readout.
+
+4.16 Scheduling and fairness
+  - Undecided tracks are sampled fast so a decision arrives quickly; decided
+  - tracks are sampled slowly, only to refresh geometry.
+  - When many samples are queued, keep only the newest sample per track so
+    the pipeline never works on stale frames.
+
+4.17 Accuracy and safety targets
+  - Never commit an identity from a single sample.
+  - Never commit an identity when the top two candidates are within the
+    ambiguity margin.
+  - Never let a low-quality face change a committed identity.
+  - Never produce more than one event per appearance.
+  - Treat photos and video replays as a known limitation unless you add a
+    liveness stage; if you add one, keep it optional and behind the same
+    quality-gate pattern.
+
+================================================================================
+5. ENROLMENT REQUIREMENTS
+================================================================================
+5.1 Enrol from one image
+  - Accept an image (uploaded file or camera capture), detect the person
+    region, crop the face, extract the identity vector and store the
+    reference photo, the vector and the metadata.
+  - If the person already exists, add the new reference rather than silently
+    discarding it (and never replace a good reference with a worse one by
+    accident - decide, document and implement one consistent rule).
+
+5.2 Enrol from several images at once
+  - Enrol one person from multiple photos, producing one reference row per
+    photo.
+
+5.3 Face selection when a photo contains several people
+  - Detect every face in the photo, show each one as a separate selectable
+    thumbnail with its box, score and estimated attributes.
+  - The operator picks exactly which face is the identity; a single detected
+    face may be pre-selected.
+  - Visual feedback must make the selection unambiguous (for example
+    different border colours for selected and unselected).
+  - Limit the number of photos per enrolment (10 is a sensible default).
+
+5.4 Enrol from a live camera
+  - Take a still from a registered camera during enrolment, pick the face
+    from that still and use it as the reference.
+
+5.5 Reference management
+  - List the reference photos of an identity with their count.
+  - Add another reference photo to an existing identity.
+  - Remove one specific reference by index.
+  - Edit the identity metadata: name, family name, age, gender, approval
+    role / category, national number, free-text description, and which
+    operator registered the identity.
+
+5.6 Delete and list
+  - List enrolled identities with their cropped avatar (fall back to the
+    full reference image when no crop exists) and the number of references.
+  - Delete an identity together with its references and images, with a
+    confirmation step, and make the identity immediately unmatchable.
+
+5.7 Image-search (find a person by picture)
+  - Given a query face image, find the most similar stored event images and
+    return the matching event records so the operator can open them.
+  - This path is separate from identity matching: it compares whole images,
+    not identity vectors, and it must return the event records, not just
+    scores.
+
+================================================================================
+6. DATA MODEL (semantic requirements - the storage engine is your choice)
+================================================================================
+6.1 Identity (person)
+  name, family name, age, gender, approval role / category, national or ID
+  number, free-text description, registering operator, avatar crop, reference
+  photo, creation and update timestamps.
+  Rule: the "approval role" is the field that drives access control. Use a
+  controlled vocabulary (for example: approve / deny / visitor / colleague)
+  rather than free text, and validate it.
+
+6.2 Face reference (one row per enrolled photo)
+  identity reference, identity vector, image file, creation timestamp.
+  Rule: keep one row per reference photo instead of packing every vector into
+  one growing record; that makes adding, removing and auditing references
+  trivial and keeps record size bounded.
+
+6.3 Detection event
+  identity name (or unknown), similarity score, estimated age, estimated
+  gender, approval role, national number, camera source, date, time, track
+  id, full-frame artefact, face-crop artefact, person-crop artefact, artefact
+  file name, creation and update timestamps.
+
+6.4 Camera
+  display name, address, port, stream profile name, stream address, stream
+  type flag, gate label, device credentials, creation and update timestamps.
+
+6.5 User
+  display name, login name, password (stored hashed, never in clear text and
+  never transferred in a recoverable form), e-mail, role (admin / observer),
+  "remember me" flag, creation and update timestamps.
+  Rule: user records must be real accounts with hashed secrets and a session
+  or token mechanism - not a client-side comparison of encoded strings.
+
+6.6 Settings
+  one configuration record holding every value from stage 0 of section 4,
+  including the report-lock flag.
+
+6.7 Structural requirements
+  - Index the fields you filter and sort on (identity name, event name,
+    event date and time, track id).
+  - Support pagination for the event list and for the identity list.
+  - Support change notifications so open consoles update live.
+  - Define a retention policy for events and their artefacts, and make it
+    configurable.
+  - Biometric data (identity vectors) is sensitive: store it so it is not
+  readable in the clear, restrict who can read it, and log every access.
+
+================================================================================
+7. OPERATOR CONSOLE REQUIREMENTS
+================================================================================
+7.1 Sign-in and roles
+  - Sign-in with credentials, real server-side authentication, a session that
+    can be ended (sign-out) and that expires.
+  - Two roles:
+      admin    - everything
+      observer - monitoring, reports and identity lists only
+  - The console must enforce the role difference in the interface AND the
+    service must enforce it on every operation.
+  - No "remember me" shortcut that stores anything recoverable.
+
+7.2 Dashboard / monitoring
+  - Camera mosaic with live video (see 3.3), the annotated flavour for
+    privileged users and the raw flavour for observers.
+  - Two detection panels: identified people and unidentified people, each
+    with its own expand/collapse state, a display counter and a "load more"
+    action.
+  - Selecting a detection opens a details panel with: identity or unknown,
+    approval state, track id, estimated age and gender, localised date and
+    time, the description of the enrolled identity, the detected face crop
+    next to the enrolled avatar, the full frame, zoom, a full-screen viewer,
+    a download action and a delete action.
+  - New detections appear without a manual refresh.
+  - An "analysing" state must be visibly distinct from "unknown".
+
+7.3 Reports
+  - A table of events with the captured frame, identity, score, gender, age,
+    approval role, national number, camera, date and time.
+  - Pagination (about 30 rows per page) and sorting by newest first.
+  - Filters, all combinable: similarity/image search, name, national number,
+    gender, age band (lower bound inclusive, upper bound exclusive), date
+    range (endpoints excluded), time range, approval role / category, and a
+    "fully identified only" toggle. A filter must actually narrow the result
+    set - each one must be verified.
+  - Export the filtered result as a printable document (multi-page,
+   portrait, right-to-left, with index, image, name, date, time, gender,
+   approval state, age and national number).
+  - A report-lock switch: when enabled, running a search requires the
+    administrator's password.
+  - Row actions: open the detail view, download the stored frame with a
+    sensible file name, delete the event (with confirmation, and the list
+    must update immediately).
+
+7.4 Cameras screen
+  - Inventory table/list (index, id, name, address, port, gate, stream
+    address, user name, edit, delete).
+  - Add/edit form with validation.
+  - Discovery panel with live results and one-click registration.
+  - Per-camera raw/annotated switch and a stream status indicator.
+
+7.5 People screen
+  - Grid of enrolled identities with avatar and reference count.
+  - Add, edit and delete.
+  - The enrolment dialog (upload one or many photos, detect faces, pick the
+    right one, fill the metadata) must be reachable from this screen - not
+    only in a separate desktop tool.
+  - A button that opens the standalone enrolment helper as well.
+
+7.6 Person detail
+  - Identity card, reference count, one representative crop, the list of
+    reference photos, add-more-reference action, delete identity, and the
+    person's own detection history if available.
+
+7.7 Settings screen
+  - Engine tuning: match threshold, detection threshold, crop padding,
+    snapshot quality, ambiguity margin, sample count, min face width/score -
+    all live-editable and applied without a restart.
+  - Access control: enable, relay address and port, channel 1 / channel 2
+    switches, and a connection test.
+  - Alarm switch, zone mode switch, report lock switch.
+  - Light/dark theme switch (both themes must actually differ).
+  - Users section for administrators: list, add, edit, delete (with
+    confirmation), role assignment.
+
+7.8 Presentation requirements
+  - Right-to-left layout with a locale-aware date picker (support a
+    right-to-left regional calendar such as the Persian/Jalali one and keep
+    it correct in both directions), localised digits, and a bundled font
+    that is actually registered with the build system.
+  - Consistent design system: custom fields, rows, sliders, image boxes,
+    video boxes, detail panels, date and time boxes.
+  - Loading, empty, error and confirmation states everywhere something can
+    fail or be empty.
+  - Desktop-first layout with sensible behaviour on smaller screens; no
+    horizontal overflow on a laptop.
+  - Every asset the interface references must exist in the bundle (no
+    missing sound files, no local images loaded as if they were remote).
+
+================================================================================
+8. HELPER TOOLS
+================================================================================
+8.1 Enrolment helper (desktop)
+  - Two areas: ENROL and MANAGE.
+  - ENROL: pick a camera, build the stream address, live preview, capture a
+    still, detect the people in it, draw the boxes, click a person to select
+    them, collect the selected face crops in a pending list (with thumbnails,
+    zoom, wheel scrolling, remove and clear), or load a still from a file
+    instead; fill in the identity metadata; save.
+  - MANAGE: list enrolled identities with their photo, search/filter, edit,
+    delete, and trigger an engine refresh after a change.
+  - Right-to-left layout, regional date handling and a coherent colour
+    system.
+
+8.2 Zone editor (desktop)
+  - Load a snapshot from a local webcam, from a camera, from a file or from
+    an image array.
+  - Draw polygons, rectangles and lines; zoom in/out/fit; wheel zoom; click to
+    add points; drag to move; finish a shape; convert coordinates correctly
+    between canvas and source-image space.
+  - Region list with select, rename, edit, delete, clear-all; colour per
+    region; optional relay binding per region.
+  - Save and reload a per-camera zone file with metadata (image size, region
+    count, version, creation time, camera address) in a format the service
+    can read back unchanged. Saving and reloading must round-trip.
+
+8.3 Service control
+  - Start, stop and reset the service and the data store; read the configured
+    port; clear stale processes holding the configured ports before starting.
+
+================================================================================
+9. NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+9.1 Performance
+  - Target 30 frames per second of processing per camera on accelerated
+    hardware, with an automatic, slower cadence on CPU-only hardware.
+  - The recognition pipeline must never block the interface or the video
+    delivery path. Use separate workers and bounded queues.
+  - The enrolled-identity index is matched against in one vectorised pass -
+    do not loop over identities per frame in interpreted code.
+  - Keep memory flat over long runs: no unbounded queues, no unbounded
+    caches, no per-frame allocations that grow.
+
+9.2 Isolation and resilience
+  - A crashing detector, camera or relay client must not take the service
+    down. Isolate heavy analysis in its own worker process so a fault cannot
+    propagate into the interface.
+  - Handle a camera disappearing, a storage hiccup, a malformed record, an
+    oversized upload, an unsupported file type and a database that is not
+    yet running - each with a clear log line and a graceful outcome.
+  - Clean shutdown: release cameras, stop workers, flush queues.
+
+9.3 Security
+  - The programmatic interface must be authenticated; every operation must
+    check the caller's role. No open endpoints.
+  - Restrict cross-origin access to the deployed origins instead of
+    allowing everything.
+  - Hash user passwords; protect camera credentials; never log secrets.
+  - Validate and limit uploads (type, size); sanitise any path taken from a
+    request.
+  - Rate-limit the discovery and upload operations.
+  - Encrypt the data at rest where the platform allows, and document the
+  - biometric-data handling: minimisation, access logging, deletion.
+  - Serve the console and the interface over a secure channel in production
+    and make sure the streams and downloads still work under it.
+
+9.4 Observability
+  - Structured logging to console and to a rotating file, with a configurable
+    level (info by default; debug must be opt-in).
+  - Log every enrolment, deletion, settings change, relay actuation,
+  - notification and failed operation.
+  - Expose metrics: frames per second per camera, detection latency, queue
+  - depths, events per minute, error counters.
+
+9.5 Portability and packaging
+  - Run on a mainstream desktop operating system and in a container;
+  - provide a one-command start and a one-command build.
+  - Ship the interface as a static bundle served by the service, plus a
+  - standalone build if the chosen stack supports it.
+  - The data store and its data directory must be relocatable and
+  - backup-able (document how to export and restore).
+
+9.6 Maintainability
+  - Clear module boundaries: capture / zone / detection / tracking / face /
+  - embedding / matching / decision / events / actions / overlay, with the
+  - storage layer behind repositories and the interface layer behind routes.
+  - The analysable pieces (face analysis, person detection, tracking,
+  - embedding, storage, notifications, relay) must sit behind small
+  - interfaces so any implementation can be swapped.
+  - Configuration, not hard-coded values; one place for thresholds, paths and
+  - ports.
+  - Type-checked, formatted code with meaningful names and comments that
+  - explain intent (especially the algorithm stages).
+
+================================================================================
+10. ACCEPTANCE CRITERIA (verify every one before reporting done)
+================================================================================
+[ ] The whole system starts with one command and the console loads from it.
+[ ] A camera can be registered manually and also via network discovery, and
+    its live stream appears in the mosaic.
+[ ] The annotated stream shows person boxes, face boxes, identity labels,
+    track ids and a frame-rate readout.
+[ ] The raw stream shows no analysis and is cheaper.
+[ ] A known enrolled person is recognised live with the correct name, and
+    the label appears within about a second of the person being visible.
+[ ] An unknown person is labelled unknown rather than being forced onto the
+    nearest identity.
+[ ] Two similar-looking enrolled people produce "unknown" instead of a coin
+    flip (the ambiguity margin works).
+[ ] A small or blurry face never changes the identity - the track stays in
+    the "analysing" state until the face is good enough.
+[ ] One appearance produces exactly one event, with the full frame, the face
+    crop and the person crop attached.
+[ ] Events are listed newest-first, paginated, and every filter narrows the
+    result set correctly (including the age band and date range edges).
+[ ] The filtered result exports to a printable document.
+[ ] An identity can be enrolled from one photo and from several photos, and
+    the operator can pick which face is registered when several are present.
+[ ] A newly enrolled identity is matchable immediately - no restart, no
+    manual refresh.
+[ ] A reference photo can be added and removed individually, and the match
+    behaviour changes accordingly.
+[ ] Deleting an identity removes it from matching immediately.
+[ ] Image-search returns the matching event records, not just scores.
+[ ] In zone mode, people outside the zones are not detected, and a person
+    inside a zone is attributed to that zone.
+[ ] A zone-bound relay is pulsed only for people detected in that zone, and
+    only for identities with the approve role.
+[ ] With two relay channels both are pulsed, in order, and a failure in one
+    does not prevent the other.
+[ ] The audible alarm and the notification are raised for new detections when
+    enabled, and a notification failure does not break recognition.
+[ ] Changing any threshold or switch in the console affects the running
+    system without a restart.
+[ ] The health and resource views always answer correctly.
+[ ] Sign-in, sign-out, role separation and session expiry work; an observer
+    cannot reach admin operations either through the interface or by calling
+    the interface directly.
+[ ] Deleting a camera, an identity or an event asks for confirmation.
+[ ] Every asset referenced by the interface exists and renders; the bundled
+    font is registered with the build.
+[ ] The right-to-left layout, regional calendar and localised digits are
+    correct in every screen that shows a date, a time or a name.
+[ ] The service survives a camera going offline, an unreadable record and an
+    oversized upload, and keeps serving the other cameras.
+[ ] Automated tests cover the matching maths, the vote resolution, the
+    de-duplication window, the zone geometry and the coordinate conversion.
+[ ] The README states the stack, how to build, how to run, how to back up and
+    how to configure it.
+
+================================================================================
+11. PITFALLS TO AVOID (learned from a real implementation - do not ship these)
+================================================================================
+ 1. A resource/status view that reads an internal queue from the wrong owner
+    and therefore always errors - make it report the real numbers.
+ 2. Access-control actuation that breaks for some channel combinations
+    because of a naming slip - test every combination.
+ 3. Deleting a temporary file twice after a successful write, raising an
+    error after the record was already stored.
+ 4. Output sub-directories that are only created when the parent is missing,
+    so saving fails on a partially populated tree.
+ 5. A configuration file that is written in one shape and read in another, so
+    the tool cannot reload its own file.
+ 6. Zone coordinates stored in source-image pixels without rescaling, which
+    silently drifts when the live resolution differs.
+ 7. Capture and upload operations that swallow their own "nothing detected"
+    error and answer success with an empty body.
+ 8. An image-search path that rebuilds the whole gallery index on every
+    request - cache it and invalidate it on change.
+ 9. Two enrolment paths that disagree about whether a new reference replaces
+    or appends - pick one rule and use it everywhere.
+10. A global tuning value that every request overwrites, so per-request
+    behaviour is impossible.
+11. De-duplication scoped globally per identity, which hides the same person
+    seen on two cameras - make the scope explicit.
+12. Declared configuration and helpers that are never wired up - dead knobs
+    mislead operators.
+13. Two helper services binding the same port.
+14. A path parameter that only works for one prefix and crashes otherwise.
+15. Logging configured at import time, so the service always runs at debug
+    level and fills the disk.
+16. Reading the first element of a list right after loading it - it throws
+    when the list is empty. Handle the empty case everywhere.
+17. Realtime subscriptions and form controllers that are never disposed.
+18. Helper functions for alarms and access control that exist but are never
+    called, so the feature silently does nothing.
+19. A count badge that falls back to a fake number when the real value is
+    unknown.
+20. Deleting a record through a different path depending on which screen you
+    are on - one code path, one semantics.
+21. Storing a password as plain text or as an encoding instead of a hash.
+22. Leaving the interface endpoints unauthenticated and the cross-origin
+    policy wide open.
+23. No indexes on the fields you filter by - the reports get slower every
+    week.
+24. Keeping every identity vector in one growing record - one row per
+    reference photo instead.
+
+================================================================================
+12. BUILD ORDER
+================================================================================
+M1  Foundations - layout, configuration, logging, health view, data store
+    bootstrap, empty console shell.
+M2  Storage - entities, repositories, pagination, indexes, change
+    notifications.
+M3  Capture - camera worker, frame buffer, reconnect, raw stream delivery,
+    camera registry, discovery.
+M4  Detection and tracking - person detection, stable track ids, boxes,
+    annotated stream with the frame-rate readout.
+M5  Face stage - face detection, best-face choice, quality gate, identity
+    vector, attribute estimates.
+M6  Matching - in-memory index, vectorised similarity, top-K aggregation,
+    threshold and ambiguity margin, unknown handling.
+M7  Decision and events - vote buffer, weighted majority, commit, artefact
+    capture, event records, de-duplication.
+M8  Enrolment - upload, face detection result, face picking, single and
+    multi enrolment, reference add/remove, immediate index refresh, delete.
+M9  Zones and access control - zone definitions and editing, masking and
+    attribution, relay client and actuation, alarm and notifications.
+M10 Console complete - monitoring, reports with filters and export, cameras,
+    people, settings, users, roles, localisation.
+M11 Hardening - authentication and authorisation on every operation,
+    indexes, retention, metrics, backups, load test, full acceptance pass.
+
+================================================================================
+13. DELIVERABLES
+================================================================================
+ 1. The complete source code, organised by the milestones.
+ 2. A console you can open and use with real data.
+ 3. The helper tools (enrolment helper, zone editor, service control).
+ 4. Automated tests for the algorithm stages and the storage layer.
+ 5. A README with: the stack you chose and why, how to build, how to run,
+    how to configure every knob, how to back up and restore, and the known
+    limitations.
+ 6. A short acceptance report: each item of section 10 with pass/fail and
+    the evidence (a test name, a screenshot or a log line).
+
+Start now: pick your stack, scaffold the project, and work through the
+milestones in order. Report progress after each milestone and finish by
+running the full acceptance list.
+================================================================================
+END OF PROMPT
+================================================================================

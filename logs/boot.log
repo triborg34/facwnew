@@ -1,0 +1,2336 @@
+06:58:56 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.352] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.431] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+06:58:56 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+06:58:56 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+06:58:56 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+06:58:56 INFO    app                    service ready  port=8770
+06:58:57 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=5 duration_ms=800
+06:58:57 INFO    pipeline               event stored  id=67 identity=Lena Fixture camera=Hallway track=1
+06:58:57 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=5 duration_ms=800
+06:58:57 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:58:57 INFO    pipeline               event stored  id=68 identity=Lena Fixture camera=Hallway Demo track=2
+06:58:57 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:58:59 INFO    web                    slow request  path=/api/events/export ms=1672
+06:59:03 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:03 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:08 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=4 duration_ms=800
+06:59:08 INFO    pipeline               event stored  id=69 identity=Lena Fixture camera=Hallway track=11
+06:59:08 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=4 duration_ms=800
+06:59:09 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:09 INFO    pipeline               event stored  id=70 identity=Lena Fixture camera=Hallway Demo track=12
+06:59:10 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:10 INFO    capture                file source finished  camera=Hallway
+06:59:10 INFO    capture                file source finished  camera=Hallway
+06:59:10 INFO    capture                file source finished  camera=Hallway
+06:59:10 INFO    capture                file source finished  camera=Hallway
+06:59:10 INFO    capture                file source finished  camera=Hallway Demo
+06:59:41 ERROR   capture                camera offline after repeated failures  camera=Hallway
+06:59:47 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=5 duration_ms=800
+06:59:47 INFO    pipeline               event stored  id=71 identity=Lena Fixture camera=Hallway track=17
+06:59:47 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:47 INFO    pipeline               event stored  id=72 identity=Lena Fixture camera=Hallway Demo track=18
+06:59:47 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=5 duration_ms=800
+06:59:48 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:48 INFO    web                    slow request  path=/video/1/snapshot ms=1263
+06:59:50 INFO    web                    slow request  path=/video/1/snapshot ms=1237
+06:59:51 INFO    web                    slow request  path=/video/1/snapshot ms=1268
+06:59:53 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:54 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+06:59:56 ERROR   capture                camera offline after repeated failures  camera=Hallway
+06:59:59 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+06:59:59 INFO    pipeline               event stored  id=73 identity=Lena Fixture camera=Hallway track=27
+06:59:59 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+07:00:01 INFO    capture                file source finished  camera=Hallway
+07:00:01 INFO    capture                file source finished  camera=Hallway
+07:00:01 INFO    capture                file source finished  camera=Hallway
+07:00:01 INFO    capture                file source finished  camera=Hallway Demo
+07:00:01 INFO    capture                file source finished  camera=Hallway
+07:00:11 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:00:26 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:00:29 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.336] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.414] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+07:00:29 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+07:00:29 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+07:00:29 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+07:00:29 INFO    app                    service ready  port=8770
+07:00:29 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+07:00:29 INFO    pipeline               event stored  id=74 identity=Lena Fixture camera=Hallway track=1
+07:00:30 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:30 INFO    pipeline               event stored  id=75 identity=Lena Fixture camera=Hallway Demo track=2
+07:00:30 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+07:00:30 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:35 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.333] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.414] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+07:00:35 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+07:00:35 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+07:00:35 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+07:00:35 INFO    app                    service ready  port=8770
+07:00:35 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:00:35 INFO    pipeline               event stored  id=76 identity=Lena Fixture camera=Hallway track=1
+07:00:36 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:36 INFO    pipeline               event stored  id=77 identity=Lena Fixture camera=Hallway Demo track=2
+07:00:36 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:00:36 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:47 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+07:00:47 INFO    pipeline               event stored  id=78 identity=Lena Fixture camera=Hallway track=10
+07:00:47 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=3 duration_ms=800
+07:00:47 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:47 INFO    pipeline               event stored  id=79 identity=Lena Fixture camera=Hallway Demo track=11
+07:00:47 INFO    access.relay           relay pulse  channel=relay2 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:00:49 INFO    capture                file source finished  camera=Hallway
+07:00:49 INFO    capture                file source finished  camera=Hallway
+07:00:49 INFO    capture                file source finished  camera=Hallway
+07:00:49 INFO    capture                file source finished  camera=Hallway
+07:00:49 INFO    capture                file source finished  camera=Hallway Demo
+07:01:20 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:01:35 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:01:50 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:01:59 INFO    app                    settings applied  changed=['zone_mode']
+07:02:00 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:00 INFO    pipeline               event stored  id=80 identity=Lena Fixture camera=Hallway track=14
+07:02:03 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:05 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:02:13 INFO    capture                file source finished  camera=Hallway
+07:02:18 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:18 INFO    pipeline               event stored  id=81 identity=Lena Fixture camera=Hallway track=20
+07:02:20 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:02:20 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:31 INFO    capture                file source finished  camera=Hallway
+07:02:35 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:02:41 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:41 INFO    pipeline               event stored  id=82 identity=Lena Fixture camera=Hallway track=26
+07:02:41 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:50 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:02:54 INFO    capture                file source finished  camera=Hallway
+07:02:54 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=2 duration_ms=800
+07:02:54 INFO    pipeline               event stored  id=83 identity=Lena Fixture camera=Hallway track=29
+07:03:01 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:03:01 INFO    pipeline               event stored  id=84 identity=Lena Fixture camera=Hallway Demo track=30
+07:03:02 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:03:05 ERROR   capture                camera offline after repeated failures  camera=Hallway
+07:03:15 INFO    capture                file source finished  camera=Hallway Demo
+07:03:15 INFO    access.relay           relay pulse  channel=relay1 ok=True error= reason=identity=Lena Fixture camera=6 duration_ms=800
+07:03:15 INFO    pipeline               event stored  id=85 identity=Lena Fixture camera=Hallway Demo track=33
+07:03:15 INFO    app                    settings applied  changed=['access_control', 'relay_host', 'zone_mode']
+07:05:20 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.339] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.417] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+07:05:20 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+07:05:20 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+07:05:20 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+07:05:20 INFO    app                    service ready  port=8770
+07:05:20 INFO    pipeline               event stored  id=86 identity=Lena Fixture camera=Hallway track=1
+07:05:20 INFO    pipeline               event stored  id=87 identity=Lena Fixture camera=Hallway Demo track=2
+07:05:28 INFO    web                    slow request  path=/api/cameras/test-address ms=1506
+07:05:28 INFO    app                    settings applied  changed=[]
+07:05:29 INFO    web                    slow request  path=/api/events/export ms=1815
+07:05:32 INFO    pipeline               event stored  id=88 identity=Lena Fixture camera=Hallway Demo track=11
+07:05:32 INFO    pipeline               event stored  id=89 identity=Lena Fixture camera=Hallway track=12
+07:05:34 INFO    capture                file source finished  camera=Hallway
+07:05:34 INFO    capture                file source finished  camera=Hallway Demo
+07:05:46 INFO    pipeline               event stored  id=90 identity=Lena Fixture camera=Hallway track=26
+07:05:46 INFO    pipeline               event stored  id=91 identity=Lena Fixture camera=Hallway Demo track=25
+07:05:48 INFO    capture                file source finished  camera=Hallway
+07:05:48 INFO    capture                file source finished  camera=Hallway Demo
+07:05:59 INFO    web                    slow request  path=/api/cameras/test-address ms=1502
+07:05:59 INFO    app                    settings applied  changed=[]
+07:06:00 INFO    pipeline               event stored  id=92 identity=Lena Fixture camera=Hallway Demo track=31
+07:06:01 INFO    web                    slow request  path=/api/events/export ms=1496
+07:06:11 INFO    pipeline               event stored  id=93 identity=Lena Fixture camera=Hallway Demo track=36
+07:06:13 INFO    capture                file source finished  camera=Hallway Demo
+07:06:50 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.327] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.405] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+07:06:50 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+07:06:50 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+07:06:50 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+07:06:50 INFO    app                    service ready  port=8770
+07:06:50 INFO    pipeline               event stored  id=94 identity=Lena Fixture camera=Hallway track=1
+07:06:50 INFO    pipeline               event stored  id=95 identity=Lena Fixture camera=Hallway Demo track=2
+07:07:02 INFO    pipeline               event stored  id=96 identity=Lena Fixture camera=Hallway track=11
+07:07:02 INFO    pipeline               event stored  id=97 identity=Lena Fixture camera=Hallway Demo track=12
+07:07:04 INFO    capture                file source finished  camera=Hallway Demo
+07:07:04 INFO    capture                file source finished  camera=Hallway
+07:07:30 INFO    web                    slow request  path=/api/cameras/test-address ms=1504
+07:07:30 INFO    app                    settings applied  changed=[]
+07:07:31 INFO    pipeline               event stored  id=98 identity=Lena Fixture camera=Hallway Demo track=17
+07:07:32 INFO    web                    slow request  path=/api/events/export ms=1840
+07:07:42 INFO    pipeline               event stored  id=99 identity=Lena Fixture camera=Hallway Demo track=22
+07:07:44 INFO    capture                file source finished  camera=Hallway Demo
+09:46:32 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+[ WARN:0@0.302] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.378] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+09:46:32 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx
+09:46:32 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx
+09:46:32 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+09:46:32 INFO    app                    service ready  port=8770
+09:46:33 INFO    pipeline               event stored  id=100 identity=Lena Fixture camera=Hallway track=1
+09:46:33 INFO    pipeline               event stored  id=101 identity=Lena Fixture camera=Hallway Demo track=2
+09:46:44 INFO    pipeline               event stored  id=102 identity=Lena Fixture camera=Hallway track=11
+09:46:44 INFO    pipeline               event stored  id=103 identity=Lena Fixture camera=Hallway Demo track=12
+09:46:46 INFO    capture                file source finished  camera=Hallway
+09:46:46 INFO    capture                file source finished  camera=Hallway Demo
+09:46:58 INFO    pipeline               event stored  id=104 identity=Lena Fixture camera=Hallway track=27
+09:46:58 INFO    pipeline               event stored  id=105 identity=Lena Fixture camera=Hallway Demo track=28
+09:47:00 INFO    capture                file source finished  camera=Hallway Demo
+09:47:00 INFO    capture                file source finished  camera=Hallway
+10:02:01 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+10:02:01 INFO    core.device            processing device resolved  device=cpu requested=auto cuda_devices=0 opencv_cuda=False ort_cuda=False reason=auto: no CUDA available, using CPU
+[ WARN:0@0.393] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.471] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+10:02:01 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=cpu device_reason=auto: no CUDA available, using CPU
+10:02:01 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx device=cpu backend=cpu reason=auto: no CUDA available, using CPU
+10:02:01 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+10:02:01 INFO    app                    service ready  port=8770
+10:02:02 INFO    pipeline               event stored  id=106 identity=Lena Fixture camera=Hallway track=1
+10:02:02 INFO    pipeline               event stored  id=107 identity=Lena Fixture camera=Hallway Demo track=2
+10:02:13 INFO    pipeline               event stored  id=108 identity=Lena Fixture camera=Hallway Demo track=11
+10:02:13 INFO    pipeline               event stored  id=109 identity=Lena Fixture camera=Hallway track=12
+10:02:15 INFO    capture                file source finished  camera=Hallway
+10:02:15 INFO    capture                file source finished  camera=Hallway Demo
+10:02:42 INFO    store.db               database ready  path=D:\facw\data\facw.db schema=1
+10:02:42 INFO    core.device            processing device resolved  device=cpu requested=auto cuda_devices=0 opencv_cuda=False ort_cuda=False reason=auto: no CUDA available, using CPU
+[ WARN:0@0.388] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.466] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+10:02:42 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=cpu device_reason=auto: no CUDA available, using CPU
+10:02:42 INFO    vision.person          person detector loaded  model=D:\facw\models\persondet.onnx device=cpu backend=cpu reason=auto: no CUDA available, using CPU
+10:02:42 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+10:02:42 INFO    app                    service ready  port=8770
+10:02:43 INFO    pipeline               event stored  id=110 identity=Lena Fixture camera=Hallway track=1
+10:02:43 INFO    pipeline               event stored  id=111 identity=Lena Fixture camera=Hallway Demo track=2
+10:02:47 INFO    web                    slow request  path=/api/cameras/test-address ms=1516
+10:02:47 INFO    app                    settings applied  changed=[]
+10:02:49 INFO    web                    slow request  path=/api/events/export ms=2299
+10:02:54 INFO    pipeline               event stored  id=112 identity=Lena Fixture camera=Hallway Demo track=9
+10:02:54 INFO    pipeline               event stored  id=113 identity=Lena Fixture camera=Hallway track=10
+10:02:56 INFO    capture                file source finished  camera=Hallway Demo
+10:02:56 INFO    capture                file source finished  camera=Hallway
+10:03:08 INFO    pipeline               event stored  id=114 identity=Lena Fixture camera=Hallway track=26
+10:03:08 INFO    pipeline               event stored  id=115 identity=Lena Fixture camera=Hallway Demo track=25
+10:03:10 INFO    capture                file source finished  camera=Hallway Demo
+10:03:10 INFO    capture                file source finished  camera=Hallway
+10:03:28 INFO    pipeline               event stored  id=116 identity=Lena Fixture camera=Hallway Demo track=31
+10:03:34 INFO    web                    slow request  path=/api/cameras/test-address ms=1518
+10:03:35 INFO    app                    settings applied  changed=[]
+10:03:36 INFO    web                    slow request  path=/api/events/export ms=1829
+10:03:39 INFO    pipeline               event stored  id=117 identity=Lena Fixture camera=Hallway Demo track=36
+10:03:41 INFO    capture                file source finished  camera=Hallway Demo
+08:26:06 INFO    store.db               database ready  path=D:\Codes\facwnew\data\facw.db schema=1
+08:26:06 INFO    core.device            processing device resolved  device=cpu requested=auto cuda_devices=0 opencv_cuda=False ort_cuda=False reason=auto: no CUDA available, using CPU
+[ WARN:0@0.778] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.862] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+08:26:06 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=cpu device_reason=auto: no CUDA available, using CPU
+08:26:06 INFO    vision.person          person detector loaded  model=D:\Codes\facwnew\models\persondet.onnx device=cpu backend=cpu reason=auto: no CUDA available, using CPU
+08:26:06 INFO    pipeline.matching      match index rebuilt  rows=2 identities=2 version=1
+08:26:06 INFO    app                    service ready  port=8770
+08:26:06 INFO    server                 console opened in the default browser  url=http://127.0.0.1:8770
+08:26:06 INFO    pipeline               event stored  id=118 identity=Lena Fixture camera=Hallway track=1
+08:26:11 INFO    web                    slow request  path=/video/6/snapshot ms=1228
+08:26:13 INFO    web                    slow request  path=/video/6/snapshot ms=1210
+08:26:15 INFO    web                    slow request  path=/video/6/snapshot ms=1222
+08:26:18 INFO    pipeline               event stored  id=119 identity=Lena Fixture camera=Hallway track=6
+Exception in thread Thread-2 (worker):
+Exception in thread Thread-3 (worker):
+Exception in thread Thread-4 (worker):
+Exception in thread Thread-5 (worker):
+Exception in thread Thread-6 (worker):
+Exception in thread Thread-7 (worker):
+Exception in thread Thread-8 (worker):
+Exception in thread Thread-9 (worker):
+Exception in thread Thread-10 (worker):
+Exception in thread Thread-11 (worker):
+Exception in thread Thread-12 (worker):
+Exception in thread Thread-13 (worker):
+Exception in thread Thread-14 (worker):
+Exception in thread Thread-15 (worker):
+Exception in thread Thread-16 (worker):
+Exception in thread Thread-17 (worker):
+Exception in thread Thread-18 (worker):
+Exception in thread Thread-19 (worker):
+Exception in thread Thread-20 (worker):
+Exception in thread Thread-21 (worker):
+Exception in thread Thread-22 (worker):
+Exception in thread Thread-23 (worker):
+Exception in thread Thread-24 (worker):
+Exception in thread Thread-25 (worker):
+Exception in thread Thread-26 (worker):
+Exception in thread Thread-27 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+Exception in thread Thread-28 (worker):
+Exception in thread Thread-29 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Exception in thread Thread-30 (worker):
+Exception in thread Thread-31 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-32 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-34 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-35 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-36 (worker):
+Exception in thread Thread-37 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-33 (worker):
+Exception in thread Thread-38 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-39 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-42 (worker):
+Exception in thread Thread-40 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Exception in thread Thread-43 (worker):
+Exception in thread Thread-41 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-46 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-47 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-44 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-45 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-51 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-52 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-48 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-53 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-49 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Traceback (most recent call last):
+TypeError: getaddrinfo() argument 1 must be string or None
+Exception in thread Thread-50 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+Exception in thread Thread-55 (worker):
+Exception in thread Thread-56 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-57 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-58 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-59 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-60 (worker):
+Exception in thread Thread-61 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-62 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-64 (worker):
+Exception in thread Thread-63 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-67 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-65 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-66 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-72 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-75 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-71 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-73 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-70 (worker):
+Exception in thread Thread-80 (worker):
+Exception in thread Thread-76 (worker):
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-68 (worker):
+Exception in thread Thread-69 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-78 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-79 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-74 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+TypeError: getaddrinfo() argument 1 must be string or None
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-77 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+Exception in thread Thread-81 (worker):
+Exception in thread Thread-82 (worker):
+Exception in thread Thread-83 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+Exception in thread Thread-84 (worker):
+Exception in thread Thread-85 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-88 (worker):
+Exception in thread Thread-87 (worker):
+Exception in thread Thread-86 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-90 (worker):
+Exception in thread Thread-89 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-92 (worker):
+Traceback (most recent call last):
+Exception in thread Thread-93 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-94 (worker):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-96 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-97 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-98 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+Exception in thread Thread-95 (worker):
+Exception in thread Thread-100 (worker):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-102 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-103 (worker):
+Exception in thread Thread-91 (worker):
+Exception in thread Thread-104 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Exception in thread Thread-106 (worker):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+Exception in thread Thread-105 (worker):
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Traceback (most recent call last):
+Exception in thread Thread-99 (worker):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exception in thread Thread-101 (worker):
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 285, in worker
+    got = check(ip, port)
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Codes\facwnew\facw\pipeline\discovery.py", line 272, in check
+    with socket.create_connection((ip, port), timeout=0.25):
+         ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 850, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+  File "C:\Users\Microsoft\AppData\Local\Programs\Python\Python314\Lib\socket.py", line 989, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+TypeError: getaddrinfo() argument 1 must be string or None
+08:27:30 INFO    pipeline               event stored  id=120 identity=unknown camera=\u062f\u0648\u0631\u0628\u06cc\u0646 \u0648\u0631\u0648\u062f\u06cc track=7
+08:28:52 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=2
+08:28:53 INFO    pipeline.matching      match index rebuilt  rows=0 identities=0 version=3
+08:30:21 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=4
+08:30:25 INFO    pipeline.matching      match index rebuilt  rows=0 identities=0 version=5
+08:31:36 INFO    web                    slow request  path=/api/enrolment/capture ms=1122
+08:32:21 INFO    app                    settings applied  changed=['processing_device']
+08:33:45 INFO    web                    slow request  path=/api/enrolment/capture ms=1196
+08:34:13 INFO    web                    slow request  path=/api/enrolment/detect ms=1001
+08:34:20 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=6
+08:36:41 INFO    store.db               database ready  path=D:\Codes\facwnew\data\facw.db schema=1
+08:36:41 INFO    core.device            processing device resolved  device=cpu requested=gpu cuda_devices=0 opencv_cuda=False ort_cuda=False reason=GPU requested but unavailable - falling back to CPU
+[ WARN:0@0.331] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.392] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+08:36:41 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=cpu device_reason=GPU requested but unavailable - falling back to CPU
+08:36:41 INFO    vision.person          person detector loaded  model=D:\Codes\facwnew\models\persondet.onnx device=cpu backend=cpu reason=GPU requested but unavailable - falling back to CPU
+08:36:41 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=1
+08:36:41 INFO    app                    service ready  port=8770
+08:36:41 INFO    server                 console opened in the default browser  url=http://127.0.0.1:8770
+08:36:42 INFO    web                    slow request  path=/video/7/snapshot ms=1259
+08:36:43 INFO    web                    slow request  path=/video/7/snapshot ms=1228
+08:36:44 INFO    pipeline               event stored  id=121 identity=\u0639\u0627\u0631\u0641 camera=\u062f\u0648\u0631\u0628\u06cc\u0646 \u0648\u0631\u0648\u062f\u06cc track=1

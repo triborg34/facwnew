@@ -1,0 +1,480 @@
+================================================================================
+FACW - FACE ACCESS CONTROL WATCH
+Project summary: what was built, and what it does
+Generated: 2026-11-07
+================================================================================
+
+CONTENTS
+  1. Overview
+  2. Technology choices
+  3. Feature list (by area)
+  4. What was actually verified
+  5. Bugs found and fixed during verification
+  6. Files and layout
+  7. How to run it
+  8. Known limitations
+  9. Suggested next step
+
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+FACW is a complete, self-contained, on-premise face-recognition and
+access-control system. It watches cameras, identifies people against an enrolled
+database, writes an auditable event log, actuates physical door relays, and
+provides a Persian (RTL) operator console.
+
+It runs on a single host on a local network. There is no cloud component and
+nothing is fetched from the internet at runtime.
+
+Design rules followed throughout:
+  - Access control fails CLOSED: if in doubt, the door does not open.
+  - An audit record is never lost. If an audit write fails, the operation still
+    completes, but the access decision itself is strictly fail-closed.
+  - One failing camera never affects the others, and never restarts the service.
+
+Scale: ~8,000 lines of Python, ~2,800 lines of console JavaScript/CSS/HTML.
+
+
+================================================================================
+2. TECHNOLOGY CHOICES
+================================================================================
+
+  Language/runtime   Python 3.10+ (developed and tested on 3.12.10)
+  Web framework      FastAPI + uvicorn
+  Storage            SQLite in WAL mode (one connection per thread)
+  Vision             OpenCV 5.0 via cv2.dnn:
+                       - YuNet        face detection
+                       - SFace        128-dimensional face embeddings
+                       - MediaPipe    person detection (ONNX)
+  Console            Vanilla JavaScript single-page app, no build step
+  PDF reports        reportlab, with Persian text shaping
+  Encryption         cryptography (AES-256-GCM sealing, PBKDF2 passwords)
+
+Everything runs on the CPU. No Docker, no Node.js, no GPU required.
+
+All three model files ship in models/:
+  yunet.onnx      227 KB    face detector
+  sface.onnx    37,789 KB   face recogniser
+  persondet.onnx  3,400 KB  person detector
+
+
+================================================================================
+3. FEATURE LIST (BY AREA)
+================================================================================
+
+3.1 CAMERA AND VIDEO
+--------------------------------------------------------------------------------
+  - Four source types: RTSP, HTTP (MJPEG), local webcam, and local video file.
+  - Stream address is built automatically from host + port + profile name, or
+    can be entered in full.
+  - Newest-frame single-slot buffer: a slow analysis pass never causes a
+    backlog of stale frames.
+  - Fail-fast host probe before opening a stream, so an unreachable camera is
+    reported immediately instead of hanging.
+  - Exponential reconnect with backoff; the camera shows "offline" while the
+    rest of the system keeps running.
+  - File sources play at their native frame rate and stop cleanly at the end of
+    the file.
+  - Viewer reference counting: a camera is only held open while something needs
+    it.
+  - Two live views per camera: raw, and annotated with detection boxes, track
+    numbers, identities and zone outlines.
+  - Snapshot endpoint for individual frames.
+  - Camera management: add, edit, delete, connectivity check, and restart
+    (replays a finished file or retries a corrected address).
+  - Automatic camera discovery:
+      * WS-Discovery probe
+      * Rate-limited, cancellable TCP sweep of the local /24
+      * Live streaming of results as devices are found
+      * ONVIF stream-URL retrieval using WS-Security digest credentials
+
+
+3.2 RECOGNITION
+--------------------------------------------------------------------------------
+  - Person detection feeds tracking; faces are then found inside each person
+    crop, which avoids matching a face to the wrong body.
+  - Quality gate: a face that is too small, too blurry or too low-confidence
+    never votes. The track simply keeps analysing.
+  - Sampling: each track votes repeatedly (fast interval first, then slow) and
+    only commits after N consistent votes with a strict majority.
+  - Match decision:
+      * below the threshold                        -> "unknown"
+      * runner-up within the ambiguity margin      -> "unknown" (refuses to guess)
+      * otherwise                                  -> the best identity
+  - Identities are grouped by identity ID, not display name, so two people may
+    share a name without corrupting the decision.
+  - Each track produces exactly one event per appearance.
+  - Duplicate suppression window (per identity + camera).
+  - Track expiry (TTL) so abandoned tracks do not linger.
+  - Face attributes: estimated age and gender. These are a documented
+    heuristic, NOT a trained classifier, and are labelled as such.
+  - Image search: upload a photo and find the nearest stored events by
+    perceptual fingerprint (dHash + HSV histogram).
+
+
+3.3 ACCESS CONTROL
+--------------------------------------------------------------------------------
+  - Two relay channels, pulsed in order, with a configurable pulse width.
+  - One failing channel does not abort the other; both outcomes are reported.
+  - ONLY an identity whose role is "approve" actuates a relay. Denied visitors,
+    unknown faces and errors never open a door.
+  - Zone mode: a person must have their box centre inside a zone before access
+    is granted, and each zone can be bound to its own relay channel.
+  - Every actuation is written to the audit log.
+  - Two relay transports: a real HTTP relay board, and a simulation transport
+    for hardware-free demonstration and testing.
+
+
+3.4 EVENT LOG AND AUDIT
+--------------------------------------------------------------------------------
+  - Every detection is stored with three artefacts: the full frame, the face
+    crop, and the person crop.
+  - Filters can be combined freely: name, national number, gender, role, age
+    range, camera, zone, Jalali date range, identified-only.
+  - Column sorting and pagination.
+  - Live updates over Server-Sent Events.
+  - Per-event detail view with images, zoom, and delete.
+  - Separate audit log covering sign-in, enrolment, settings changes, zone
+    saves, relay pulses, backups, retention and deletions.
+  - Separate biometric access log noting every time face vectors are read.
+  - Retention policy (days, 0 = keep forever); the purge itself is audited.
+
+
+3.5 REPORTING
+--------------------------------------------------------------------------------
+  - Multi-page Persian (RTL) PDF report:
+      * index page: number, name, date, time, status, camera
+      * one detail page per row with the stored frame and the face crop
+  - Persian text is correctly shaped and joined (not isolated or reversed
+    letters), using a bundled Vazirmatn font.
+  - Optional report lock.
+  - Respects the current filter set, so a report matches what the operator sees.
+
+
+3.6 ENROLMENT
+--------------------------------------------------------------------------------
+  - One person may have many reference photos. Photos are appended, never
+    replaced, so adding a photo cannot destroy an existing one.
+  - Up to 10 photos per enrolment.
+  - Face picker: when a photo contains several faces, every face is offered as a
+    numbered thumbnail and the operator chooses the right one.
+    (Candidates are capped at the 16 best faces - see section 5.)
+  - Capture a frame directly from a camera instead of uploading a file.
+  - Identity fields: name, family name, age, gender, permission role, national
+    number, description, who registered them.
+  - Reference images can be listed and deleted individually.
+  - The match index refreshes immediately after enrolment.
+
+
+3.7 OPERATOR CONSOLE
+--------------------------------------------------------------------------------
+  Five screens, all in Persian with right-to-left layout:
+
+    1. MONITORING   Camera mosaic with raw/annotated toggle and expand,
+                    identified and unknown panels, detail modal.
+    2. REPORTS      All filters, Jalali date pickers, sorting, pagination,
+                    row view / download / delete, image search, PDF export.
+    3. CAMERAS      Inventory table, add/edit form, live discovery results.
+    4. PEOPLE       Identity grid, enrolment dialog, person detail with
+                    reference images and detection history.
+    5. SETTINGS     Engine tuning sliders, access-control configuration,
+                    user management, theme.
+
+  - Jalali (Persian) calendar date picker, verified exact over 200 years.
+  - Persian digits throughout.
+  - Light and dark themes.
+  - No horizontal overflow at narrow widths.
+  - Live status, detections and alarms pushed from the server.
+  - Alarm sound on configured events.
+
+
+3.8 ACCOUNTS, SECURITY AND OPERATIONS
+--------------------------------------------------------------------------------
+  - Two roles:
+      admin     - everything
+      observer  - view dashboard (raw video only), reports, people; no edits
+  - Server-side sessions; HttpOnly cookie.
+  - Passwords hashed with PBKDF2-SHA256, 210,000 iterations.
+  - Login throttle: 8 attempts per 300 seconds.
+  - The last remaining admin cannot be deleted or demoted.
+  - Face vectors are sealed at rest with AES-256-GCM.
+  - Credentials never appear in listings; stream URLs are redacted.
+  - Restricted CORS and security headers.
+  - Health and resource views (CPU, memory, queues, per-camera state).
+  - Backup to a consistent SQLite snapshot; integrity check on boot.
+  - Settings are live-tunable and persisted; changes apply without a restart.
+
+  Roughly 40 tunable settings, including:
+    match_threshold, ambiguity_margin, samples_required, min_face_width,
+    min_face_score, person_confidence, overlap_threshold, dedup_window_seconds,
+    track_ttl_seconds, retention_days, access_control, zone_mode,
+    relay_host, relay_port, relay_channel_1/2, relay_pulse_ms,
+    snapshot_quality, processing_device, log_level, report_lock,
+    notify_method, notify_recipient.
+
+
+3.9 HARDWARE ACCELERATION
+--------------------------------------------------------------------------------
+  - processing_device setting: auto | cpu | gpu, resolved once at start-up.
+  - auto uses CUDA only when a device is genuinely present; otherwise CPU.
+  - A missing GPU never prevents start-up: the service falls back to CPU and
+    records the reason.
+  - The resolved device and its evidence are exposed at /api/health/full, so
+    the console can report what is really in use rather than what was asked.
+  - The person detector takes the CUDA target (it is a plain dnn graph); the
+    YuNet/SFace helpers expose no backend switch and stay on CPU.
+
+3.10 HELPER TOOLS
+--------------------------------------------------------------------------------
+  - service_control   Start, stop, restart, status and log tail. Clears stale
+                      processes holding the configured port, tracks a PID file,
+                      and waits for the service to report ready.
+  - enrolment_helper  Desktop enrolment client (Tk) that talks to the API.
+  - zone_editor       Desktop polygon editor (Tk) that loads a camera snapshot
+                      and saves normalised zones.
+  - autostart         Registers the service to start after a reboot
+                      (Windows logon task / systemd user unit / XDG autostart).
+
+
+3.11 DATA MODEL
+--------------------------------------------------------------------------------
+  Ten tables:
+
+    meta               schema version and service metadata
+    users              accounts and roles
+    sessions           server-side sessions
+    cameras            camera inventory
+    identities         enrolled people
+    face_refs          reference photos + sealed vectors (one row per photo)
+    events             detections with frame/face/person artefact paths
+    zones              normalised zone geometry per camera
+    audit              action log
+    biometric_access   log of every read of biometric data
+
+
+3.12 API
+--------------------------------------------------------------------------------
+  Approximately 50 authenticated REST endpoints covering auth, health,
+  resources, cameras, discovery, enrolment, identities, events, image search,
+  report export, live detections, the event stream, zones, settings, relay
+  test/pulse/log, users, audit, backup, retention and index rebuild.
+
+
+================================================================================
+4. WHAT WAS ACTUALLY VERIFIED
+================================================================================
+
+This section states plainly what was run, and what was not.
+
+4.1 Automated tests
+--------------------------------------------------------------------------------
+  33 unit tests pass (tests/test_algorithms.py):
+      - top-K mean scoring, threshold behaviour, ambiguity margin
+      - malformed vector rows skipped instead of raising
+      - atomic index rebuild
+      - vote resolution including strict majority
+      - track expiry
+      - zone polygon / rectangle / line geometry
+      - resolution-independent zones and mask fallback
+      - access-control policy: only "approve" unlocks; deny, visitor,
+        colleague and unknown never unlock
+      - one failing relay channel does not abort the other
+      - access control disabled never actuates
+      - device resolution: auto picks CPU with no GPU, CUDA when a GPU is
+        present, an explicit "gpu" request falls back to CPU instead of
+        failing, an explicit "cpu" request is honoured even with a GPU, and a
+        CUDA build that rejects the target degrades to CPU without raising
+
+  24 acceptance checks pass against the running service (tests/acceptance.py):
+      - unauthenticated access rejected; bad password rejected
+      - observer cannot create a camera (403)
+      - health and resource views
+      - camera list and address probe
+      - identity list and detail
+      - event list, detail, artefact download, filtering, sorting
+      - settings read/write, user list, zones, audit trail
+      - live detections and snapshot
+      - PDF export returns a real PDF
+
+  0 errors in a headless-browser walk of all five console screens
+  (tests/browser_smoke.py), which fails on any console, page or HTTP error.
+
+4.2 Demonstrated end to end
+--------------------------------------------------------------------------------
+  - Service boots from a cold start and creates its database in one launch.
+  - The console opens automatically in the default browser once the service
+    reports healthy; it refuses to open a dead URL, and FACW_OPEN_BROWSER=0
+    disables it for servers and tests.
+  - Live identification succeeded: a person was detected, tracked, and
+    identified as the enrolled identity "Lena Fixture" with a score of 0.915
+    and role "approve".
+  - Access control fired automatically on that approved detection: both relay
+    channels pulsed in order and the actuation was written to the audit log.
+  - Zones applied correctly: with zone mode on and a zone covering the scene,
+    the track carried the zone name and identified normally.
+  - The Persian PDF report rendered with correctly joined, right-to-left text
+    (23 pages for a large result set).
+  - All four helper tools import, the two GUI tools construct, and their API
+    clients work against the live service.
+
+4.3 NOT verified
+--------------------------------------------------------------------------------
+  - Real IP cameras (RTSP/ONVIF) were not available. That code path is
+    implemented and unit-tested in structure, but exercised only against file
+    sources.
+  - Real relay hardware and a real SMTP server were not available; the HTTP
+    relay protocol and e-mail notification ran only in simulation and log mode.
+  - WS-Discovery was tested against the local-network sweep, not against a
+    device that answers WS-Discovery.
+  - Facenet/age-gender estimation is a documented heuristic, not a trained
+    classifier, and was not evaluated for accuracy.
+  - autostart "install" was intentionally NOT run, because it modifies the
+    host; only "status" was checked.
+
+
+================================================================================
+5. BUGS FOUND AND FIXED DURING VERIFICATION
+================================================================================
+
+These were real defects found by actually running the system, not hypothetical
+concerns. Several would have broken a real deployment.
+
+  1. Console deadlock with six or more cameras.
+     Every camera tile held its own long-lived MJPEG connection. Browsers allow
+     only about six connections per host, so once six tiles were open every
+     other API call hung forever and the console appeared frozen.
+     Fixed by polling snapshots with a bounded number of in-flight requests.
+
+  2. Live event stream and report export returned HTTP 422.
+     The route "/api/events/{event_id}" was declared before the literal routes
+     "/api/events/stream" and "/api/events/export", so those strings were parsed
+     as integer event IDs. Fixed by route ordering, with a comment recording the
+     constraint.
+
+  3. Duplicate names made every match "unknown".
+     The match index grouped references by display name. Two identities with the
+     same name produced two scores that were numerically identical, which the
+     ambiguity check correctly treated as "cannot decide" - so the system
+     rejected every match. Fixed by grouping on identity ID.
+
+  4. File sources consumed a 14-second clip in under a second.
+     With no frame pacing the entire video was decoded almost instantly, so the
+     pipeline saw the whole scene between two analysis passes and nothing was
+     ever tracked. The decode loop also flooded the log and starved the event
+     loop. Fixed by pacing playback to the file's native frame rate, treating
+     end-of-file as "finished" rather than "broken", and logging a read failure
+     only once.
+
+  5. Relative camera paths failed under a different working directory.
+     A service started by a scheduler resolves relative paths against an
+     unrelated directory. Fixed by resolving file sources against the project
+     root.
+
+  6. Enrolment returned 383 faces (1.4 MB) for a crowd photo.
+     Building hundreds of thumbnail nodes stalled the browser. Fixed by capping
+     candidates to the 16 best faces, and by making the numbered preview use the
+     same candidate set so the numbers always match the chips.
+
+  7. Fonts returned 404.
+     The CSS referenced "assets/..." relative to /css/. Fixed with an absolute
+     path.
+
+  8. An English "Choose File / No file chosen" control sat in the Persian UI.
+     Replaced with a hidden native input behind a Persian button.
+
+  9. Camera restart re-armed the stop flag incorrectly.
+     A stop/start race left the reader thread exiting immediately. Fixed by
+     installing a fresh event, and by distinguishing "held by the analysis
+     pipeline" from "held by a console viewer" so a viewer closing its snapshot
+     no longer stops analysis.
+
+ 10. The identical-image ambiguity case was initially misdiagnosed as a code
+     fault; the cause was duplicate seeded data. Fixed the seed script to be
+     idempotent and cleaned the duplicates.
+
+
+================================================================================
+6. FILES AND LAYOUT
+================================================================================
+
+  facw/
+    facw/
+      core/        config, logging, security, application container
+      storage/     database schema, repositories, media store
+      vision/      face engine (YuNet/SFace), person detector, fingerprints
+      pipeline/    matching, tracking, zones, capture, discovery,
+                   relay, notifications, engine, enrolment
+      web/         auth, video, API routes, reports, server
+      tools/       service_control, enrolment_helper, zone_editor, autostart
+    web/console/   the SPA (vanilla JS, RTL, Jalali calendar)
+    models/        the three ONNX model files
+    data/          database, media artefacts, backups, settings, seal key
+    logs/          boot.log and facw.log (JSON lines)
+    scripts/       devrestart.sh, fetch_models.py, make_demo_clip.py,
+                   seed_demo.py
+    tests/         unit tests, acceptance checks, browser smoke test, fixtures
+    README.md      full setup, operation, security and offline-deployment guide
+
+
+================================================================================
+7. HOW TO RUN IT
+================================================================================
+
+  pip install -r requirements.txt
+
+  python -m facw.tools.service_control start
+
+  Open http://127.0.0.1:8770
+
+  Default accounts (change these immediately):
+
+    admin     / admin12345      full access
+    observer  / observer12345   view-only
+
+  Other commands:
+
+    python -m facw.tools.service_control status
+    python -m facw.tools.service_control stop
+    python -m facw.tools.service_control restart
+    python -m facw.tools.service_control logs -n 60
+
+  Five-minute demo:
+
+    python scripts/make_demo_clip.py --seconds 14 --fps 15
+    python scripts/seed_demo.py
+    python -m facw.tools.service_control restart
+
+  Tests:
+
+    python -m pytest tests/ -q
+    python tests/acceptance.py            (service must be running)
+    python tests/browser_smoke.py         (service running + Playwright)
+
+  Fully offline install (build a wheelhouse on a connected machine, copy the
+  project, then install with --no-index) is documented in README.md, section 9.
+
+
+================================================================================
+8. KNOWN LIMITATIONS
+================================================================================
+
+  - Real cameras, relay boards and SMTP were not available for testing; those
+    paths are implemented to their protocols but only exercised via simulation.
+  - Age and gender values are estimates from face geometry, not a trained
+    model. They are shown as approximate and should not be used for decisions.
+  - SQLite is correct and appropriate for a single host. A multi-site
+    deployment would need a different database.
+  - The console must be kept on a private network. It is an
+    access-control system, not a hardened internet-facing service.
+  - Default passwords must be changed before any real use.
+
+
+================================================================================
+9. SUGGESTED NEXT STEP
+================================================================================
+
+Point one real RTSP camera at the system (Cameras -> add camera) and confirm
+live detection and identification on actual hardware. That is the single path
+only real equipment can validate; everything else has been exercised.
