@@ -73,6 +73,12 @@ def create_app(app_state: App) -> FastAPI:
         response.headers.setdefault("Referrer-Policy", "same-origin")
         if request.url.path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
+        elif not request.url.path.startswith("/assets/"):
+            # Console shell, JS and CSS carry no build hash, so a cached copy
+            # silently keeps old behaviour after a restart (this is why a fixed
+            # dashboard.js still flashed black).  Revalidate every time; the
+            # ETag makes the round trip a cheap 304.
+            response.headers["Cache-Control"] = "no-cache, must-revalidate"
         elapsed = (time.perf_counter() - started) * 1000
         if elapsed > 1000:
             log.info("slow request", extra={"path": request.url.path, "ms": round(elapsed)})
@@ -101,9 +107,17 @@ def create_app(app_state: App) -> FastAPI:
     if assets_dir.exists():
         api.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
+    # The console is plain ES modules with no build step, so a cached copy of
+    # an old dashboard.js silently keeps buggy behaviour after a restart.
+    # "no-cache" means: always revalidate (cheap 304 via the etag), so a changed
+    # file is picked up on the next load while unchanged files stay fast.
+    def _no_reuse(response):
+        response.headers.setdefault("Cache-Control", "no-cache, must-revalidate")
+        return response
+
     @api.get("/")
     def index() -> FileResponse:
-        return FileResponse(console_dir / "index.html")
+        return _no_reuse(FileResponse(console_dir / "index.html"))
 
     @api.get("/{path:path}")
     def spa(path: str):
@@ -119,7 +133,7 @@ def create_app(app_state: App) -> FastAPI:
         except ValueError:
             return JSONResponse({"detail": "not found"}, status_code=404)
         if candidate.is_file():
-            return FileResponse(candidate)
+            return _no_reuse(FileResponse(candidate))
         return FileResponse(console_dir / "index.html")
 
     return api

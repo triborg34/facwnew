@@ -375,34 +375,50 @@
   let mounted = false;
   let root;
 
-  function refresh() {
+  // The live mosaic and the detection list are two independent surfaces.
+  // They used to share one refresh() entry point, so any code that repainted
+  // the detections also ran the mosaic path - one wrong call and every tile
+  // restarts.  They are now separated: refreshMosaic() owns the video tiles
+  // (and their frame loops), refreshDetections() owns the list, and nothing
+  // that merely updates detections can touch a running stream.
+  function refreshMosaic() {
     if (!root) return;
     const mosaicHost = root.querySelector("#mosaic-host");
-    // The mosaic is rebuilt only when its structure changes.  Rebuilding it on
-    // every status poll used to restart every live frame (the "stuttering").
+    if (!mosaicHost) return;
     const cams = store.state.cameras || [];
     const sig = cams.map((c) => c.id + ":" + c.name).join("|") + "|" + (S.expanded || "");
-    if (mosaicHost && S.mosaicSig !== sig) {
-      S.mosaicSig = sig;
-      Object.keys(S.live).forEach((k) => stopLive(k));
-      S.live = {};
-      renderMosaic(mosaicHost);
-      syncLiveLoops();
+    if (S.mosaicSig === sig) return;   // structure unchanged: let frames run
+    S.mosaicSig = sig;
+    Object.keys(S.live).forEach((k) => stopLive(k));
+    S.live = {};
+    renderMosaic(mosaicHost);
+    syncLiveLoops();
+  }
+
+  function refreshDetections() {
+    if (!S.detHost) return;
+    if (!S.detHost.querySelector("[data-panel]")) {
+      clear(S.detHost);
+      detectionPanels(S.detHost);
     }
-    if (S.detHost) {
-      if (!S.detHost.querySelector("[data-panel]")) {
-        clear(S.detHost);
-        detectionPanels(S.detHost);
-      }
-      paintDetections();
-    }
+    paintDetections();
+  }
+
+  // Kept for the places that legitimately want both (panel collapse toggle,
+  // mount).  Detection-only callers use refreshDetections() directly.
+  function refresh() {
+    refreshMosaic();
+    refreshDetections();
   }
 
   async function loadCameras() {
     try {
       const res = await window.API.get("/api/cameras");
       store.set({ cameras: res.items || [] });
-      refresh();
+      // Status poll: rebuild the mosaic only if the camera set actually
+      // changed, otherwise just retouch the badges in place.  This must not
+      // touch the detection list either - it has its own timer.
+      refreshMosaic();
       syncLiveLoops();
       updateCameraBadges();
     } catch (e) {
@@ -428,8 +444,23 @@
           const box = tile.querySelector(".video-box");
           if (box) box.insertBefore(h("div", { class: "live-dot" }, h("i"), "LIVE"), box.firstChild);
         }
-      } else if (overlay) {
-        overlay.textContent = state === "offline" ? (cam.last_error || "دوربین آفلاین است") : "در حال اتصال…";
+      } else {
+        // not streaming: drop the LIVE badge and show the reason.  The earlier
+        // version only updated an existing overlay, so a camera that stopped
+        // kept its LIVE dot forever.
+        const live = tile.querySelector(".live-dot");
+        if (live) live.remove();
+        const box = tile.querySelector(".video-box");
+        if (box) {
+          let msg = box.querySelector(".overlay-msg");
+          if (!msg) {
+            msg = h("div", { class: "overlay-msg" });
+            box.appendChild(msg);
+          }
+          msg.textContent = state === "offline"
+            ? (cam.last_error || "دوربین آفلاین است")
+            : "در حال اتصال…";
+        }
       }
     });
   }
