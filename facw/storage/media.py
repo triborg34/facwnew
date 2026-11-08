@@ -127,3 +127,20 @@ class MediaStore:
             return None
         img = cv2.imread(str(path))
         return img
+
+
+def image_bytes(frame: np.ndarray, quality: int = 78, max_width: int = 0) -> bytes:
+    """Encode a frame as JPEG for the live view.
+
+    ``max_width`` downscales wide camera frames before encoding: a 2560px
+    mosaic tile is invisible at display size and costs 4x the bandwidth.  Used
+    by the live-frame endpoint and the MJPEG streamer.
+    """
+    if frame is None or getattr(frame, "size", 0) == 0:
+        return b""
+    img = frame
+    if max_width and img.shape[1] > max_width:
+        scale = max_width / float(img.shape[1])
+        img = cv2.resize(img, (max_width, max(1, int(img.shape[0] * scale))), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), int(quality)])
+    return buf.tobytes() if ok else b""

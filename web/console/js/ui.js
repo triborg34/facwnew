@@ -65,12 +65,17 @@
     if (opts.footerExtra) foot.appendChild(opts.footerExtra);
     if ((opts.actions || []).length) foot.appendChild(h("div", { class: "spacer" }));
 
+    let closed = false;
     function close() {
+      if (closed) return;
+      closed = true;
       const i = openModals.indexOf(entry);
       if (i >= 0) openModals.splice(i, 1);
       backdrop.remove();
       document.removeEventListener("keydown", onKey);
       if (previous && previous.focus) previous.focus();
+      // lets a caller release resources (live camera polling, timers, ...)
+      if (typeof opts.onClose === "function") { try { opts.onClose(); } catch (e) { /* ignore */ } }
     }
     function onKey(ev) {
       if (ev.key === "Escape" && openModals[openModals.length - 1] === entry) {
@@ -78,11 +83,14 @@
         close();
       }
     }
-    const entry = { close, el: modalEl };
+    const entry = { close, el: modalEl, onClose: opts.onClose, get closed() { return closed; } };
     openModals.push(entry);
     document.addEventListener("keydown", onKey);
     document.body.appendChild(backdrop);
-    return { close, body, modal: modalEl, footer: foot };
+    // The console never lets a modal swallow the page: a backdrop click on the
+    // bare overlay closes it, like Escape (the dialog body keeps its clicks).
+    backdrop.addEventListener("click", (ev) => { if (ev.target === backdrop) close(); });
+    return { close, body, modal: modalEl, footer: foot, get closed() { return closed; } };
   }
 
   function confirmDialog(opts) {

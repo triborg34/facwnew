@@ -75,6 +75,7 @@ class Track:
         "track_id", "camera_key", "bbox", "score", "first_seen", "last_seen",
         "votes", "committed", "identity", "face_box", "person_crop", "last_sample_at",
         "sample_count", "decided_notified", "emitted", "zone_name", "vector",
+        "updated_at",
     )
 
     def __init__(self, track_id: int, camera_key: str, bbox, score: float) -> None:
@@ -96,6 +97,9 @@ class Track:
         self.emitted = False
         self.zone_name = ""
         self.vector = None
+        #: bumped whenever the box or state changes; the console's live view
+        #: polls with the value it already holds and only re-renders on change.
+        self.updated_at = now
 
     @property
     def state(self) -> str:

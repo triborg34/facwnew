@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 
 from ..core.logging_setup import get_logger
+from ..storage.media import image_bytes
 from .auth import current_user
 
 log = get_logger("video")
@@ -78,6 +79,9 @@ def video_stream(
         flavour = "raw"
     want_annotated = flavour == "annotated"
     settings_mgr = app.settings
+    # Quality of the RAW flavour.  The annotated flavour is already produced at
+    # the snapshot quality and only needs a small reduction for the wire.
+    self_quality = 72
 
     def frames():
         stream.acquire(owner="viewer")
@@ -100,7 +104,7 @@ def video_stream(
                             continue
                         frame, seq = got
                         last = seq
-                        yield _encode(frame, max(45, settings_mgr.get().snapshot_quality - 30))
+                        yield image_bytes(frame, max(45, settings_mgr.get().snapshot_quality - 30), max_width=1280)
                     else:
                         got = stream.frames.get(last, timeout=1.0)
                         if got is None:
@@ -114,12 +118,7 @@ def video_stream(
                             continue
                         frame, seq, _ts = got
                         last = seq
-                        # cap the raw cadence so many viewers stay cheap
-                        now = time.time()
-                        if now - last_send < 0.04:
-                            continue
-                        last_send = now
-                        yield _encode(frame, 70)
+                        yield image_bytes(frame, self_quality, max_width=1600)
                 except GeneratorExit:  # client disconnected
                     break
                 except Exception as exc:  # noqa: BLE001 - a broken stream must not kill the server
@@ -132,26 +131,32 @@ def video_stream(
 
 
 @router.get("/video/{camera_id}/snapshot")
-def snapshot(camera_id: int, request: Request, user=Depends(current_user)):
+def snapshot(camera_id: int, request: Request, flavour: str = "raw", user=Depends(current_user)):
     app = request.app.state.app
     stream = app.streams.get(camera_id)
     if stream is None:
         raise HTTPException(status_code=404, detail="camera not registered")
+    if user.get("role") != "admin":
+        flavour = "raw"
     stream.acquire(owner="viewer")
     try:
         # Give the worker a brief moment to produce a frame, then fall back to a
         # placeholder.  Never block for seconds: the console polls one snapshot
         # per tile and a slow response would stall the whole mosaic.
-        deadline = time.time() + 1.2
+        deadline = time.time() + (1.2 if flavour == "raw" else 0.45)
         while True:
-            frame = stream.snapshot()
+            frame = app.latest_frame(camera_id, flavour)
             if frame is not None:
                 ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
                 if ok:
-                    return Response(content=buf.tobytes(), media_type="image/jpeg")
+                    return Response(
+                        content=buf.tobytes(),
+                        media_type="image/jpeg",
+                        headers={"Cache-Control": "no-store"},
+                    )
             if time.time() >= deadline:
                 break
-            time.sleep(0.06)
+            time.sleep(0.03)
     finally:
         stream.release(owner="viewer")
     # No frame (offline camera / finished file): answer with a placeholder so the

@@ -107,6 +107,7 @@ class DiscoveryScanner:
         self._rate_limit = rate_limit_seconds
         self.running = False
         self.progress = "idle"
+        self._auth: tuple = ("", "")
 
     # -- lifecycle -----------------------------------------------------
     def start(
@@ -115,6 +116,8 @@ class DiscoveryScanner:
         on_done: Optional[Callable[[int], None]] = None,
         subnets: Optional[List[str]] = None,
         timeout: float = 4.0,
+        username: str = "",
+        password: str = "",
     ) -> bool:
         with self._lock:
             if self.running:
@@ -129,6 +132,7 @@ class DiscoveryScanner:
             self._on_result = on_result
             self._on_done = on_done
             self._last_run = time.time()
+            self._auth = (username, password)
             self._thread = threading.Thread(
                 target=self._run, args=(subnets, timeout), name="discovery", daemon=True
             )
@@ -165,6 +169,10 @@ class DiscoveryScanner:
                     existing.vendor = dev.vendor
                 if not existing.model:
                     existing.model = dev.model
+                if not existing.name or existing.name.startswith("camera@"):
+                    existing.name = dev.name
+                if dev.note:
+                    existing.note = dev.note
                 dev = existing
             else:
                 self._devices[key] = dev
@@ -198,6 +206,25 @@ class DiscoveryScanner:
                     pass
 
     def _ws_discovery(self, timeout: float) -> None:
+        """Multicast WS-Discovery probe, then ONVIF describe of every answer.
+
+        Two bugs in the previous version made this path useless on real
+        cameras:
+
+        * the probe used ``uuid:facw-discovery`` as MessageID - the schema
+          wants a RFC 4122 UUID, and some firmware rejects anything else;
+        * the reply was parsed with a case-sensitive regex although many
+          devices answer with lower-case element names.
+
+        Each answering device is now asked over ONVIF for its WSDL services
+        (GetDeviceInformation / GetCapabilities / GetProfiles / GetStreamUri),
+        which is where the usable ``rtsp://`` address and the profile token
+        come from.  Credentials are optional here: without them we still report
+        the device and its service URL.
+        """
+        import uuid as _uuid
+
+        message_id = "uuid:" + str(_uuid.uuid4())
         probe = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope"'
@@ -205,7 +232,7 @@ class DiscoveryScanner:
             ' xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery"'
             ' xmlns:dn="http://www.onvif.org/ver10/network/wsdl">'
             "<e:Header>"
-            "<w:MessageID>uuid:facw-discovery</w:MessageID>"
+            f"<w:MessageID>{message_id}</w:MessageID>"
             "<w:To>urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To>"
             "<w:Action>http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action>"
             "</e:Header>"
@@ -216,9 +243,18 @@ class DiscoveryScanner:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                sock.bind(("", 0))
+            except OSError:
+                pass
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-            sock.settimeout(0.5)
-            sock.sendto(probe, WS_DISCOVERY_ADDR)
+            # retransmit like the spec's "Probe" pattern: one lost multicast
+            # packet used to make the whole scan find nothing.
+            sock.settimeout(0.4)
+            for _ in range(2):
+                sock.sendto(probe, WS_DISCOVERY_ADDR)
+                if self._cancel.wait(0.25):
+                    break
         except OSError as exc:
             log.info("ws-discovery unavailable", extra={"error": str(exc)})
             if sock:
@@ -226,6 +262,7 @@ class DiscoveryScanner:
             return
 
         deadline = time.time() + timeout
+        seen_ips = set()
         while time.time() < deadline and not self._cancel.is_set():
             try:
                 data, addr = sock.recvfrom(65535)
@@ -235,27 +272,72 @@ class DiscoveryScanner:
                 break
             try:
                 xml = data.decode("utf-8", "ignore")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 continue
-            if "ProbeMatches" not in xml and "ProbeMatch" not in xml:
+            low = xml.lower()
+            if "probematches" not in low and "probematch" not in low:
                 continue
-            xaddrs = _extract("XAddrs", xml).split()
-            service_url = xaddrs[0] if xaddrs else ""
+            seen_ips.add(addr[0])
+            xaddrs = re.findall(r"<(?:\w+:)?XAddrs[^>]*>(.*?)</(?:\w+:)?XAddrs>", xml, re.S | re.I)
+            service_url = (xaddrs[0].strip().split()[0] if xaddrs and xaddrs[0].strip() else "")
+            scopes = " ".join(re.findall(r"<(?:\w+:)?Scopes[^>]*>(.*?)</(?:\w+:)?Scopes>", xml, re.S | re.I))
+            name = ""
+            m = re.search(r"onvif://www\.onvif\.org/name/([^\s<]+)", scopes, re.I)
+            if m:
+                name = _unquote(m.group(1).replace("_", " "))
+            hardware = ""
+            h = re.search(r"onvif://www\.onvif\.org/hardware/([^\s<]+)", scopes, re.I)
+            if h:
+                hardware = _unquote(h.group(1))
             dev = DiscoveredDevice(
                 address=addr[0],
-                name=_extract("Name", xml) or _extract("Scopes", xml).split()[-1].split("/")[-1]
-                if _extract("Scopes", xml) else f"camera@{addr[0]}",
+                name=name or f"camera@{addr[0]}",
+                model=hardware,
                 service_url=service_url,
                 sources=["ws-discovery"],
             )
-            m = re.search(r"onvif://www\.onvif\.org/name/([^ ]+)", xml)
-            if m:
-                dev.name = m.group(1).replace("_", " ")
-            v = re.search(r"onvif://www\.onvif\.org/hardware/([^ ]+)", xml)
-            if v:
-                dev.model = v.group(1)
+            if service_url:
+                self._onvif_describe(dev)
             self._emit(dev)
-        sock.close()
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+    def _onvif_describe(self, dev: "DiscoveredDevice", username: str = "", password: str = "") -> None:
+        """Fill in vendor/model/stream address over ONVIF (best effort)."""
+        from .onvif import OnvifClient
+
+        if not username:
+            username, password = getattr(self, "_auth", ("", ""))
+        try:
+            client = OnvifClient(dev.service_url, username, password, timeout=4.0)
+            info = client.get_device_information()
+            if info is not None:
+                dev.vendor = dev.vendor or info.manufacturer
+                dev.model = info.model or dev.model
+                if not dev.name or dev.name.startswith("camera@"):
+                    dev.name = " ".join(p for p in (info.manufacturer, info.model) if p) or dev.name
+                if info.model:
+                    dev.model = info.model
+            client.discover_media_url()
+            profiles = client.get_profiles()
+            if profiles:
+                main = profiles[0]
+                for prof in profiles:
+                    if any(k in prof.name.lower() for k in ("main", "high", "hd")):
+                        main = prof
+                        break
+                uri = client.get_stream_uri(main.token)
+                if uri:
+                    dev.stream_address = uri
+                    dev.note = f"ONVIF profile '{main.name or main.token}'"
+                if "onvif" not in dev.sources:
+                    dev.sources.append("onvif")
+            elif not profiles and username:
+                dev.note = "ONVIF rejected the credentials"
+        except Exception as exc:  # noqa: BLE001 - discovery must degrade quietly
+            log.info("onvif describe failed", extra={"address": dev.address, "error": str(exc)})
 
     def _tcp_sweep(self, subnet: str, timeout: float) -> None:
         try:
@@ -311,56 +393,28 @@ class DiscoveryScanner:
 
 
 def fetch_onvif_stream_url(service_url: str, username: str, password: str, timeout: float = 4.0) -> str:
-    """Best-effort ONVIF ``GetStreamUri`` using the camera's own management API.
+    """ONVIF ``GetStreamUri`` for a device service URL (compatibility wrapper).
 
-    Implemented with WS-Security UsernameToken digest over plain HTTP.  Returns
-    the RTSP URL or "" when the device does not cooperate - the caller then
-    falls back to the manually entered profile path.
+    The old implementation guessed ``/media_service`` and hard-coded the
+    profile token ``main``, which fails on most firmware.  See
+    :mod:`facw.pipeline.onvif` for the real WSDL flow (capabilities ->
+    profiles -> stream URI) with WS-Security and HTTP digest.
     """
     if not service_url:
         return ""
-    try:
-        import base64
-        import hashlib
-        import os
-        from urllib.request import Request, urlopen
+    from .onvif import OnvifClient
 
-        nonce = os.urandom(16)
-        created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        digest = base64.b64encode(
-            hashlib.sha1(nonce + created.encode() + password.encode()).digest()
-        ).decode()
-        nonce_b64 = base64.b64encode(nonce).decode()
-        envelope = f"""<?xml version="1.0" encoding="UTF-8"?>
-<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
-            xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
-            xmlns:tt="http://www.onvif.org/ver10/schema">
-  <s:Header>
-    <Security xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-      <UsernameToken>
-        <Username>{username}</Username>
-        <Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">{digest}</Password>
-        <Nonce EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary">{nonce_b64}</Nonce>
-        <Created xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">{created}</Created>
-      </UsernameToken>
-    </Security>
-  </s:Header>
-  <s:Body>
-    <trt:GetStreamUri>
-      <trt:StreamSetup>
-        <tt:Stream>RTP-Unicast</tt:Stream>
-        <tt:Transport><tt:Protocol>RTSP</tt:Protocol></tt:Transport>
-      </trt:StreamSetup>
-      <trt:ProfileToken>main</trt:ProfileToken>
-    </trt:GetStreamUri>
-  </s:Body>
-</s:Envelope>"""
-        url = service_url.replace("/device_service", "/media_service")
-        req = Request(url, data=envelope.encode(), headers={"Content-Type": "application/soap+xml"})
-        with urlopen(req, timeout=timeout) as resp:  # noqa: S310 - operator-provided LAN endpoint
-            body = resp.read().decode("utf-8", "ignore")
-        m = re.search(r"<[^>]*Uri>\s*(rtsp://[^<\s]+)", body)
-        return m.group(1) if m else ""
+    try:
+        client = OnvifClient(service_url, username, password, timeout)
+        client.discover_media_url()
+        profiles = client.get_profiles()
+        if not profiles:
+            return ""
+        preferred = next(
+            (p for p in profiles if any(k in (p.name or "").lower() for k in ("main", "high", "hd"))),
+            profiles[0],
+        )
+        return client.get_stream_uri(preferred.token)
     except Exception as exc:  # noqa: BLE001 - discovery must degrade quietly
         log.info("onvif stream uri lookup failed", extra={"error": str(exc)})
         return ""

@@ -45,7 +45,7 @@ class Detection:
 
 
 class PersonDetector(Protocol):
-    def detect(self, frame: np.ndarray, score_threshold: float) -> List[Detection]: ...
+    def detect(self, frame: np.ndarray, score_threshold: float, max_side: int = ...) -> List[Detection]: ...
 
     def close(self) -> None: ...
 
@@ -78,8 +78,21 @@ class MediaPipePersonDetector:
         self._lock = threading.Lock()
         self.device = device or resolve_device()
         self.net = cv2.dnn.readNet(str(model_path))
-        # This net is a plain dnn graph, so the CUDA target applies here.
+        # This net is a plain dnn graph, so the CUDA/OpenCL target applies here.
         self.backend = apply_dnn_target(self.net, self.device)
+        # Threads: one detector is shared by every camera worker, so the first
+        # call used to run single-threaded.  Pin a sane pool; the GIL is
+        # released inside the C++ forward() call.
+        try:
+            self.net.setPreferableBackend(
+                cv2.dnn.DNN_BACKEND_CUDA if self.backend == "cuda" else cv2.dnn.DNN_BACKEND_DEFAULT
+            )
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            cv2.setNumThreads(max(4, (cv2.getNumberOfCPUs() if hasattr(cv2, "getNumberOfCPUs") else 4)))
+        except Exception:  # noqa: BLE001
+            pass
         self._anchors = self._load_anchors()
         log.info(
             "person detector loaded",
@@ -129,11 +142,21 @@ class MediaPipePersonDetector:
         pad_bias = np.array([left, top], dtype=np.float32) / ratio
         return np.ascontiguousarray(blob, dtype=np.float32), pad_bias
 
-    def detect(self, frame: np.ndarray, score_threshold: float = 0.4) -> List[Detection]:
+    def detect(self, frame: np.ndarray, score_threshold: float = 0.4, max_side: int = 0) -> List[Detection]:
         if frame is None or frame.size == 0:
             return []
         h, w = frame.shape[:2]
-        blob, pad_bias = self._preprocess(frame)
+        # Work on a downscaled copy when the frame is large: the graph input is
+        # 224x224, so rescaling a 1080p frame first is both faster and no less
+        # accurate.  ``max_side`` comes from the settings (person_max_side).
+        work = frame
+        scale_back = 1.0
+        cap = int(max_side or 0)
+        if cap > 0 and max(h, w) > cap:
+            scale_back = cap / float(max(h, w))
+            work = cv2.resize(frame, (max(1, int(w * scale_back)), max(1, int(h * scale_back))), interpolation=cv2.INTER_AREA)
+            h, w = work.shape[:2]
+        blob, pad_bias = self._preprocess(work)
         with self._lock:
             self.net.setInput(blob)
             outs = self.net.forward(self.net.getUnconnectedOutLayersNames())
@@ -162,6 +185,9 @@ class MediaPipePersonDetector:
         xy2 = (cxy + wh / 2 + anchors) * scale
         boxes = np.concatenate([xy1, xy2], axis=1)
         boxes -= [pad_bias[0], pad_bias[1], pad_bias[0], pad_bias[1]]
+        if scale_back != 1.0:
+            boxes /= scale_back
+            h, w = frame.shape[:2]
 
         dets: List[Detection] = []
         for box, sc in zip(boxes, scores):
@@ -170,7 +196,10 @@ class MediaPipePersonDetector:
                 continue
             clamped.score = float(sc)
             dets.append(clamped)
-        return nms(dets, 0.25)
+        # NMS is applied once, by the caller (stage 3), with the configured
+        # threshold; suppressing twice here cost latency and could drop a
+        # legitimate second person standing close by.
+        return dets
 
     def close(self) -> None:
         self.net = None  # type: ignore[assignment]
@@ -211,12 +240,14 @@ class HaarPersonDetector:
     and the console still works (degraded).
     """
 
+    backend = "hog"
+
     def __init__(self) -> None:
         self.hog = cv2.HOGDescriptor()
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
         log.warning("person detector: falling back to HOG (ONNX model missing)")
 
-    def detect(self, frame: np.ndarray, score_threshold: float = 0.4) -> List[Detection]:
+    def detect(self, frame: np.ndarray, score_threshold: float = 0.4, max_side: int = 0) -> List[Detection]:
         if frame is None or frame.size == 0:
             return []
         h, w = frame.shape[:2]

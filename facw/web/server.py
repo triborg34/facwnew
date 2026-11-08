@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from ..core.app import App
 from ..core.logging_setup import get_logger
 from . import api_more, api_routes, video
+from .forms import LargeEnrolmentForm
 
 log = get_logger("web")
 
@@ -45,6 +46,11 @@ def create_app(app_state: App) -> FastAPI:
     )
     api.state.app = app_state
 
+    # Enrolment forms carry a base64 camera still in a text field, which is
+    # larger than Starlette's 1 MB per-field default.  This must be the
+    # outermost middleware (added last), so it sees the body before the router
+    # does; adding it first would put it inside the CORS wrapper and body
+    # parsing would already have happened.
     api.add_middleware(
         CORSMiddleware,
         allow_origins=_allowed_origins(cfg.port),
@@ -71,6 +77,8 @@ def create_app(app_state: App) -> FastAPI:
         if elapsed > 1000:
             log.info("slow request", extra={"path": request.url.path, "ms": round(elapsed)})
         return response
+
+    api.add_middleware(LargeEnrolmentForm)
 
     # ---- start-up / shut-down: start the pipeline with the server -----
     @api.on_event("startup")

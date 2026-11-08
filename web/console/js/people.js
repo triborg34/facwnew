@@ -52,43 +52,207 @@
   }
 
   // ------------------------------------------------------- enrolment dialog
-  function openEnrolment(target) {
-    // target: undefined = new identity, or an identity id to add references to
-    const photos = [];      // {file, preview, faces:[], chosen:0}
+  //
+  // One dialog registers a person from ANY mix of sources:
+  //   * file uploads ("افزودن عکس از فایل")
+  //   * a live camera preview with a "capture" button (small, fitted, zoomable)
+  //   * a single still frame that can be dragged to crop before face detection
+  //   * the detected face of an unknown person on the dashboard (opts.still)
+  //
+  // Every image carries its own face candidates and the operator's chosen one,
+  // so the save call sends files and camera frames in a single request
+  // (/api/enrolment/save accepts `files` + `stills`).
+  function openEnrolment(target, opts) {
+    opts = opts || {};
+    const photos = [];      // {file|null, still, cameraId, faces:[], chosen, previewFull, source}
     const err = h("div", { class: "state error", style: "display:none" });
     const photoStrip = h("div", { class: "face-strip" });
     const faceStrip = h("div", { class: "face-strip" });
-    const previewBox = h("div", { class: "img-box", style: "max-height:250px;overflow:hidden;display:none" });
+    const live = h("div", { class: "field", style: "margin-top:10px;display:none" },
+      h("label", {}, "چهره‌ها — یکی را انتخاب کنید"), faceStrip);
 
-    const meta = {
-      name: h("input", { type: "text" }),
-      family_name: h("input", { type: "text" }),
-      age: h("input", { type: "number", min: 0, max: 120 }),
-      gender: h("select", {}, [["unknown", L.notset], ["male", L.male], ["female", L.female]].map(([v, t]) => h("option", { value: v }, t))),
-      role: h("select", {}, [["colleague", L.colleague], ["approve", L.approve], ["visitor", L.visitor], ["deny", L.deny]].map(([v, t]) => h("option", { value: v }, t))),
-      national_number: h("input", { type: "text" }),
-      description: h("textarea", {}),
-    };
-
+    // --- live camera preview -------------------------------------------
     const camSelect = h("select", {});
     (store.state.cameras || []).forEach((c) => camSelect.appendChild(h("option", { value: c.id }, c.name)));
+    const camImg = h("img", { alt: "live camera", draggable: "false" });
+    const camFrame = h("div", { class: "frame" }, camImg, h("div", { class: "hint" }, "پیش‌نمایش زنده"));
+    const camNoSignal = h("div", { class: "no-signal", style: "display:none" }, "دوربین تصویری نمی‌فرستد");
+    const camPreview = h("div", { class: "cam-preview" }, camFrame, camNoSignal);
+    const liveState = h("span", { class: "badge" }, "غیرفعال");
+    const liveBtn = h("button", { class: "btn sm", type: "button" }, "پیش‌نمایش زنده");
+    const captureBtn = h("button", { class: "btn sm primary", type: "button" }, "\u{1F4F7} گرفتن قاب");
+    const camZoomLabel = h("span", { class: "badge", style: "min-width:52px;text-align:center" }, "100\u066A");
+    const camZoom = h("div", { class: "zoom-tools" },
+      h("button", { class: "btn sm ghost", type: "button", title: "کوچک‌نمایی", onclick: () => setZoom(camScale - 0.25) }, "\u2212"),
+      camZoomLabel,
+      h("button", { class: "btn sm ghost", type: "button", title: "بزرگ‌نمایی", onclick: () => setZoom(camScale + 0.25) }, "+"),
+      h("button", { class: "btn sm ghost", type: "button", onclick: () => setZoom(1) }, "تناسب"));
+    let camScale = 1;
+    let camTimer = null;
+    let camInflight = false;
+
+    function setZoom(next) {
+      camScale = Math.max(1, Math.min(3, next));
+      camImg.style.transform = `scale(${camScale})`;
+      camFrame.style.overflow = camScale > 1 ? "auto" : "hidden";
+      camZoomLabel.textContent = I.num(Math.round(camScale * 100)) + "\u066A";
+    }
+
+    function refreshLiveFrame() {
+      if (!camTimer || camInflight) return;
+      const camId = camSelect.value;
+      if (!camId) return;
+      camInflight = true;
+      const probe = new Image();
+      probe.onload = () => {
+        camInflight = false;
+        if (!camTimer) return;
+        camImg.src = probe.src;
+        camNoSignal.style.display = "none";
+        camFrame.style.display = "";
+        liveState.className = "badge ok";
+        liveState.textContent = "زنده";
+      };
+      probe.onerror = () => {
+        camInflight = false;
+        if (!camTimer) return;
+        camNoSignal.style.display = "";
+        camFrame.style.display = "none";
+        liveState.className = "badge danger";
+        liveState.textContent = "بدون سیگنال";
+      };
+      // RAW frames: this preview is only for aiming the camera at a face.
+      probe.src = `/video/${camId}/snapshot?flavour=raw&t=${Date.now()}`;
+    }
+
+    function startLive() {
+      if (camTimer) return;
+      if (!camSelect.value) { toast("ابتدا یک دوربین ثبت کنید", "warn"); return; }
+      refreshLiveFrame();
+      camTimer = setInterval(refreshLiveFrame, 260);
+      liveBtn.textContent = "توقف پیش‌نمایش";
+      liveState.className = "badge warn";
+      liveState.textContent = "در حال اتصال…";
+      camSelect.disabled = true;
+    }
+
+    function stopLive() {
+      if (camTimer) clearInterval(camTimer);
+      camTimer = null;
+      camInflight = false;
+      liveBtn.textContent = "پیش‌نمایش زنده";
+      liveState.className = "badge";
+      liveState.textContent = "غیرفعال";
+      camSelect.disabled = false;
+    }
+
+    function closeLive() {
+      stopLive();
+      camImg.removeAttribute("src");
+    }
+
+    liveBtn.onclick = () => (camTimer ? stopLive() : startLive());
+    camSelect.onchange = () => { if (camTimer) { stopLive(); startLive(); } };
+
+    // --- still + crop ---------------------------------------------------
+    const crop = window.IMGW.cropEditor();
+    const stillBox = h("div", { style: "display:none;margin-top:10px" },
+      h("div", { class: "row", style: "align-items:flex-end" },
+        h("div", { class: "field", style: "flex:1" }, h("label", {}, "قاب گرفته‌شده (برای برش بکشید)"), crop.el),
+        h("div", { class: "field", style: "width:auto;flex:none" },
+          h("label", {}, "\u00A0"),
+          h("button", { class: "btn sm", type: "button", onclick: () => addStill(crop.dataUrl(), "برش دستی") }, "استفاده از این قاب"),
+          h("button", { class: "btn sm ghost", type: "button", style: "margin-top:6px", onclick: () => { stillBox.style.display = "none"; } }, "بستن")))
+    );
+    let lastStillCamera = 0;
+
+    async function captureFromCamera() {
+      const camId = camSelect.value;
+      if (!camId) { toast("ابتدا یک دوربین انتخاب کنید", "warn"); return; }
+      if (!camTimer) startLive();
+      captureBtn.disabled = true;
+      try {
+        const res = await window.API.post("/api/enrolment/capture", { camera_id: Number(camId) });
+        if (!res.still) { toast("قاب دوربین دریافت نشد", "warn"); return; }
+        lastStillCamera = Number(camId);
+        if (res.faces && res.faces.length) {
+          // faces were detected on exactly this frame - keep the same frame
+          pushPhoto({ still: res.still, cameraId: Number(camId), faces: res.faces, previewFull: res.preview, source: "دوربین" });
+          toast("قاب دوربین ثبت شد", "ok");
+          stillBox.style.display = "none";
+        } else {
+          // no face on the whole frame: let the operator crop the region
+          await crop.load(res.still);
+          stillBox.style.display = "";
+          toast("در کل قاب چهره‌ای یافت نشد؛ ناحیهٔ چهره را با ماوس انتخاب کنید", "warn");
+        }
+      } catch (e) {
+        toast("خطا: " + e.message, "danger");
+      } finally {
+        captureBtn.disabled = false;
+      }
+    }
+    captureBtn.onclick = captureFromCamera;
+
+    async function addStill(dataUrl, label) {
+      if (!dataUrl) return;
+      if (photos.length >= MAX_PHOTOS) { toast(`حداکثر ${I.num(MAX_PHOTOS)} تصویر مجاز است`, "warn"); return; }
+      try {
+        const res = await window.API.post("/api/enrolment/detect-b64", { image: dataUrl });
+        if (!res.faces || !res.faces.length) {
+          toast("در این ناحیه چهره‌ای یافت نشد؛ ناحیهٔ بزرگ‌تری را انتخاب کنید", "warn");
+          return;
+        }
+        pushPhoto({ still: dataUrl, cameraId: lastStillCamera, faces: res.faces, previewFull: res.preview, source: label || "دوربین" });
+        stillBox.style.display = "none";
+        toast("قاب دوربین ثبت شد", "ok");
+      } catch (e) {
+        toast("خطا: " + e.message, "danger");
+      }
+    }
+
+    // --- photo list -----------------------------------------------------
+    function pushPhoto(p) {
+      p.source = p.source || "فایل";
+      p.file = p.file || null;
+      p.chosen = 0;
+      photos.push(p);
+      renderPhotos();
+      renderFaces(photos.length - 1);
+    }
+
+    function thumbOf(p) {
+      const f = p.faces[p.chosen];
+      return (f && f.thumbnail) || p.previewFull || "";
+    }
+
+    function sourceLabel(p) {
+      if (p.file) return p.file.name.length > 16 ? p.file.name.slice(0, 14) + "…" : p.file.name;
+      return p.source;
+    }
 
     function renderPhotos() {
       clear(photoStrip);
+      if (!photos.length) {
+        photoStrip.appendChild(h("div", { class: "muted", style: "font-size:12px;padding:6px 0" },
+          "هنوز تصویری افزوده نشده است: فایل بارگذاری کنید یا از دوربین قاب بگیرید."));
+        return;
+      }
       photos.forEach((p, i) => {
-        const chosenFace = p.faces[p.chosen];
         photoStrip.appendChild(h("div", {
           class: "face-chip" + (p.chosen >= 0 ? " selected" : " unselected"),
-          title: "کلیک برای انتخاب چهرهٔ این عکس",
-          onclick: () => { cycleFace(i); },
+          title: "کلیک = انتخاب چهرهٔ بعدی در همین تصویر",
+          onclick: () => cycleFace(i),
         },
-          h("img", { src: (chosenFace && chosenFace.thumbnail) || p.preview, alt: "" }),
+          h("img", { src: thumbOf(p), alt: "" }),
           h("div", { class: "cap" }, p.faces.length
             ? `چهرهٔ ${I.num(p.chosen + 1)} از ${I.num(p.faces.length)}`
             : "بدون چهره"),
-          h("button", { class: "btn sm ghost", style: "width:100%", onclick: (ev) => {
-            ev.stopPropagation(); photos.splice(i, 1); renderPhotos(); renderFaces();
-          } }, "حذف")
+          h("div", { class: "cap", style: "opacity:.72" }, sourceLabel(p)),
+          h("button", {
+            class: "btn sm ghost", style: "width:100%",
+            onclick: (ev) => { ev.stopPropagation(); photos.splice(i, 1); renderPhotos(); renderFaces(photos.length - 1); },
+          }, "حذف")
         ));
       });
     }
@@ -97,14 +261,15 @@
       const p = photos[i];
       if (!p.faces.length) return;
       p.chosen = (p.chosen + 1) % p.faces.length;
-      renderPhotos(); renderFaces(i);
+      renderPhotos();
+      renderFaces(i);
     }
 
     function renderFaces(activeIndex) {
       clear(faceStrip);
-      const p = photos[activeIndex === undefined ? photos.length - 1 : activeIndex];
-      if (!p) { previewBox.style.display = "none"; return; }
-      if (p.previewFull) { previewBox.style.display = ""; clear(previewBox); previewBox.appendChild(h("img", { src: p.previewFull, alt: "preview" })); }
+      const p = photos[activeIndex === undefined || activeIndex < 0 ? photos.length - 1 : activeIndex];
+      if (!p || !p.faces.length) { live.style.display = "none"; return; }
+      live.style.display = "";
       p.faces.forEach((f, fi) => {
         faceStrip.appendChild(h("div", {
           class: "face-chip " + (fi === p.chosen ? "selected" : "unselected"),
@@ -119,7 +284,7 @@
 
     async function addFiles(files) {
       for (const file of Array.from(files)) {
-        if (photos.length >= MAX_PHOTOS) { toast(`حداکثر ${I.num(MAX_PHOTOS)} عکس مجاز است`, "warn"); break; }
+        if (photos.length >= MAX_PHOTOS) { toast(`حداکثر ${I.num(MAX_PHOTOS)} تصویر مجاز است`, "warn"); break; }
         const fd = new FormData();
         fd.append("file", file);
         try {
@@ -128,39 +293,46 @@
             toast(`در «${file.name}» چهره‌ای یافت نشد`, "warn");
             continue;
           }
-          photos.push({ file, faces: res.faces, chosen: 0, previewFull: res.preview });
+          pushPhoto({ file, faces: res.faces, previewFull: res.preview, source: "فایل" });
         } catch (e) { toast(`خطا در ${file.name}: ${e.message}`, "danger"); }
       }
-      renderPhotos(); renderFaces();
     }
 
-    async function captureStill() {
-      const camId = camSelect.value;
-      if (!camId) { toast("ابتدا یک دوربین انتخاب کنید", "warn"); return; }
-      try {
-        const res = await window.API.post("/api/enrolment/capture", { camera_id: Number(camId) });
-        if (!res.faces || !res.faces.length) { toast("در تصویر دوربین چهره‌ای یافت نشد", "warn"); return; }
-        photos.push({ file: null, cameraId: Number(camId), faces: res.faces, chosen: 0, previewFull: res.preview });
-        renderPhotos(); renderFaces();
-        toast("قاب دوربین گرفته شد", "ok");
-      } catch (e) { toast("خطا: " + e.message, "danger"); }
-    }
+    const fileInput = h("input", {
+      type: "file", accept: "image/*", multiple: true,
+      onchange: (ev) => { addFiles(ev.target.files); ev.target.value = ""; },
+    });
 
-    const fileInput = h("input", { type: "file", accept: "image/*", multiple: true,
-      onchange: (ev) => { addFiles(ev.target.files); ev.target.value = ""; } });
+    // --- identity fields ------------------------------------------------
+    const meta = {
+      name: h("input", { type: "text", value: opts.name || "" }),
+      family_name: h("input", { type: "text", value: opts.family_name || "" }),
+      age: h("input", { type: "number", min: 0, max: 120, value: opts.age || "" }),
+      gender: h("select", {}, [["unknown", L.notset], ["male", L.male], ["female", L.female]]
+        .map(([v, t]) => h("option", { value: v, selected: opts.gender === v ? true : null }, t))),
+      role: h("select", {}, [["colleague", L.colleague], ["approve", L.approve], ["visitor", L.visitor], ["deny", L.deny]]
+        .map(([v, t]) => h("option", { value: v, selected: opts.role === v ? true : null }, t))),
+      national_number: h("input", { type: "text" }),
+      description: h("textarea", {}),
+    };
 
     const body = h("div", {},
       h("div", { class: "muted", style: "font-size:12.5px;margin-bottom:6px" },
-        `حداکثر ${I.num(MAX_PHOTOS)} عکس. اگر چند چهره در یک عکس باشد، با کلیک روی کاشی‌ها چهرهٔ درست را انتخاب کنید.`),
+        `حداکثر ${I.num(MAX_PHOTOS)} تصویر. اگر چند چهره در یک تصویر باشد، با کلیک روی کاشی‌ها چهرهٔ درست را انتخاب کنید.`),
       h("div", { class: "row" },
         h("div", { class: "field" }, h("label", {}, "افزودن عکس از فایل"), fileInput),
-        h("div", { class: "field" }, h("label", {}, "گرفتن قاب از دوربین"), camSelect),
-        h("div", { class: "field" }, h("label", {}, " "),
-          h("button", { class: "btn", onclick: captureStill }, "\u{1F4F7} گرفتن قاب"))
+        h("div", { class: "field" }, h("label", {}, "دوربین"), camSelect),
+        h("div", { class: "field", style: "flex:none;width:auto" }, h("label", {}, "\u00A0"),
+          h("div", { style: "display:flex;gap:6px;align-items:center" }, liveBtn, captureBtn))
       ),
-      h("div", { class: "field", style: "margin-top:8px" }, h("label", {}, "عکس‌های افزوده‌شده"), photoStrip),
-      previewBox,
-      h("div", { class: "field", style: "margin-top:8px" }, h("label", {}, "چهره‌ها — یکی را انتخاب کنید"), faceStrip),
+      h("div", { style: "margin-top:8px" },
+        h("div", { style: "display:flex;align-items:center;gap:8px;margin-bottom:4px" },
+          h("span", { class: "muted", style: "font-size:12px" }, "پیش‌نمایش دوربین"), liveState,
+          h("div", { style: "flex:1" })),
+        camPreview, camZoom),
+      stillBox,
+      h("div", { class: "field", style: "margin-top:8px" }, h("label", {}, "تصاویر افزوده‌شده"), photoStrip),
+      live,
       h("div", { class: "card", style: "margin-top:12px" }, h("div", { class: "card-head" }, "اطلاعات هویتی"),
         h("div", { class: "card-body" },
           h("div", { class: "row" },
@@ -177,30 +349,27 @@
       err
     );
 
-    modal({
-      title: target ? "افزودن تصویر مرجع" : "ثبت شخص جدید",
+    const dialog = modal({
+      title: target ? "افزودن تصویر مرجع" : (opts.title || "ثبت شخص جدید"),
       size: "lg",
       body,
+      onClose: closeLive,
       actions: [
-        { label: "انصراف", kind: "ghost", onClick: (c) => c() },
+        { label: "انصراف", kind: "ghost", onClick: (c) => { closeLive(); c(); } },
         { label: "ذخیره", kind: "primary", onClick: async (c) => {
-            if (!photos.length) { err.style.display = ""; err.textContent = "حداقل یک عکس لازم است"; return; }
+            err.style.display = "none";
+            if (!photos.length) { err.style.display = ""; err.textContent = "حداقل یک تصویر لازم است"; return; }
             if (!target && !meta.name.value.trim()) { err.style.display = ""; err.textContent = "نام الزامی است"; return; }
             const fd = new FormData();
             const chosen = [];
-            let missing = false;
-            photos.forEach((p) => {
-              if (!p.file) { missing = true; return; }
-              fd.append("files", p.file);
+            const stills = [];
+            for (const p of photos) {
               chosen.push(p.chosen);
-            });
-            if (missing) {
-              // camera-captured stills take the dedicated path (one at a time)
-              err.style.display = "";
-              err.textContent = "قاب‌های دوربین را جداگانه ذخیره کنید یا به‌جای آن فایل بارگذاری کنید.";
-              return;
+              if (p.file) fd.append("files", p.file);
+              else if (p.still) stills.push(p.still);
             }
             fd.append("faces", JSON.stringify(chosen));
+            fd.append("stills", JSON.stringify(stills));
             fd.append("metadata", JSON.stringify({
               name: meta.name.value.trim(), family_name: meta.family_name.value.trim(),
               age: meta.age.value || null, gender: meta.gender.value, role: meta.role.value,
@@ -209,17 +378,51 @@
             if (target) fd.append("identity_id", String(target));
             try {
               await window.API.form("/api/enrolment/save", fd);
-              toast("ثبت شد", "ok");
+              toast(target ? "تصویر مرجع افزوده شد" : "شخص ثبت شد", "ok");
+              closeLive();
               c();
               if (target) openPerson(target); else loadGrid();
-            } catch (e) { err.style.display = ""; err.textContent = e.message; }
+              if (opts.onSaved) opts.onSaved();
+            } catch (e) {
+              err.style.display = "";
+              err.textContent = e.message;
+            }
           } },
       ],
     });
     err.style.display = "none";
     renderPhotos();
+    renderFaces(-1);
+
+    // an unknown person from the dashboard arrives with its reviewed still
+    if (opts.still) {
+      lastStillCamera = opts.cameraId || 0;
+      if (opts.faces && opts.faces.length) {
+        pushPhoto({ still: opts.still, cameraId: opts.cameraId || 0, faces: opts.faces, previewFull: opts.preview || "", source: opts.source || "ناشناس" });
+      } else {
+        crop.load(opts.still).then(() => { stillBox.style.display = ""; }).catch(() => { /* ignore */ });
+      }
+    }
+    return dialog;
   }
 
+  // Entry point used by the dashboard for an unknown detection: enrol the
+  // exact frame the operator is looking at.
+  function openEnrolFromDetection(info) {
+    info = info || {};
+    return openEnrolment(null, {
+      title: "ثبت شخص ناشناس",
+      still: info.still || "",
+      faces: info.faces || [],
+      preview: info.preview || "",
+      cameraId: info.cameraId || 0,
+      age: info.age,
+      gender: info.gender,
+      role: info.role || "visitor",
+      source: "ناشناس",
+      onSaved: info.onSaved,
+    });
+  }
   // ------------------------------------------------------- person detail
   async function openPerson(id) {
     const body = h("div", {}, loading());
@@ -369,5 +572,5 @@
     await loadGrid();
   }
 
-  window.PagePeople = { mount, openEnrolment, openPerson };
+  window.PagePeople = { mount, openEnrolment, openPerson, openEnrolFromDetection };
 })();

@@ -8,6 +8,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -221,6 +222,57 @@ def restart_camera(request: Request, camera_id: int, user=Depends(require_admin)
     return {"restarted": True, "camera_id": camera_id, "state": stream.status.state}
 
 
+@router.get("/cameras/probe-preview")
+def camera_probe_preview(stream: str, user=Depends(require_admin)) -> Response:
+    """Decode one frame from an arbitrary stream address (discovery preview).
+
+    The browser can never open an ``rtsp://`` URL itself, so the check runs on
+    the server: open the capture, read a frame, answer it as a JPEG.  Nothing is
+    stored and the capture is released immediately.
+    """
+    import cv2
+
+    from ..storage.media import image_bytes
+
+    addr = (stream or "").strip()
+    if not addr:
+        raise HTTPException(status_code=400, detail="\u0622\u062F\u0631\u0633 \u067E\u062E\u0634 \u062E\u0627\u0644\u06CC \u0627\u0633\u062A")
+    if not re.match(r"^(rtsp|rtsps|http|https|file)://", addr, re.I) and not os.path.exists(addr):
+        raise HTTPException(status_code=400, detail="\u0622\u062F\u0631\u0633 \u067E\u062E\u0634 \u0645\u0639\u062A\u0628\u0631 \u0646\u06CC\u0633\u062A")
+    cap = None
+    try:
+        params = [cv2.CAP_FFMPEG] if hasattr(cv2, "CAP_FFMPEG") else []
+        cap = cv2.VideoCapture(addr, *params) if params else cv2.VideoCapture(addr)
+        try:
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except Exception:  # noqa: BLE001 - not all backends accept it
+            pass
+        if not cap.isOpened():
+            raise HTTPException(status_code=502, detail="\u0627\u062A\u0635\u0627\u0644 \u0628\u0647 \u062C\u0631\u06CC\u0627\u0646 \u0628\u0631\u0642\u0631\u0627\u0631 \u0646\u0634\u062F")
+        frame = None
+        # A network camera usually needs a moment and a couple of dropped
+        # frames before the first decodable picture appears.
+        for _ in range(12):
+            ok, got = cap.read()
+            if ok and got is not None and getattr(got, "size", 0):
+                frame = got
+                break
+        if frame is None:
+            raise HTTPException(status_code=504, detail="\u0642\u0627\u0628\u06CC \u062F\u0631\u06CC\u0627\u0641\u062A \u0646\u0634\u062F")
+        return Response(content=image_bytes(frame, quality=80, max_width=960), media_type="image/jpeg",
+                        headers={"Cache-Control": "no-store"})
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"\u062E\u0637\u0627 \u062F\u0631 \u062A\u0633\u062A \u062C\u0631\u06CC\u0627\u0646: {exc}") from exc
+    finally:
+        if cap is not None:
+            try:
+                cap.release()
+            except Exception:  # noqa: BLE001
+                pass
+
+
 @router.post("/cameras/test-address")
 def test_address(request: Request, payload: Dict[str, Any] = Body(...), user=Depends(current_user)) -> Dict[str, Any]:
     st = str(payload.get("stream_type") or "rtsp").lower()
@@ -238,11 +290,17 @@ def test_address(request: Request, payload: Dict[str, Any] = Body(...), user=Dep
 @router.post("/discovery/start")
 def discovery_start(request: Request, payload: Dict[str, Any] = Body(default={}), user=Depends(require_admin)) -> Dict[str, Any]:
     app = _app(request)
-    subnets = payload.get("subnets") if isinstance(payload, dict) else None
+    payload = payload if isinstance(payload, dict) else {}
+    subnets = payload.get("subnets") or None
+    # Credentials are optional, but without them a camera answers WS-Discovery
+    # yet refuses GetProfiles, so no stream address can be built.
     started = app.discovery.start(
         on_result=lambda d: app.db.bus.publish("discovery", {"device": d}),
         on_done=lambda n: app.db.bus.publish("discovery", {"done": True, "count": n}),
         subnets=subnets,
+        timeout=float(payload.get("timeout") or 4.0),
+        username=str(payload.get("username") or ""),
+        password=str(payload.get("password") or ""),
     )
     if not started:
         return {"started": False, "detail": app.discovery.progress, "devices": app.discovery.devices}
@@ -260,6 +318,38 @@ def discovery_cancel(request: Request, user=Depends(require_admin)) -> Dict[str,
 def discovery_results(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
     app = _app(request)
     return {"devices": app.discovery.devices, "running": app.discovery.running, "progress": app.discovery.progress}
+
+
+@router.post("/discovery/onvif")
+def discovery_onvif(request: Request, payload: Dict[str, Any] = Body(...), user=Depends(require_admin)) -> Dict[str, Any]:
+    """Full ONVIF describe of one camera: identity, media service, profiles, streams.
+
+    The console calls this for a discovered device or a manually typed address,
+    so the operator can pick a profile instead of guessing an RTSP path.
+    """
+    from ..pipeline.onvif import OnvifClient
+
+    address = str(payload.get("address") or "").strip()
+    service_url = str(payload.get("service_url") or "").strip()
+    if not service_url and address:
+        port = int(payload.get("port") or 80)
+        service_url = f"http://{address}:{port}/onvif/device_service"
+    if not service_url:
+        raise HTTPException(status_code=400, detail="آدرس دوربین یا سرویس ONVIF لازم است")
+    client = OnvifClient(
+        service_url,
+        str(payload.get("username") or ""),
+        str(payload.get("password") or ""),
+        timeout=float(payload.get("timeout") or 6.0),
+    )
+    result = client.describe(with_streams=bool(payload.get("streams", True)))
+    result["ok"] = bool(result.get("profiles") or result.get("info"))
+    if result["ok"]:
+        try:
+            _app(request).audit.record("onvif_describe", actor=user["login_name"], detail=service_url)
+        except Exception:  # noqa: BLE001 - audit must not break discovery
+            pass
+    return result
 
 
 @router.post("/discovery/stream-uri")
@@ -331,43 +421,109 @@ def _decode_upload(data: bytes, filename: str) -> np.ndarray:
     return img
 
 
+def _data_url(frame: np.ndarray, quality: int = 88, max_side: int = 1280) -> str:
+    """Self-contained copy of a still for the console (camera enrolment).
+
+    PNG keeps the exact pixels the operator reviewed; the JPEG fallback keeps
+    the payload small for very large camera frames.
+    """
+    import base64
+
+    if frame is None or getattr(frame, "size", 0) == 0:
+        return ""
+    img = frame
+    h, w = img.shape[:2]
+    scale = min(1.0, float(max_side) / float(max(h, w, 1)))
+    if scale < 1.0:
+        img = cv2.resize(img, (max(1, int(w * scale)), max(1, int(h * scale))), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), int(quality)])
+    if not ok:
+        return ""
+    return "data:image/jpeg;base64," + base64.b64encode(buf.tobytes()).decode()
+
+
 @router.post("/enrolment/detect")
 async def enrolment_detect(request: Request, file: UploadFile = File(...), user=Depends(require_admin)) -> Dict[str, Any]:
     """Detect every face in an upload and return selectable candidates."""
     app = _app(request)
     data = await file.read()
     img = _decode_upload(data, file.filename or "")
-    candidates = app.enrolment.detect_faces(img)
+    candidates, preview = app.enrolment.candidates_for(img)
     if not candidates:
         # explicit, not a silent empty success (pitfall 7)
-        return {"faces": [], "preview": app.enrolment.annotate_preview(img), "detail": "no face found"}
-    return {"faces": [c.as_dict() for c in candidates], "preview": app.enrolment.annotate_preview(img)}
+        return {"faces": [], "preview": preview, "detail": "no face found"}
+    return {"faces": [c.as_dict() for c in candidates], "preview": preview}
+
+
+@router.post("/enrolment/detect-b64")
+def enrolment_detect_b64(request: Request, payload: Dict[str, Any] = Body(...), user=Depends(require_admin)) -> Dict[str, Any]:
+    """Detect faces in a still the console already holds (camera crop).
+
+    The enrolment dialog crops a captured frame before sending it, because a
+    centred face in a wide shot is often below the detector's real working
+    size.  The still travels as a data URL, so no temp file is ever written.
+    """
+    app = _app(request)
+    img = app.enrolment.image_from_client(payload.get("image"))
+    if img is None:
+        raise HTTPException(status_code=422, detail="could not read the supplied image")
+    candidates, preview = app.enrolment.candidates_for(img)
+    return {
+        "faces": [c.as_dict() for c in candidates],
+        "preview": preview,
+        "detail": "" if candidates else "no face found",
+    }
+
+
+def _grab_still(app, cam_id: int, timeout: float = 5.0):
+    """Newest frame from a registered camera, or ``None``.
+
+    Opens the source for the duration of the grab and releases it again unless
+    the analysis pipeline owns it, so "capture from camera" works even when
+    nobody is watching that camera in the console.
+    """
+    stream = app.streams.get(cam_id)
+    if stream is None:
+        raise HTTPException(status_code=404, detail="camera not registered")
+    stream.acquire(owner="viewer")
+    try:
+        deadline = time.time() + max(0.5, timeout)
+        while time.time() < deadline:
+            frame = stream.snapshot()
+            if frame is not None:
+                return frame
+            time.sleep(0.05)
+        return None
+    finally:
+        stream.release(owner="viewer")
 
 
 @router.post("/enrolment/capture")
 def enrolment_capture(request: Request, payload: Dict[str, Any] = Body(...), user=Depends(require_admin)) -> Dict[str, Any]:
-    """Grab a still from a registered camera for enrolment (spec 5.4)."""
+    """Grab a still from a registered camera for enrolment (spec 5.4).
+
+    Returns the annotated preview plus a self-contained PNG copy of the exact
+    frame.  The console keeps that copy and sends it back with the enrolment
+    form, so the registered face is the one the operator reviewed - not a
+    second, slightly different frame grabbed at save time.
+    """
     app = _app(request)
-    cam_id = int(payload.get("camera_id") or 0)
-    stream = app.streams.get(cam_id)
-    if stream is None:
-        raise HTTPException(status_code=404, detail="camera not registered")
-    stream.acquire()
-    frame = None
     try:
-        for _ in range(50):
-            frame = stream.snapshot()
-            if frame is not None:
-                break
-            time.sleep(0.1)
-    finally:
-        stream.release()
+        cam_id = int(payload.get("camera_id") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="camera_id must be a number") from None
+    if cam_id <= 0:
+        raise HTTPException(status_code=422, detail="camera_id is required")
+    frame = _grab_still(app, cam_id)
     if frame is None:
         raise HTTPException(status_code=503, detail="no frame available from camera")
-    candidates = app.enrolment.detect_faces(frame)
+    candidates, preview = app.enrolment.candidates_for(frame)
     return {
         "faces": [c.as_dict() for c in candidates],
-        "preview": app.enrolment.annotate_preview(frame),
+        "preview": preview,
+        "still": _data_url(frame),
+        "frame_size": [int(frame.shape[1]), int(frame.shape[0])],
+        "camera_id": cam_id,
         "detail": "" if candidates else "no face found in the captured still",
     }
 
@@ -375,21 +531,48 @@ def enrolment_capture(request: Request, payload: Dict[str, Any] = Body(...), use
 @router.post("/enrolment/save")
 async def enrolment_save(
     request: Request,
-    files: List[UploadFile] = File(...),
+    files: List[UploadFile] = File(default=[]),
     faces: str = Form("[]"),
     metadata: str = Form("{}"),
     identity_id: Optional[str] = Form(None),
+    stills: str = Form("[]"),
     user=Depends(require_admin),
 ) -> Dict[str, Any]:
+    """Enrol from a mixed list of uploads and camera stills.
+
+    ``faces[i]`` selects the face in image ``i``.  Images come from ``files``
+    (in order) and then from ``stills`` (base64/data URLs of frames captured
+    from a camera).  Previously a camera still could never be saved from this
+    form: the handler only accepted file uploads and the console refused to
+    submit at all, which is the error operators saw.
+    """
     app = _app(request)
     try:
         picked = json.loads(faces or "[]")
         meta = json.loads(metadata or "{}")
+        extra_stills = json.loads(stills or "[]")
     except json.JSONDecodeError:
         raise HTTPException(status_code=422, detail="malformed faces/metadata") from None
-    if not isinstance(picked, list) or len(picked) != len(files):
-        raise HTTPException(status_code=422, detail="one face selection per photo is required")
-    images = [_decode_upload(await f.read(), f.filename or "") for f in files]
+    if not isinstance(picked, list):
+        raise HTTPException(status_code=422, detail="faces must be a list")
+    if not isinstance(extra_stills, list):
+        raise HTTPException(status_code=422, detail="stills must be a list")
+
+    images: List[np.ndarray] = []
+    for f in files or []:
+        images.append(_decode_upload(await f.read(), f.filename or ""))
+    for payload in extra_stills:
+        img = app.enrolment.image_from_client(payload)
+        if img is None:
+            raise HTTPException(status_code=422, detail="could not read a captured camera frame")
+        images.append(img)
+    if not images:
+        raise HTTPException(status_code=422, detail="at least one photo is required")
+    if len(picked) != len(images):
+        raise HTTPException(
+            status_code=422,
+            detail=f"one face selection per image is required ({len(images)} image(s), {len(picked)} selection(s))",
+        )
     try:
         target = int(identity_id) if identity_id not in (None, "", "null") else None
         result = app.enrolment.enrol(
@@ -404,26 +587,25 @@ async def enrolment_save(
 def enrolment_camera_save(request: Request, payload: Dict[str, Any] = Body(...), user=Depends(require_admin)) -> Dict[str, Any]:
     """Enrol from a still taken from a camera, picking one detected face."""
     app = _app(request)
-    cam_id = int(payload.get("camera_id") or 0)
-    face_index = int(payload.get("face_index") or 0)
-    meta = payload.get("metadata") or {}
-    stream = app.streams.get(cam_id)
-    if stream is None:
-        raise HTTPException(status_code=404, detail="camera not registered")
-    stream.acquire()
-    frame = None
     try:
-        for _ in range(50):
-            frame = stream.snapshot()
-            if frame is not None:
-                break
-            time.sleep(0.1)
-    finally:
-        stream.release()
+        cam_id = int(payload.get("camera_id") or 0)
+        face_index = int(payload.get("face_index") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="camera_id/face_index must be numbers") from None
+    meta = payload.get("metadata") or {}
+    identity_id = payload.get("identity_id")
+    frame = None
+    still = payload.get("still")
+    if still:
+        # the reviewed frame, so the saved face is exactly what was picked
+        frame = app.enrolment.image_from_client(still)
+    if frame is None:
+        frame = _grab_still(app, cam_id)
     if frame is None:
         raise HTTPException(status_code=503, detail="no frame available from camera")
+    target = int(identity_id) if identity_id not in (None, "", "null") else None
     try:
-        result = app.enrolment.enrol([frame], [face_index], meta, actor=user["login_name"])
+        result = app.enrolment.enrol([frame], [face_index], meta, actor=user["login_name"], identity_id=target)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from None
     return result

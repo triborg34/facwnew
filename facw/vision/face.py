@@ -73,9 +73,19 @@ def crop(image: np.ndarray, box: Tuple[int, int, int, int]) -> np.ndarray:
 
 
 class FaceEngine:
-    """YuNet detector + SFace recogniser, thread-safe."""
+    """YuNet detector + SFace recogniser, thread-safe.
+
+    Two interchangeable implementations of the same ONNX graphs:
+
+    * ``cv``     - ``cv2.FaceDetectorYN`` / ``cv2.FaceRecognizerSF`` (CPU, or
+                   OpenCL when that is the resolved device).
+    * ``ort``    - ONNX Runtime with the CUDA execution provider, used when the
+                   resolved device is CUDA so the face stage is accelerated too.
+    """
 
     def __init__(self, models_dir: Path, device: Optional["DeviceInfo"] = None) -> None:
+        from ..core.device import ort_providers
+
         self._lock = threading.Lock()
         self.device = device or resolve_device()
         yunet = models_dir / "yunet.onnx"
@@ -90,14 +100,22 @@ class FaceEngine:
         self.recognizer = cv2.FaceRecognizerSF.create(str(sface), "")
         self.feature_size = 128
         self._input_size = (320, 320)
-        # NOTE: cv2.FaceDetectorYN / FaceRecognizerSF have no dnn backend or
-        # target switch, so this stage always runs on the CPU.  The resolved
-        # device is recorded and reported; see core.device.
+        self.backend = "cv"
+        self._ort = None
+        if self.device.use_onnxruntime:
+            from .ort_face import build as build_ort
+
+            self._ort = build_ort(yunet, sface, ort_providers(self.device))
+            if self._ort is not None:
+                self.backend = "onnxruntime"
+        # OpenCV's FaceDetectorYN/FaceRecognizerSF expose no backend switch, so
+        # that implementation is CPU/OpenCL only; see core.device.
         log.info(
             "face engine ready",
             extra={
                 "models": f"{yunet.name},{sface.name}",
                 "device": self.device.device,
+                "backend": self.backend,
                 "device_reason": self.device.reason,
             },
         )
@@ -108,15 +126,19 @@ class FaceEngine:
         if image is None or image.size == 0 or image.shape[0] < 16 or image.shape[1] < 16:
             return []
         h, w = image.shape[:2]
-        with self._lock:
-            if (w, h) != self._input_size:
-                self.detector.setInputSize((w, h))
-                self._input_size = (w, h)
-            try:
-                _, raw = self.detector.detect(image)
-            except cv2.error as exc:  # malformed input must not kill the caller
-                log.warning("face detect failed", extra={"error": str(exc)})
-                return []
+        if self._ort is not None:
+            with self._lock:
+                raw = self._ort.detect(image, float(score_threshold))
+        else:
+            with self._lock:
+                if (w, h) != self._input_size:
+                    self.detector.setInputSize((w, h))
+                    self._input_size = (w, h)
+                try:
+                    _, raw = self.detector.detect(image)
+                except cv2.error as exc:  # malformed input must not kill the caller
+                    log.warning("face detect failed", extra={"error": str(exc)})
+                    return []
         if raw is None or len(raw) == 0:
             return []
         faces: List[FaceBox] = []
@@ -127,13 +149,17 @@ class FaceEngine:
                 continue
             if sc < score_threshold:
                 continue
-            lms = row[4:14].reshape(5, 2).astype(np.float32)
+            lms = np.asarray(row[4:14], dtype=np.float32).reshape(5, 2)
             faces.append(FaceBox(x, y, bw, bh, sc, lms))
         return faces
+
 
     # -- embedding -----------------------------------------------------
     def embed_aligned(self, image: np.ndarray, face: FaceBox) -> Optional[np.ndarray]:
         """Normalised 128-D vector for an aligned face crop."""
+        if self._ort is not None and face.landmarks is not None:
+            vec = self._ort.embedding(image, face.landmarks)
+            return vec
         try:
             with self._lock:
                 feat = self.recognizer.feature(image)
@@ -147,6 +173,9 @@ class FaceEngine:
         """Align the face from its landmarks then embed (stage 6)."""
         if face.landmarks is None:
             return None
+        if self._ort is not None:
+            with self._lock:
+                return self._ort.embedding(image, face.landmarks)
         try:
             with self._lock:
                 aligned = self.recognizer.alignCrop(image, self._to_raw(face))

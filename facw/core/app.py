@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .config import Paths, SettingsManager
-from .device import DeviceInfo, resolve as resolve_device
+from .device import DeviceInfo, configure_opencv, resolve as resolve_device
 from .logging_setup import configure, get_logger, set_level
 from .security import Sealer
 from ..pipeline.capture import StreamRegistry
@@ -64,8 +64,10 @@ class App:
         # --- vision ---
         # Resolve the execution device once so face and person stages agree.
         self.device: DeviceInfo = resolve_device(self.settings.get().processing_device)
+        configure_opencv(self.device)
         self.face = FaceEngine(self.paths.models_dir, device=self.device)
         self.person = build_person_detector(self.paths.models_dir, device=self.device)
+        self._refresh_accel()
         self.index = MatchIndex(dim=self.face.feature_size)
         self.index.rebuild(self.identities.load_vectors(actor="boot"))
 
@@ -117,6 +119,10 @@ class App:
             set_level(new.log_level)
         if any(k in changed for k in ("relay_host", "relay_port")):
             self._wire_relay(new)
+        if "processing_device" in changed:
+            # Reload the vision stages on the newly resolved device.  The
+            # workers pick the objects up on their next frame.
+            self.reload_vision(new)
         if "discovery_rate_limit_seconds" in changed:
             self.discovery._rate_limit = new.discovery_rate_limit_seconds
         if changed:
@@ -129,6 +135,29 @@ class App:
         log.info("settings applied", extra={"changed": sorted(changed.keys())})
 
     # -- lifecycle ------------------------------------------------------
+    def reload_vision(self, cfg=None) -> Dict[str, Any]:
+        """Rebuild the face/person stages (used after a device change)."""
+        cfg = cfg or self.settings.get()
+        with self._lock:
+            self.device = resolve_device(cfg.processing_device)
+            configure_opencv(self.device)
+            face = FaceEngine(self.paths.models_dir, device=self.device)
+            person = build_person_detector(self.paths.models_dir, device=self.device)
+            old_face, old_person = self.face, self.person
+            self.face = face
+            self.person = person
+            self.ctx.face = face
+            self.ctx.person = person
+            self.enrolment.face = face
+            self.index_dim = face.feature_size
+        for old in (old_face, old_person):
+            try:
+                old.close()
+            except Exception:  # noqa: BLE001
+                pass
+        log.info("vision stages reloaded", extra={"device": self.device.as_dict()})
+        return self.device.as_dict()
+
     def start(self) -> None:
         with self._lock:
             if self._ready:
@@ -160,6 +189,26 @@ class App:
     def resync_cameras(self) -> None:
         self.pipeline.sync(self.cameras.list())
 
+    def latest_frame(self, camera_id: int, flavour: str = "annotated"):
+        """Newest frame of one camera for the live view (or ``None``).
+
+        ``annotated`` returns the pipeline's overlay frame (boxes, zones);
+        ``raw`` returns the capture frame untouched.  Never blocks and never
+        starts a camera that nobody is watching.
+        """
+        cid = int(camera_id)
+        stream = self.streams.get(cid)
+        if stream is None:
+            return None
+        if flavour == "annotated":
+            buf = self.pipeline.annotated(cid)
+            if buf is not None:
+                got = buf.get(-1, timeout=0.0)
+                if got is not None:
+                    return got[0]
+            return None
+        return stream.snapshot()
+
     # -- health / resources --------------------------------------------
     def health(self) -> Dict[str, Any]:
         db_ok = False
@@ -177,7 +226,35 @@ class App:
             "index": self.index.stats(),
             "cameras": self.streams.all_status(),
             "device": self.device.as_dict(),
+            # accelerator detail: which backend actually runs each stage, so
+            # "is it using the GPU?" is answerable from the console instead of
+            # guessed from a log line.
+            "accelerator": self._refresh_accel(),
         }
+
+    def _refresh_accel(self) -> Dict[str, Any]:
+        """Which backend is *actually* running each stage.
+
+        The setting says what was asked for; this says what happened.  A user
+        who selects GPU on a machine without CUDA needs to see that the stages
+        fell back, and why, without reading the log.
+        """
+        info = self.device.as_dict()
+        self._accel = {
+            "requested": info.get("requested"),
+            "device": info.get("device"),
+            "reason": info.get("reason"),
+            "cuda_devices": info.get("cuda_devices"),
+            "opencv_cuda": info.get("opencv_cuda"),
+            "dnn_cuda": info.get("dnn_cuda"),
+            "dnn_opencl": info.get("dnn_opencl"),
+            "ort_usable": info.get("ort_usable"),
+            "face_backend": getattr(self.face, "backend", "?"),
+            "person_backend": getattr(self.person, "backend", "?"),
+            "using_gpu": bool(getattr(self.face, "backend", "") == "onnxruntime"
+                              or getattr(self.person, "backend", "") in ("cuda", "opencl")),
+        }
+        return self._accel
 
     def resources(self) -> Dict[str, Any]:
         """Resource view.  Every value is read from its real owner - the
@@ -211,6 +288,8 @@ class App:
         try:
             if cv2.cuda.getCudaEnabledDeviceCount() > 0:
                 accel = f"cuda x{cv2.cuda.getCudaEnabledDeviceCount()}"
+            elif self.device.dnn_opencl and hasattr(cv2, "ocl") and cv2.ocl.useOpenCL():
+                accel = "opencl"
         except Exception:
             accel = "cpu"
         pmetrics = self.pipeline.metrics()
@@ -218,6 +297,9 @@ class App:
             "cpu_percent": cpu_pct,
             "memory_mb": mem_mb,
             "accelerator": accel,
+            "device": self.device.as_dict(),
+            "face_backend": getattr(self.face, "backend", "-"),
+            "person_backend": getattr(self.person, "backend", "-"),
             "processing_device": self.settings.get().processing_device,
             "identities": self.index.stats()["identities"],
             "reference_rows": self.index.stats()["rows"],

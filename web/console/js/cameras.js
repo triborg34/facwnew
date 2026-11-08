@@ -155,42 +155,76 @@
   }
 
   // ------------------------------------------------------------ discovery
+  //
+  // Discovery has three inputs the previous version silently ignored:
+  //   * credentials  - a camera answers WS-Discovery without them but refuses
+  //                    GetProfiles, so no stream address can be built;
+  //   * subnet       - a camera on another VLAN is never reached by a /24 sweep;
+  //   * ONVIF describe - the stream address lives in the WSDL services
+  //                    (GetProfiles + GetStreamUri), not in the discovery reply.
+  // All three are exposed here, and the device row shows the ONVIF profile that
+  // produced the address so a wrong guess is visible instead of silent.
+  let discCreds = { username: "", password: "", subnet: "" };
+
   function renderDiscovery() {
-    const host = root.querySelector("#disc-host");
+    const host = root && root.querySelector("#disc-host");
     if (!host) return;
     clear(host);
+    const user = h("input", { type: "text", placeholder: "admin", value: discCreds.username, autocomplete: "off" });
+    const pass = h("input", { type: "password", placeholder: "رمز دوربین", value: discCreds.password, autocomplete: "new-password" });
+    const subnet = h("input", { type: "text", placeholder: "مثلاً 192.168.1.0/24 (اختیاری)", value: discCreds.subnet });
+    const remember = () => {
+      discCreds = { username: user.value.trim(), password: pass.value, subnet: subnet.value.trim() };
+    };
+    [user, pass, subnet].forEach((el) => el.addEventListener("input", remember));
+
     host.appendChild(h("div", { class: "card-head" },
       h("span", {}, "کشف دوربین در شبکه"),
       h("span", { class: "badge" + (discoveryRunning ? " warn" : "") }, discoveryRunning ? "در حال اسکن" : "آماده"),
       h("div", { class: "spacer" }),
-      h("button", { class: "btn sm primary", disabled: discoveryRunning, onclick: startScan }, "شروع اسکن"),
-      h("button", { class: "btn sm", disabled: !discoveryRunning, onclick: cancelScan }, "توقف")
-    ));
-    const body = h("div", { class: "card-body" });
+      h("button", { class: "btn sm primary", disabled: discoveryRunning, onclick: () => startScan(remember) }, "شروع اسکن"),
+      h("button", { class: "btn sm", disabled: !discoveryRunning, onclick: cancelScan }, "توقف")));
+
+    const body = h("div", { class: "card-body" },
+      h("div", { class: "grid-3", style: "margin-bottom:10px" },
+        h("div", { class: "field" }, h("label", {}, "نام کاربری دوربین"), user),
+        h("div", { class: "field" }, h("label", {}, "رمز عبور"), pass),
+        h("div", { class: "field" }, h("label", {}, "شبکه (اختیاری)"), subnet)),
+      h("div", { class: "muted", style: "font-size:12px;margin-bottom:10px" },
+        "دوربین‌ها با WS-Discovery (ONVIF) پیدا می‌شوند؛ آدرس پخش از سرویس‌های ONVIF دوربین گرفته می‌شود. " +
+        "بدون نام کاربری و رمز، بیشتر دوربین‌ها فقط «پیدا» می‌شوند و آدرس پخش نمی‌دهند."));
+
     if (!discoveryDevices.length) {
-      body.appendChild(empty(discoveryRunning ? "در حال جست‌وجو…" : "دستگاهی یافت نشد", "نتایج حین اسکن به‌صورت زنده نمایش داده می‌شوند"));
+      body.appendChild(empty(discoveryRunning ? "در حال جست‌وجو…" : "دستگاهی یافت نشد",
+        "نتایج حین اسکن زنده نمایش داده می‌شوند. اگر دوربینی پیدا نشد، شبکه را دستی وارد کنید."));
     } else {
       body.appendChild(h("div", { class: "table-wrap" }, h("table", { class: "data" },
-        h("thead", {}, h("tr", {}, h("th", {}, "آدرس"), h("th", {}, "نام"), h("th", {}, "مدل"),
-          h("th", {}, "آدرس پخش"), h("th", {}, "وضعیت"), h("th", {}, "عملیات"))),
+        h("thead", {}, h("tr", {}, h("th", {}, "آدرس"), h("th", {}, "نام / مدل"),
+          h("th", {}, "آدرس پخش"), h("th", {}, "منبع"), h("th", {}, "عملیات"))),
         h("tbody", {}, discoveryDevices.map((d) => h("tr", {},
-          h("td", { class: "mono" }, d.address),
-          h("td", {}, d.name || "\u2014"),
-          h("td", {}, d.model || "\u2014"),
-          h("td", { class: "mono", style: "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, d.stream_address || "\u2014"),
-          h("td", {}, h("span", { class: "badge" }, (d.sources || []).join(", "))),
-          h("td", {},
-            h("button", { class: "btn sm", onclick: () => registerDevice(d) }, "افزودن"),
-            h("button", { class: "btn sm ghost", onclick: () => fetchStream(d) }, "دریافت آدرس پخش"))
-        )))
-      )));
+          h("td", { class: "mono" }, d.address + (d.port && d.port !== 554 ? ":" + d.port : "")),
+          h("td", {}, h("div", {}, d.name || "—"),
+            h("div", { class: "muted", style: "font-size:11px" }, [d.vendor, d.model].filter(Boolean).join(" ") || "—")),
+          h("td", { class: "mono", style: "max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap",
+            title: d.stream_address || "" }, d.stream_address || (d.note || "—")),
+          h("td", {}, h("span", { class: "badge" }, (d.sources || []).join(", ") || "—")),
+          h("td", { style: "white-space:nowrap" },
+            h("button", { class: "btn sm", onclick: () => registerDevice(d, remember) }, "افزودن"),
+            h("button", { class: "btn sm ghost", onclick: () => describeDevice(d, remember) }, "ONVIF"),
+            h("button", { class: "btn sm ghost", onclick: () => testPreview(d, remember) }, "پیش‌نمایش"))
+        ))))));
     }
     host.appendChild(body);
   }
 
-  async function startScan() {
+  async function startScan(remember) {
+    if (remember) remember();
     try {
-      const r = await window.API.post("/api/discovery/start", {});
+      const r = await window.API.post("/api/discovery/start", {
+        username: discCreds.username,
+        password: discCreds.password,
+        subnets: discCreds.subnet ? [discCreds.subnet] : undefined,
+      });
       if (!r.started) { toast(r.detail || "اسکن آغاز نشد", "warn"); return; }
       discoveryRunning = true;
       discoveryDevices = [];
@@ -205,46 +239,128 @@
     renderDiscovery();
   }
 
-  async function fetchStream(d) {
-    const login = h("input", { type: "text", placeholder: "نام کاربری" });
-    const pass = h("input", { type: "password", placeholder: "رمز عبور" });
+  // Full WSDL describe: device identity, media service, profiles and the
+  // stream address of each profile.  The operator picks the profile instead of
+  // guessing a path, which is what made discovery look broken before.
+  async function describeDevice(d, remember) {
+    if (remember) remember();
+    const body = h("div", {}, loading("در حال پرس‌وجوی سرویس‌های ONVIF…"));
+    const m = modal({
+      title: "سرویس‌های ONVIF — " + d.address,
+      size: "lg",
+      body,
+      actions: [{ label: "بستن", kind: "ghost", onClick: (c) => c() }],
+    });
+    let res = null;
+    try {
+      res = await window.API.post("/api/discovery/onvif", {
+        address: d.address,
+        port: d.port && d.port !== 554 ? d.port : 80,
+        service_url: d.service_url,
+        username: discCreds.username,
+        password: discCreds.password,
+      });
+    } catch (e) {
+      clear(body);
+      body.appendChild(errorState("سرویس ONVIF پاسخ نداد: " + e.message, () => { m.close(); describeDevice(d, remember); }));
+      return;
+    }
+    clear(body);
+    const info = res.info || {};
+    body.appendChild(h("table", { class: "data", style: "margin-bottom:12px" }, h("tbody", {},
+      h("tr", {}, h("td", { class: "muted" }, "سازنده"), h("td", {}, info.manufacturer || "—")),
+      h("tr", {}, h("td", { class: "muted" }, "مدل"), h("td", {}, info.model || "—")),
+      h("tr", {}, h("td", { class: "muted" }, "نسخه نرم‌افزار"), h("td", {}, info.firmware || "—")),
+      h("tr", {}, h("td", { class: "muted" }, "سریال"), h("td", {}, info.serial || "—")),
+      h("tr", {}, h("td", { class: "muted" }, "سرویس رسانه"), h("td", { class: "mono" }, res.media_url || "—")),
+    )));
+    const profiles = res.profiles || [];
+    if (!profiles.length) {
+      body.appendChild(empty("پروفایلی برنگشت",
+        (res.errors || []).join(" · ") || "نام کاربری و رمز دوربین را بررسی کنید؛ بیشتر دوربین‌ها بدون احراز هویت GetProfiles را رد می‌کنند."));
+      return;
+    }
+    profiles.forEach((p) => {
+      body.appendChild(h("div", { class: "card", style: "margin-bottom:8px" },
+        h("div", { class: "card-head" },
+          h("span", {}, p.label || p.token),
+          h("span", { class: "badge" }, p.encoding || "—"),
+          h("div", { class: "spacer" }),
+          h("button", { class: "btn sm", onclick: () => {
+            d.stream_address = p.uri;
+            d.sources = (d.sources || []).concat(["onvif:" + (p.name || p.token)]);
+            toast("آدرس پخش این پروفایل انتخاب شد", "ok");
+            m.close();
+            renderDiscovery();
+          } }, "انتخاب این پروفایل")),
+        h("div", { class: "card-body mono", style: "font-size:12px;word-break:break-all" }, p.uri || "—")));
+    });
+  }
+
+  // Try the address the way the pipeline does: decode a single frame.
+  async function testPreview(d, remember) {
+    if (remember) remember();
+    if (!d.stream_address) {
+      toast("ابتدا آدرس پخش را با دکمه ONVIF بدست آورید", "warn");
+      return;
+    }
+    const body = h("div", {}, loading("در حال دریافت یک قاب…"));
+    const m = modal({
+      title: "پیش‌نمایش — " + d.address,
+      size: "lg",
+      body,
+      actions: [{ label: "بستن", kind: "ghost", onClick: (c) => c() }],
+    });
+    try {
+      // goes through the server so the browser never needs the camera itself
+      const url = "/api/cameras/probe-preview?stream=" + encodeURIComponent(d.stream_address);
+      const img = h("img", { src: url + "&t=" + Date.now(), style: "max-width:100%;border-radius:8px" });
+      const probe = new Image();
+      probe.onload = () => { clear(body); body.appendChild(img); };
+      probe.onerror = () => {
+        clear(body);
+        body.appendChild(errorState("قاب دریافت نشد — آدرس پخش یا رمز اشتباه است.",
+          () => { m.close(); describeDevice(d, remember); }));
+      };
+      probe.src = url + "&t=" + Date.now();
+    } catch (e) {
+      clear(body);
+      body.appendChild(errorState(e.message));
+    }
+  }
+
+  async function registerDevice(d, remember) {
+    if (remember) remember();
+    const name = h("input", { type: "text", value: d.name || ("camera-" + d.address.replace(/\./g, "-")) });
+    const stream = h("input", { type: "text", class: "mono", value: d.stream_address || "" });
     modal({
-      title: "دریافت آدرس پخش از دستگاه",
-      size: "sm",
+      title: "افزودن دوربین",
+      size: "md",
       body: h("div", {},
-        h("div", { class: "muted", style: "margin-bottom:8px" }, `دستگاه ${d.address} — از رابط مدیریت دوربین استفاده می‌شود.`),
-        h("div", { class: "field" }, h("label", {}, "نام کاربری"), login),
-        h("div", { class: "field" }, h("label", {}, "رمز عبور"), pass)),
+        h("div", { class: "field" }, h("label", {}, "نام نمایشی"), name),
+        h("div", { class: "field" }, h("label", {}, "آدرس پخش (RTSP)"), stream),
+        h("div", { class: "muted", style: "font-size:12px" },
+          "اگر آدرس خالی باشد از نام کاربری و رمز همین صفحه استفاده می‌شود و مسیر استاندارد دوربین ساخته می‌شود.")),
       actions: [
         { label: "انصراف", kind: "ghost", onClick: (c) => c() },
-        { label: "دریافت", kind: "primary", onClick: async (c) => {
+        { label: "ثبت", kind: "primary", onClick: async (c) => {
             try {
-              const r = await window.API.post("/api/discovery/stream-uri", {
-                service_url: d.service_url, address: d.address, port: d.port,
-                username: login.value, password: pass.value,
+              await window.API.post("/api/cameras", {
+                name: name.value.trim() || ("camera-" + d.address.replace(/\./g, "-")),
+                address: d.address,
+                port: d.port || 554,
+                stream_type: "rtsp",
+                stream_address: stream.value.trim(),
+                username: discCreds.username,
+                password: discCreds.password,
               });
-              d.stream_address = r.stream_address;
-              d.sources = (d.sources || []).concat([r.source]);
-              toast("آدرس پخش دریافت شد", "ok");
-              c(); renderDiscovery();
+              toast("دوربین ثبت شد", "ok");
+              c();
+              await loadCameras();
             } catch (e) { toast("خطا: " + e.message, "danger"); }
           } },
       ],
     });
-  }
-
-  async function registerDevice(d) {
-    try {
-      await window.API.post("/api/cameras", {
-        name: d.name || ("camera-" + d.address.replace(/\./g, "-")),
-        address: d.address,
-        port: d.port || 554,
-        stream_type: "rtsp",
-        stream_address: d.stream_address || "",
-      });
-      toast("دوربین ثبت شد", "ok");
-      await loadCameras();
-    } catch (e) { toast("خطا: " + e.message, "danger"); }
   }
 
   async function loadCameras() {

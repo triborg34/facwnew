@@ -7,7 +7,7 @@ import queue
 import time
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 
 from ..core.config import RuntimeSettings
@@ -211,11 +211,24 @@ async def live_events(request: Request, topics: str = "events,identities,cameras
 
 
 @router.get("/live/detections")
-def live_detections(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
-    """Current on-screen tracks per camera (analysing / identified / unknown)."""
+def live_detections(
+    request: Request,
+    if_none_match: str = "",
+    ttl: float = 2.5,
+    user=Depends(current_user),
+) -> Dict[str, Any]:
+    """Current on-screen tracks per camera (analysing / identified / unknown).
+
+    The console polls this several times a second.  ``version`` changes only
+    when a box, a state or a vote actually moved, so a quiet scene answers
+    ``changed: false`` with no payload and the live view repaints instantly
+    when something does happen.
+    """
     app = _app(request)
     out: List[Dict[str, Any]] = []
+    version = 0
     for t in app.tracks.all_tracks():
+        version = (version * 31 + t.track_id * 7 + int(t.updated_at * 1000) + len(t.votes) + (5 if t.committed else 0)) % 2_147_483_647
         ident = t.identity or {}
         out.append(
             {
@@ -223,17 +236,49 @@ def live_detections(request: Request, user=Depends(current_user)) -> Dict[str, A
                 "camera_key": t.camera_key,
                 "state": t.state,
                 "identity_name": ident.get("name", "") if t.committed else "",
+                "identity_id": ident.get("identity_id") if t.committed else None,
                 "score": round(float(ident.get("score", 0.0)), 3) if ident else 0.0,
                 "zone": t.zone_name,
                 "samples": t.sample_count,
+                "votes": len(t.votes),
                 "age": ident.get("age"),
                 "gender": ident.get("gender", ""),
-                "since": t.first_seen,
+                "since": round(t.first_seen, 3),
+                "updated": round(t.updated_at, 3),
+                "stale": (time.time() - t.last_seen) > max(1.0, float(ttl or 2.5)),
                 "bbox": [round(float(v), 1) for v in t.bbox],
             }
         )
     out.sort(key=lambda d: d["track_id"], reverse=True)
-    return {"tracks": out, "count": len(out)}
+    payload = {"tracks": out, "count": len(out), "version": str(version), "ts": round(time.time(), 3)}
+    if str(if_none_match or "") == str(version) and not app.tracks.count:
+        return {"tracks": [], "count": len(out), "version": str(version), "changed": False}
+    payload["changed"] = True
+    return payload
+
+
+@router.get("/live/frame/{camera_id}")
+def live_frame(camera_id: int, request: Request, flavour: str = "annotated", user=Depends(current_user)) -> Response:
+    """Newest frame of one camera as a single JPEG (no multipart overhead).
+
+    Used by the console's live view: a small XHR loop is cheaper per frame than
+    a multipart stream for mosaic tiles and keeps the browser's per-host
+    connection budget free for the API.
+    """
+    from ..storage.media import image_bytes
+
+    app = _app(request)
+    if user.get("role") != "admin":
+        flavour = "raw"
+    frame = app.latest_frame(camera_id, flavour)
+    if frame is None:
+        return Response(status_code=204, headers={"Cache-Control": "no-store"})
+    data = image_bytes(frame, quality=78, max_width=1280)
+    return Response(
+        content=data,
+        media_type="image/jpeg",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
 
 
 # ==========================================================================

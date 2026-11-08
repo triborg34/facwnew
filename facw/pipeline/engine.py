@@ -134,6 +134,7 @@ class AppearanceTracker:
                 best_t.bbox = tuple(box.tolist())
                 best_t.score = det.score
                 best_t.last_seen = time.time()
+                best_t.updated_at = best_t.last_seen
                 matched.append((best_t, det))
             else:
                 tr = Track(self.tracks.next_id(), camera_key, tuple(box.tolist()), det.score)
@@ -343,6 +344,7 @@ class PipelineWorker:
         self.zones: List[Zone] = []
         self._zones_loaded_at = 0.0
         self._fps_marks: List[float] = []
+        self._last_detect_at = 0.0
 
     # -- lifecycle -----------------------------------------------------
     def start(self) -> None:
@@ -387,20 +389,40 @@ class PipelineWorker:
                 annotated = self.process_frame(frame, settings)
                 latency = (time.perf_counter() - t0) * 1000.0
                 self.annotations.put(annotated, latency)
-                self.ctx.record_frame(self.camera_id, latency)
+                self.ctx.record_frame(self.camera_id, latency, self.stream.status.fps)
             except Exception as exc:  # noqa: BLE001 - one camera must not kill the service
                 self.ctx.metrics.errors += 1
                 log.error("pipeline worker error", extra={"camera": self.camera_id, "error": str(exc)})
                 self._stop.wait(0.25)
 
     def _sample_due(self, track: Track, settings) -> bool:
-        """Stage 16: fast cadence while undecided, slow after a decision."""
+        """Stage 16: fast cadence while undecided, slow after a decision.
+
+        A committed track is *not* re-embedded at all (it is resolved for this
+        appearance); the slow cadence only drives its face-box refresh.
+        """
         now = time.time()
         cadence = settings.slow_sample_ms if track.committed else settings.fast_sample_ms
         if (now - track.last_sample_at) * 1000.0 >= cadence:
             track.last_sample_at = now
             return True
         return False
+
+    def _tracks_due(self, settings) -> bool:
+        """Cheap throttle: run detection+tracking at the fast cadence.
+
+        Without this the person detector ran on every captured frame (25-30 fps
+        per camera), which is what made the live view lag behind by seconds and
+        starved the box positions.  The newest frame is still analysed as soon
+        as it arrives at the configured cadence, so boxes stay fresh while the
+        CPU/GPU has headroom for more cameras.
+        """
+        now = time.time()
+        cadence = max(30, int(settings.fast_sample_ms)) / 1000.0
+        if (now - self._last_detect_at) < cadence:
+            return False
+        self._last_detect_at = now
+        return True
 
     def process_frame(self, frame: np.ndarray, settings) -> np.ndarray:
         h, w = frame.shape[:2]
@@ -410,25 +432,33 @@ class PipelineWorker:
         if settings.zone_mode and self.zones:
             work = apply_zone_mask(frame, self.zones)
 
-        detections = self.ctx.person.detect(work, settings.person_confidence)
+        detections = self.ctx.person.detect(work, settings.person_confidence, getattr(settings, "person_max_side", 0))
         # The detector family emits several same-size, diagonally offset slabs
         # around one person; IoU and containment both stay below their gates.
         # Suppress across the *accepted* set with a looser threshold so one
         # body yields one detection (and therefore one track).
         detections = nms(detections, 0.1)
+        detection_update = self._tracks_due(settings)
+        if not detection_update:
+            # Between association passes the existing tracks keep their ids and
+            # only their face boxes are refreshed, so annotate cheaply.
+            if not self.ctx.tracks.for_camera(self.camera_key):
+                detections = []
+            else:
+                detections = None
         if settings.zone_mode and self.zones:
             # Attribute to the zone containing the box centre; also drop boxes
             # that the block mask left empty (nothing to detect outside zones).
             kept = []
-            for d in detections:
+            for d in detections or []:
                 cx, cy = (d.x1 + d.x2) / 2.0 / max(1, w), (d.y1 + d.y2) / 2.0 / max(1, h)
                 z = attribute_zone(self.zones, cx, cy)
                 if z is not None:
                     kept.append((d, z))
-            pairs = self.tracker.update(self.camera_key, [d for d, _ in kept], settings.overlap_threshold)
+            pairs = self.tracker.update(self.camera_key, [d for d, _ in kept], settings.overlap_threshold) if detection_update else []
             zone_by_id = {id(d): z for d, z in kept}
         else:
-            pairs = self.tracker.update(self.camera_key, detections, settings.overlap_threshold)
+            pairs = self.tracker.update(self.camera_key, detections, settings.overlap_threshold) if detection_update else []
             zone_by_id = {}
 
         for track, det in pairs:
@@ -437,8 +467,10 @@ class PipelineWorker:
                 if z is not None:
                     track.zone_name = z.name
             if track.committed:
-                # Stage 4: a committed track only refreshes its face box.
-                self._refresh_face_box(track, frame, settings)
+                # Stage 4: a committed track only refreshes its face box, and
+                # only at the slow cadence (it is already resolved).
+                if self._sample_due(track, settings):
+                    self._refresh_face_box(track, frame, settings)
                 continue
             if not self._sample_due(track, settings):
                 continue
@@ -517,6 +549,7 @@ class PipelineWorker:
         track.identity = decision
         track.votes = []  # drop the vote list once committed
         track.emitted = False
+        track.updated_at = time.time()
 
         # Stage 10 - emit exactly one event for this appearance
         self._emit_event(track, frame, person_crop, body, settings, x1, y1)
@@ -649,13 +682,17 @@ class PipelineContext:
     audit: Any
     metrics: PipelineMetrics = field(default_factory=PipelineMetrics)
 
-    def record_frame(self, camera_id: int, latency_ms: float) -> None:
+    def record_frame(self, camera_id: int, latency_ms: float, source_fps: float = 0.0) -> None:
         self.metrics.frames += 1
         self.metrics.analysed += 1
         self.metrics.latency_ms = round(latency_ms, 2)
-        cam = self.metrics.per_camera.setdefault(str(camera_id), {"frames": 0, "latency_ms": 0.0})
+        cam = self.metrics.per_camera.setdefault(
+            str(camera_id), {"frames": 0, "latency_ms": 0.0, "fps": 0.0, "source_fps": 0.0}
+        )
         cam["frames"] += 1
         cam["latency_ms"] = round(latency_ms, 2)
+        cam["source_fps"] = round(float(source_fps or 0.0), 1)
+        cam["fps"] = round(1000.0 / latency_ms, 1) if latency_ms > 0 else 0.0
 
 
 class Pipeline:

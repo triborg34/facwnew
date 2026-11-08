@@ -160,6 +160,79 @@ class EnrolmentService:
         return _data_url(canvas, quality=72, max_side=560)
 
     # -- enrolment -----------------------------------------------------
+    def candidates_for(self, image: np.ndarray) -> tuple:
+        """(candidates, full-size preview) for one image, in one pass.
+
+        The console needs three views of the same still: the selectable face
+        chips, and a full-size preview with the same numbers drawn on it.  Both
+        come from :meth:`_pick_candidates`, so the number a user sees always
+        matches the chip they can choose.
+        """
+        from ..vision.face import estimate_attributes
+
+        s = self.settings_mgr.get()
+        faces = self._pick_candidates(image, s)
+        h, w = image.shape[:2]
+        out: List[FaceCandidate] = []
+        canvas = image.copy()
+        for i, f in enumerate(faces):
+            fx1, fy1, fx2, fy2 = pad_box(f.x, f.y, f.w, f.h, s.face_crop_padding, w, h)
+            crop = image[fy1:fy2, fx1:fx2]
+            age, gender = estimate_attributes(f, float(w), float(h))
+            out.append(
+                FaceCandidate(
+                    index=i,
+                    box=f.as_dict(),
+                    score=f.score,
+                    width=f.w,
+                    age=age,
+                    gender=gender,
+                    thumbnail=_data_url(crop),
+                    passed_gate=quality_gate(f, s.min_face_width, s.min_face_score),
+                )
+            )
+            colour = (60, 200, 90) if i == 0 else (240, 180, 60)
+            cv2.rectangle(canvas, (int(f.x), int(f.y)), (int(f.x + f.w), int(f.y + f.h)), colour, 2)
+            cv2.putText(
+                canvas,
+                f"#{i + 1} {f.score:.2f}",
+                (int(f.x), max(14, int(f.y) - 6)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                colour,
+                2,
+                cv2.LINE_AA,
+            )
+        # The preview is only shown in the enrol dialog, but it also travels
+        # back to the server as the "still" when the operator saves a camera
+        # capture.  Keeping it comfortably under a megabyte means that
+        # round-trip never trips a request-size limit.
+        return out, _data_url(canvas, quality=72, max_side=720)
+
+    def image_from_client(self, payload: Any) -> Optional[np.ndarray]:
+        """Decode one still sent by the console (camera review, manual crop).
+
+        Accepts a ``data:`` URL, raw base64 or a full HTTP URL prefix the
+        console happened to copy, so the form keeps working even if the browser
+        serialises the source differently.
+        """
+        import base64
+
+        text = str(payload or "").strip()
+        if not text:
+            return None
+        if "," in text and text.lower().startswith("data:"):
+            text = text.split(",", 1)[1]
+        elif text.startswith("http") and "," in text:
+            text = text.split(",", 1)[1]
+        try:
+            raw = base64.b64decode(text, validate=False)
+        except Exception:  # noqa: BLE001
+            return None
+        arr = np.frombuffer(raw, dtype=np.uint8)
+        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        return img if img is not None and img.size > 0 else None
+
     def enrol(
         self,
         images: List[np.ndarray],
@@ -183,16 +256,20 @@ class EnrolmentService:
         s = self.settings_mgr.get()
 
         extracted: List[Dict[str, Any]] = []
-        for img, pick in zip(images, selected_faces):
+        for pos, (img, pick) in enumerate(zip(images, selected_faces)):
             if img is None or img.size == 0:
                 continue
             # Same candidate set (and therefore the same ordering) the console
             # showed in the picker, so the chosen index is meaningful.
             faces = self._pick_candidates(img, s)
             if not faces:
-                raise ValueError("no face detected in one of the photos")
+                raise ValueError(
+                    f"no face detected in photo {pos + 1}" if len(images) > 1 else "no face detected in the photo"
+                )
             if pick < 0 or pick >= len(faces):
-                raise ValueError(f"face index {pick} out of range for one photo")
+                raise ValueError(
+                    f"face index {pick} out of range for photo {pos + 1} ({len(faces)} faces found)"
+                )
             chosen = faces[pick]
             if not quality_gate(chosen, 12, 0.2):
                 raise ValueError("the selected face is too small or too low quality")

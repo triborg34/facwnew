@@ -265,6 +265,8 @@
     }
     const hostEl = h("div", { id: "settings-host" });
     root.appendChild(hostEl);
+    root.appendChild(h("div", { id: "accel-host" }));
+    renderAccelerator();
     if (isAdmin) { renderSettings(); }
     else {
       hostEl.appendChild(h("div", { class: "card" }, h("div", { class: "card-body" },
@@ -279,5 +281,40 @@
     }
   }
 
-  window.PageSettings = { mount };
+  // ---- accelerator status ------------------------------------------------
+  // The "processing device" selector says what was requested; this card says
+  // what is actually running, so "is the GPU in use?" is answerable without
+  // reading logs or guessing from a settings value.
+  async function renderAccelerator() {
+    const host = root && root.querySelector("#accel-host");
+    if (!host) return;
+    let accel = null;
+    try {
+      const h0 = await window.API.get("/api/health/full");
+      accel = h0.accelerator || null;
+    } catch (e) { /* status card is optional */ }
+    clear(host);
+    if (!accel) return;
+    const label = { cuda: "CUDA (GPU)", opencl: "OpenCL (GPU)", cpu: "پردازنده (CPU)" };
+    const row = (k, v) => h("tr", {}, h("td", { class: "muted" }, k), h("td", {}, v));
+    host.appendChild(h("div", { class: "card", style: "margin-top:12px" },
+      h("div", { class: "card-head" },
+        h("span", {}, "شتاب‌دهنده پردازش"),
+        h("div", { class: "spacer" }),
+        h("span", { class: "badge " + (accel.using_gpu ? "ok" : "warn") },
+          accel.using_gpu ? "GPU فعال" : "اجرا روی CPU")),
+      h("div", { class: "card-body" },
+        h("table", { class: "data" }, h("tbody", {},
+          row("درخواست‌شده", label[accel.requested] || accel.requested || "—"),
+          row("در حال اجرا", label[accel.device] || accel.device || "—"),
+          row("تشخیص چهره", accel.face_backend === "onnxruntime" ? "ONNX Runtime (GPU)" : "OpenCV"),
+          row("تشخیص بدن", accel.person_backend || "—"),
+          row("دستگاه‌های CUDA", I.num(accel.cuda_devices || 0)),
+          row("دلیل", accel.reason || "—"))),
+        accel.using_gpu ? null : h("div", { class: "muted", style: "font-size:12px;margin-top:8px" },
+          "برای استفاده از GPU به کارت گرافیک NVIDIA با درایور CUDA و بستهٔ onnxruntime-gpu نیاز است. " +
+          "بدون آن، سامانه روی CPU کار می‌کند و همهٔ امکانات در دسترس است."))));
+  }
+
+  window.PageSettings = { mount, renderAccelerator };
 })();

@@ -336,8 +336,74 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
 .face-chip.unselected { border-color: var(--border-strong); opacity: 0.75; }
 .face-chip.unselected:hover { opacity: 1; }
 
+/* ---------- camera tile states ---------- */
+/* A tile whose camera changed size or was replaced keeps painting the last
+   good frame, so it never flashes grey-white between refreshes. */
+.video-box img.pending { opacity: 1; }
+.video-box img.failed { visibility: hidden; }
+.video-box .live-dot {
+  position: absolute; inset-block-start: 8px; inset-inline-start: 8px; display: flex; align-items: center; gap: 5px;
+  padding: 2px 7px; border-radius: 999px; background: rgba(6, 12, 22, 0.62); color: #d7e6ff;
+  font-size: 10.5px; font-variant-numeric: tabular-nums;
+}
+.video-box .live-dot i { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: block; }
+
+/* ---------- live camera preview (enrolment) ---------- */
+.cam-preview {
+  position: relative; background: var(--video-bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+.cam-preview .frame {
+  position: relative; margin: 0 auto; overflow: hidden; touch-action: none;
+  max-height: 260px; height: 260px; display: grid; place-items: center;
+}
+.cam-preview img {
+  display: block; max-width: 100%; max-height: 260px; width: auto; height: auto;
+  object-fit: contain; transition: none; cursor: crosshair;
+}
+.cam-preview .hint {
+  position: absolute; inset-block-end: 6px; inset-inline-end: 8px; font-size: 10.5px;
+  color: #cfe0f8; background: rgba(6, 12, 22, 0.6); padding: 2px 7px; border-radius: 999px;
+  pointer-events: none;
+}
+.cam-preview .no-signal { color: #93a4bd; font-size: 12.5px; padding: 60px 12px; text-align: center; }
+
+/* ---------- zoomable / scrollable image stage ---------- */
+.zoom-stage {
+  position: relative; overflow: auto; max-height: 46vh; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--video-bg); cursor: grab;
+}
+.zoom-stage.dragging { cursor: grabbing; }
+.zoom-stage .inner { display: inline-block; transform-origin: 0 0; will-change: transform; }
+.zoom-stage img { display: block; max-width: none; user-select: none; -webkit-user-drag: none; }
+.zoom-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.zoom-tools .badge { min-width: 52px; text-align: center; }
+
+/* ---------- crop editor ---------- */
+.crop-editor { display: flex; flex-direction: column; gap: 6px; }
+.crop-stage {
+  position: relative; background: var(--video-bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden; touch-action: none;
+  display: grid; place-items: center; max-height: 260px;
+}
+.crop-stage canvas { display: block; max-width: 100%; max-height: 260px; cursor: crosshair; }
+.face-chip .stars { font-size: 10.5px; color: var(--warn); letter-spacing: -1px; }
+
+/* ---------- suggestion (unknown -> enrolled) ---------- */
+.suggest-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.suggest-card {
+  width: 128px; border: 3px solid var(--border); border-radius: 10px; padding: 5px;
+  background: var(--bg-soft); cursor: pointer; text-align: center; transition: border-color var(--speed);
+}
+.suggest-card:hover { border-color: var(--warn); }
+.suggest-card.selected { border-color: var(--ok); background: var(--ok-soft); }
+.suggest-card img { width: 100%; height: 104px; object-fit: cover; border-radius: 6px; display: block; }
+.suggest-card .cap { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+
 .img-box { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--video-bg); }
 .img-box img { width: 100%; display: block; }
+.img-box.contain { display: grid; place-items: center; background: var(--video-bg); }
+.img-box.contain img { width: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* pagination */
 .pager { display: flex; align-items: center; gap: 8px; padding: 10px 14px; flex-wrap: wrap; }

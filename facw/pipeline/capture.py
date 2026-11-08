@@ -156,7 +156,14 @@ class LatestFrame:
                     return self._frame, self._seq, self._ts
             if time.time() >= deadline:
                 return None
-            time.sleep(0.008)
+            time.sleep(0.004)
+
+    def peek(self) -> Optional[tuple]:
+        """Return the newest frame without waiting (or None)."""
+        with self._lock:
+            if self._frame is None:
+                return None
+            return self._frame, self._seq, self._ts
 
 
 # --------------------------------------------------------------------------
@@ -205,6 +212,9 @@ class CameraStream:
         self._viewers = 0
         self._fps_marks: List[float] = []
         self._fails = 0
+        #: wall-clock span covered by ``_fps_marks`` (the marks keep only 60
+        #: samples, so they can no longer measure rate once trimmed)
+        self._fps_last_ts = 0.0
         # file-source pacing (see _run)
         self._file_fps = 0.0
         self._next_file_ts = 0.0
@@ -242,7 +252,7 @@ class CameraStream:
         return self._viewers
 
     def snapshot(self) -> Optional[np.ndarray]:
-        got = self.frames.get(-1, timeout=0.0)
+        got = self.frames.peek()
         return got[0] if got else None
 
     def stop(self) -> None:
@@ -374,10 +384,18 @@ class CameraStream:
         self.status.frames += 1
         if len(self._fps_marks) > 60:
             del self._fps_marks[:-60]
-        if len(self._fps_marks) >= 2:
-            span = self._fps_marks[-1] - self._fps_marks[0]
-            if span > 0.2:
-                self.status.fps = round((len(self._fps_marks) - 1) / span, 1)
+        if self._fps_last_ts <= 0.0:
+            self._fps_last_ts = now
+            return
+        span = now - self._fps_last_ts
+        # Exponential smoothing over ~2 s: the readout no longer sticks at
+        # "1 fps" once the 60-sample window is trimmed.
+        if span >= 0.5:
+            inst = len(self._fps_marks) / span
+            prev = self.status.fps or inst
+            self.status.fps = round(prev * 0.6 + inst * 0.4, 1)
+            self._fps_last_ts = now
+            del self._fps_marks[:-5]
 
 
 class StreamRegistry:
