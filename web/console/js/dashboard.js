@@ -80,6 +80,9 @@
                   ev.stopPropagation();
                   S.flavour[cam.id] = flavour === "annotated" ? "raw" : "annotated";
                   renderMosaic(root);
+                  // the mosaic was rebuilt, so its old entries are gone: reopen
+                  S.mosaicSig = null;
+                  refreshMosaic();
                 },
               }, flavour === "annotated" ? "\u{1F9E0}" : "\u{1F4F7}")
             : null,
@@ -607,62 +610,72 @@
   }
 
   // ---- live frames ------------------------------------------------------
-  // One short JPEG request loop per tile: a frame is requested only when the
-  // previous one has arrived (never more than one in flight), so a slow camera
-  // cannot pile up requests.  The last good frame stays on screen while the
-  // next one loads - no flicker, no "white tile".
-  function frameInterval() {
-    const n = Math.max(1, Object.keys(S.live).length);
-    if (n <= 1) return 70;
-    if (n <= 4) return 110;
-    return 160;
+  // Each tile holds ONE multipart/x-mixed-replace stream (/video/<id>), not a
+  // series of snapshots.  The browser repaints a multipart <img> in place as
+  // parts arrive, so there is no src swap and therefore no moment where the
+  // element has no bitmap - the black flash was inherent to swapping .src.
+  // One connection per camera also avoids the per-host connection limit that
+  // made the old per-tile snapshot loops stall the whole console.
+  function streamUrl(camId) {
+    const isAdmin = store.state.user && store.state.user.role === "admin";
+    const flavour = isAdmin ? (S.flavour[camId] || "annotated") : "raw";
+    return `/video/${camId}?flavour=${flavour}`;
   }
 
   function startLive(camId) {
     const entry = S.live[camId];
-    if (!entry || entry.timer) return;
-    const tick = () => {
-      if (!mounted || entry.busy) return;
-      const el = entry.el;
-      if (!el || !el.isConnected) return;
-      entry.busy = true;
-      const isAdmin = store.state.user && store.state.user.role === "admin";
-      const flavour = isAdmin ? (S.flavour[camId] || "annotated") : "raw";
-      // Load into the invisible buffer, then promote it: the visible frame is
-      // never left without a bitmap, so there is nothing to flash black.
-      const back = entry.front === entry.el ? entry.alt : entry.el;
-      const next = entry.front === entry.el ? entry.el : entry.alt;
-      const probe = new Image();
-      probe.decoding = "async";
-      const done = () => { entry.busy = false; };
-      probe.onload = () => {
-        done();
-        if (!mounted || !el.isConnected || !entry.alt || !entry.alt.isConnected) return;
-        back.src = probe.src;
-        // decode() resolves after the bitmap exists, so the swap below paints
-        // the new frame in the same frame as the class change (no blank gap).
-        const finish = () => {
-          if (!mounted || !back.isConnected || !next.isConnected) return;
-          back.classList.add("front");
-          next.classList.remove("front");
-          entry.front = back;
-        };
-        if (back.decode) back.decode().then(finish).catch(finish);
-        else finish();
+    if (!entry || entry.streaming) return;
+    const el = entry.el;
+    if (!el || !el.isConnected) return;
+    entry.streaming = true;
+    // The stream fills the visible buffer; the hidden one stays empty while
+    // streaming and is only used by the snapshot fallback below.
+    el.classList.add("front");
+    if (entry.alt) entry.alt.classList.remove("front");
+    entry.front = el;
+
+    const connect = () => {
+      if (!mounted || !el.isConnected || entry.stopped) return;
+      const url = streamUrl(camId) + "&t=" + Date.now();
+      entry.started = Date.now();
+      el.onerror = () => {
+        // A failed/closed stream shows the last frame until the retry lands.
+        if (entry.stopped) return;
+        entry.retry = setTimeout(connect, 1500);
       };
-      probe.onerror = () => { done(); };
-      probe.src = `/video/${camId}/snapshot?flavour=${flavour}&t=${Date.now()}`;
-      entry.timer = setTimeout(tick, frameInterval());
+      el.src = url;
     };
-    entry.timer = setTimeout(tick, 10);
+    entry.connect = connect;
+    connect();
   }
 
   function stopLive(camId) {
     const entry = S.live[camId];
     if (!entry) return;
+    entry.stopped = true;
+    entry.streaming = false;
+    if (entry.retry) clearTimeout(entry.retry);
+    entry.retry = null;
     if (entry.timer) clearTimeout(entry.timer);
     entry.timer = null;
-    entry.busy = false;
+    // Detach the source so the browser closes the multipart connection and the
+    // server's generator sees GeneratorExit -> stream.release().
+    const el = entry.el;
+    if (el) {
+      el.onerror = null;
+      el.removeAttribute("src");
+    }
+    if (entry.alt) entry.alt.removeAttribute("src");
+  }
+
+  // Switching a tile between raw and annotated needs a new stream: the flavour
+  // is part of the URL, so the connection has to be reopened.
+  function restartLive(camId) {
+    const entry = S.live[camId];
+    if (!entry) return;
+    stopLive(camId);
+    entry.stopped = false;
+    startLive(camId);
   }
 
   function syncLiveLoops() {
@@ -673,6 +686,8 @@
         delete S.live[k];
       }
     });
+    // startLive() is idempotent: it returns early when a stream is already up,
+    // so this only opens connections for tiles that do not have one.
     Object.keys(S.live).forEach((k) => startLive(k));
   }
 

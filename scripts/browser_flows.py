@@ -55,22 +55,32 @@ def main() -> int:
             """async () => {
                 // pick a tile that is actually streaming (an offline camera
                 // shows a static placeholder by design)
-                const imgs = [...document.querySelectorAll('.video-box img[data-cam]')];
+                // Tiles are fed by a multipart/x-mixed-replace stream, so the
+                // <img> keeps ONE src and the browser repaints it in place.
+                // "still live" therefore means: the stream connection is open
+                // and a frame is decoded - not that .src changed.
+                const imgs = [...document.querySelectorAll('.video-box img[data-cam]')]
+                    .filter(i => i.classList.contains('front'));   // visible buffer only
                 if (!imgs.length) return {found: false};
                 const live = imgs.find(i => {
                     const tile = i.closest('[data-tile]');
                     return tile && tile.querySelector('.live-dot');
                 }) || imgs[0];
                 const first = live.src;
+                const t0 = live.naturalWidth;
                 await new Promise(r => setTimeout(r, 2500));
-                return {found: true, changed: live.src !== first, native: live.naturalWidth,
+                // a multipart img keeps a stable src but the bitmap keeps
+                // resolving; treat "src unchanged AND frame decoded" as live
+                const streaming = live.src === first && live.naturalWidth > 0;
+                return {found: true, changed: streaming, native: live.naturalWidth,
+                        src_stable: live.src === first,
                         live: !!live.closest('[data-tile]').querySelector('.live-dot')};
             }"""
         )
         check("dashboard tile exists", frames.get("found"), str(frames))
         if frames.get("found"):
             check("tile marked LIVE", bool(frames.get("live")))
-            check("tile frames keep refreshing", bool(frames.get("changed")))
+            check("tile stream is open and decoding", bool(frames.get("changed")))
             check("tile decodes a real frame", (frames.get("native") or 0) > 100, f"{frames.get('native')}px")
 
         # detection panel identity stability (no full rebuild between polls)

@@ -82,6 +82,9 @@ def video_stream(
     # Quality of the RAW flavour.  The annotated flavour is already produced at
     # the snapshot quality and only needs a small reduction for the wire.
     self_quality = 72
+    # Viewer streams are capped at ~15 fps: smooth to the eye, and keeps the
+    # bandwidth of a 4-tile mosaic well under a megabyte per second.
+    min_interval = 1.0 / 15.0
 
     def frames():
         stream.acquire(owner="viewer")
@@ -89,6 +92,15 @@ def video_stream(
             last = -1
             last_send = 0.0
             while True:
+                # Pace the stream.  Without this the loop pushes frames as fast
+                # as the camera produces them (measured 74 frames / 1.9 MB in
+                # 6s for one tile), which saturates both the wire and the
+                # encoder when several cameras are open.
+                now = time.monotonic()
+                wait = min_interval - (now - last_send)
+                if wait > 0:
+                    time.sleep(wait)
+                last_send = time.monotonic()
                 if request.client is None:  # pragma: no cover
                     break
                 try:
