@@ -6166,3 +6166,10 @@
 {"ts": "2026-11-08T08:36:42.475", "level": "INFO", "logger": "web", "msg": "slow request", "path": "/video/7/snapshot", "ms": 1259}
 {"ts": "2026-11-08T08:36:43.070", "level": "INFO", "logger": "web", "msg": "slow request", "path": "/video/7/snapshot", "ms": 1228}
 {"ts": "2026-11-08T08:36:44.361", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 121, "identity": "عارف", "camera": "دوربین ورودی", "track": 1}
+{"ts": "2026-11-08T13:06:04.761", "level": "INFO", "logger": "store.db", "msg": "database ready", "path": "D:\\Codes\\facwnew\\data\\facw.db", "schema": 1}
+{"ts": "2026-11-08T13:06:04.876", "level": "INFO", "logger": "core.device", "msg": "processing device resolved", "device": "opencl", "requested": "auto", "cuda_devices": 0, "opencv_cuda": false, "dnn_cuda": false, "dnn_opencl": true, "ort_cuda": false, "ort_usable": false, "reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-08T13:06:04.945", "level": "INFO", "logger": "vision.face", "msg": "face engine ready", "models": "yunet.onnx,sface.onnx", "device": "opencl", "backend": "cv", "device_reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-08T13:06:04.977", "level": "INFO", "logger": "vision.person", "msg": "person detector loaded", "model": "D:\\Codes\\facwnew\\models\\persondet.onnx", "device": "opencl", "backend": "opencl", "reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-08T13:06:04.978", "level": "INFO", "logger": "pipeline.matching", "msg": "match index rebuilt", "rows": 1, "identities": 1, "version": 1}
+{"ts": "2026-11-08T13:06:05.016", "level": "INFO", "logger": "app", "msg": "service ready", "port": 8770}
+{"ts": "2026-11-08T13:06:05.540", "level": "INFO", "logger": "server", "msg": "console opened in the default browser", "url": "http://127.0.0.1:8770"}
