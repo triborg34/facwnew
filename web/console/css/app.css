@@ -257,6 +257,16 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
   display: grid; place-items: center; overflow: hidden;
 }
 .video-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Double buffer: two frames are stacked and only the newest one is visible.
+   Swapping .src on a single <img> drops its bitmap and flashes black. */
+.video-box { display: block; }
+.video-box img.frame-a,
+.video-box img.frame-b {
+  position: absolute; inset: 0; grid-area: 1 / 1; opacity: 0;
+  transition: opacity 90ms linear;
+}
+.video-box img.front { opacity: 1; z-index: 1; }
+.video-box .live-dot, .video-box .overlay-msg { z-index: 2; }
 .video-box .overlay-msg {
   position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
   color: #93a4bd; font-size: 12.5px; padding: 12px; background: linear-gradient(180deg, transparent, rgba(0,0,0,.35));

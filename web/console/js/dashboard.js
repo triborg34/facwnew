@@ -52,9 +52,14 @@
       // Tiles pull single JPEG frames in a tight loop (see startLive below).
       // Browsers allow only ~6 connections per host, so one long multipart
       // stream per tile starves every other API call (the console appears
-      // frozen).  The loop below is throttled, skips when a frame is in
-      // flight, and keeps the last good frame while the next one loads.
-      const img = h("img", { alt: cam.name, src: "", "data-cam": cam.id, decoding: "async" });
+      // frozen).
+      //
+      // Two stacked <img> elements are used as a double buffer: the next frame
+      // is decoded in the hidden one and only then swapped to the front.
+      // Assigning .src on a single visible <img> makes the browser discard the
+      // current bitmap immediately, which is the black flash every second.
+      const img = h("img", { alt: cam.name, src: "", "data-cam": cam.id, decoding: "async", class: "frame-a front" });
+      const imgAlt = h("img", { alt: "", src: "", "data-cam": cam.id, decoding: "async", class: "frame-b", "aria-hidden": "true" });
 
       const stateDot = h("span", { class: "dot " + (state === "streaming" ? "live" : state === "offline" ? "danger" : "warn") });
       const fpsBadge = h("span", { class: "mono muted", style: "font-size:11.5px", "data-fps": cam.id },
@@ -84,7 +89,7 @@
             onclick: (ev) => { ev.stopPropagation(); S.expanded = expanded ? null : cam.id; renderMosaic(root); },
           }, expanded ? "\u2715" : "\u26F6")
         ),
-        h("div", { class: "video-box" }, img,
+        h("div", { class: "video-box" }, imgAlt, img,
           state === "streaming" ? h("div", { class: "live-dot" }, h("i"), "LIVE") : null,
           state !== "streaming" ? h("div", { class: "overlay-msg" },
             state === "offline"
@@ -92,7 +97,7 @@
               : "\u062F\u0631 \u062D\u0627\u0644 \u0627\u062A\u0635\u0627\u0644\u2026") : null
         )
       );
-      S.live[cam.id] = { cam: cam, el: img };
+      S.live[cam.id] = { cam: cam, el: img, alt: imgAlt, front: img };
       mosaic.appendChild(tile);
     });
     root.appendChild(mosaic);
@@ -586,13 +591,27 @@
       entry.busy = true;
       const isAdmin = store.state.user && store.state.user.role === "admin";
       const flavour = isAdmin ? (S.flavour[camId] || "annotated") : "raw";
+      // Load into the invisible buffer, then promote it: the visible frame is
+      // never left without a bitmap, so there is nothing to flash black.
+      const back = entry.front === entry.el ? entry.alt : entry.el;
+      const next = entry.front === entry.el ? entry.el : entry.alt;
       const probe = new Image();
       probe.decoding = "async";
       const done = () => { entry.busy = false; };
       probe.onload = () => {
         done();
-        if (!mounted || !el.isConnected) return;
-        el.src = probe.src;
+        if (!mounted || !el.isConnected || !entry.alt || !entry.alt.isConnected) return;
+        back.src = probe.src;
+        // decode() resolves after the bitmap exists, so the swap below paints
+        // the new frame in the same frame as the class change (no blank gap).
+        const finish = () => {
+          if (!mounted || !back.isConnected || !next.isConnected) return;
+          back.classList.add("front");
+          next.classList.remove("front");
+          entry.front = back;
+        };
+        if (back.decode) back.decode().then(finish).catch(finish);
+        else finish();
       };
       probe.onerror = () => { done(); };
       probe.src = `/video/${camId}/snapshot?flavour=${flavour}&t=${Date.now()}`;
