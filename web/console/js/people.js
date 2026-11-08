@@ -7,6 +7,8 @@
   const MAX_PHOTOS = 10;
 
   let root = null;
+
+  let mounted = false;
   let page = 1;
   let search = "";
 
@@ -635,6 +637,8 @@
   }
 
   async function mount(host) {
+    mounted = true;
+    window.addEventListener("facw:change", onIdentityChange);
     root = host;
     clear(root);
     root.appendChild(h("div", { class: "page-head" },
@@ -650,5 +654,25 @@
     await loadGrid();
   }
 
-  window.PagePeople = { mount, openEnrolment, openPerson, openEnrolFromDetection, openEnrolFromEvent };
+  // A person enrolled from anywhere (this page, the dashboard or the report
+  // screen) must show up at once.  The index itself is rebuilt on the server
+  // when saving, but this list only refreshed on navigation, so a new person
+  // appeared to need an app restart.
+  function onIdentityChange(ev) {
+    if (!mounted) return;
+    const d = ev.detail || {};
+    if (d.topic !== "identities") return;
+    const act = (d.data || {}).action;
+    if (act === "ref_added" || act === "created" || act === "deleted" || act === "updated") {
+      loadGrid();
+    }
+  }
+
+  function unmount() {
+    mounted = false;
+    window.removeEventListener("facw:change", onIdentityChange);
+    root = null;
+  }
+
+  window.PagePeople = { mount, unmount, openEnrolment, openPerson, openEnrolFromDetection, openEnrolFromEvent };
 })();

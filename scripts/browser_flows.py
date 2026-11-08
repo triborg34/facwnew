@@ -176,7 +176,31 @@ def main() -> int:
         page.keyboard.press("Escape")
         page.wait_for_timeout(600)
 
-        # ---------- 4. cameras -> discovery ----------
+        # ---------- 4. report detail shows face AND frame ----------
+        page.locator(".topnav button:has-text('گزارش')").first.click()
+        page.wait_for_timeout(2000)
+        if page.locator("table.data tbody tr").count():
+            page.evaluate("() => document.querySelectorAll('table.data tbody tr')[0]"
+                          ".querySelector('button').click()")
+            page.wait_for_timeout(2200)
+            pair = page.evaluate(
+                """() => {
+                    const labels = [...document.querySelectorAll('.modal label')]
+                        .map(l => l.textContent.trim());
+                    const imgs = [...document.querySelectorAll('.modal img')]
+                        .map(i => ({alt: i.alt, ok: i.naturalWidth > 0}));
+                    return {labels, faces: imgs.filter(i => i.alt === 'face' && i.ok).length,
+                            frames: imgs.filter(i => i.alt === 'frame' && i.ok).length};
+                }"""
+            )
+            check("event detail shows a face image", pair["faces"] >= 1, str(pair))
+            check("event detail shows the frame", pair["frames"] >= 1, str(pair))
+            page.keyboard.press("Escape")
+            page.wait_for_timeout(600)
+        else:
+            notes.append("no events in the report; skipping the face/frame check")
+
+        # ---------- 5. cameras -> discovery ----------
         page.locator(".topnav button:has-text('دوربین')").first.click()
         page.wait_for_timeout(1500)
         disc = page.locator("#disc-host")

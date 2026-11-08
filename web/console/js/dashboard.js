@@ -267,10 +267,13 @@
     ));
 
     if (frameImg) {
+      // The face is shown above; this is the frame it was detected in, so the
+      // pair reads as "this face, in that scene".
       body.appendChild(h("div", { style: "margin-top:12px" },
-        h("div", { class: "muted", style: "font-size:12px;margin-bottom:4px" }, "\u06A9\u0627\u062F\u0631 \u06A9\u0627\u0645\u0644"),
-        h("div", { class: "img-box contain", style: "max-height:320px" },
-          h("img", { src: frameImg, alt: "frame", style: "max-height:320px;cursor:zoom-in", onclick: () => zoomImage(frameImg) }))
+        h("div", { class: "muted", style: "font-size:12px;margin-bottom:4px" },
+          "قاب كامل — چهره در این تصویر دیده شد"),
+        h("div", { class: "img-box contain", style: "max-height:340px" },
+          h("img", { src: frameImg, alt: "frame", style: "max-height:340px;cursor:zoom-in", onclick: () => zoomImage(frameImg) }))
       ));
     }
 

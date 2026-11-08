@@ -203,6 +203,23 @@
     ));
   }
 
+  // Face crop on top, the frame it was detected in underneath.
+  function faceAndFrame(e) {
+    const url = (f) => (f ? window.API.mediaUrl(f) : "");
+    const face = url(e.face_file);
+    const frame = url(e.frame_file);
+    return h("div", {},
+      h("div", { class: "field" }, h("label", {}, "چهره"),
+        face
+          ? h("div", { class: "img-box contain", style: "max-height:150px;display:grid;place-items:center" },
+              h("img", { src: face, alt: "face", style: "max-height:150px;width:auto;object-fit:contain" }))
+          : empty("چهره‌ای ثبت نشده")),
+      h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "قاب تصویر"),
+        frame
+          ? h("div", { class: "img-box" }, h("img", { src: frame, alt: "frame" }))
+          : empty("تصویری موجود نیست")));
+  }
+
   async function openEvent(ev) {
     const body = h("div", {}, loading());
     // An unknown person in the report can be registered without leaving the
@@ -278,7 +295,9 @@
           idn ? row("توضیحات", idn.description || "\u2014") : null
         )),
         h("div", {},
-          h("div", { class: "img-box" }, window.API.mediaUrl(e.frame_file) ? h("img", { src: window.API.mediaUrl(e.frame_file), alt: "frame" }) : empty("تصویر موجود نیست"))
+          // The face the identity came from (small, on top) and the full frame
+          // it was detected in (below) - together they show what happened.
+          faceAndFrame(e)
         )
       ));
     } catch (err) {
