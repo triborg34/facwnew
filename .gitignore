@@ -1,3 +1,7 @@
 .pytest_cache/*
 data/*
 logs/*
+logs/facw.log
+/logs
+logs/facw.log
+facw/core/__pycache__
