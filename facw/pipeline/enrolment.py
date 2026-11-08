@@ -267,8 +267,14 @@ class EnrolmentService:
                     f"no face detected in photo {pos + 1}" if len(images) > 1 else "no face detected in the photo"
                 )
             if pick < 0 or pick >= len(faces):
+                # This is almost always an ordering bug in the caller, not a
+                # bad click: the index was chosen for a DIFFERENT image than
+                # the one it arrived with.  Say so, so it is diagnosable.
                 raise ValueError(
-                    f"face index {pick} out of range for photo {pos + 1} ({len(faces)} faces found)"
+                    f"face index {pick} out of range for photo {pos + 1} "
+                    f"({len(faces)} face(s) found) - the selection does not "
+                    f"match this image; the photos and their face indices "
+                    f"were probably sent in different orders"
                 )
             chosen = faces[pick]
             if not quality_gate(chosen, 12, 0.2):

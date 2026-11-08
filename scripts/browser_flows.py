@@ -84,19 +84,32 @@ def main() -> int:
             check("tile decodes a real frame", (frames.get("native") or 0) > 100, f"{frames.get('native')}px")
 
         # detection panel identity stability (no full rebuild between polls)
+        # Check whichever panel actually has a row: the "unknown" one is empty
+        # whenever nobody unrecognised is in frame, and an empty panel has no
+        # row to compare (that used to be reported as a failure).
         stable = page.evaluate(
             """async () => {
-                const list = document.querySelector('[data-panel="unknown"] .det-list');
-                if (!list) return {found: false};
-                const before = list.querySelector('.det-item');
-                const mark = before ? (before.__mark = true) : null;
+                const panels = [...document.querySelectorAll('[data-panel]')];
+                let list = null, row = null;
+                for (const p of panels) {
+                    const l = p.querySelector('.det-list');
+                    const r = l && l.querySelector('.det-item');
+                    if (r) { list = l; row = r; break; }
+                }
+                if (!row) return {found: false};
+                const before = row;
+                before.__mark = true;
+                const emptyBefore = !!list.querySelector('[data-empty]');
                 await new Promise(r => setTimeout(r, 1400));
                 const after = list.querySelector('.det-item');
-                return {found: true, same: !!before && before === after, marked: !!(after && after.__mark)};
+                return {found: true, same: before === after, marked: !!(after && after.__mark),
+                        empty_flip: emptyBefore !== !!list.querySelector('[data-empty]')};
             }"""
         )
         if stable.get("found"):
-            check("detection rows are patched, not rebuilt", bool(stable.get("same") or stable.get("marked")), str(stable))
+            check("detection rows are patched, not rebuilt",
+                  bool(stable.get("same") or stable.get("marked")) and not stable.get("empty_flip"),
+                  str(stable))
 
         # ---------- 2. unknown person -> register ----------
         # A track only lives a few seconds after its person leaves the frame,

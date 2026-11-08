@@ -361,15 +361,18 @@
             if (!photos.length) { err.style.display = ""; err.textContent = "حداقل یک تصویر لازم است"; return; }
             if (!target && !meta.name.value.trim()) { err.style.display = ""; err.textContent = "نام الزامی است"; return; }
             const fd = new FormData();
-            const chosen = [];
-            const stills = [];
-            for (const p of photos) {
-              chosen.push(p.chosen);
-              if (p.file) fd.append("files", p.file);
-              else if (p.still) stills.push(p.still);
-            }
+            // The server rebuilds its image list as "all uploads, then all
+            // camera stills" (api_routes.enrolment_save), so the face indices
+            // MUST be built in that same order.  Iterating photos once and
+            // pushing chosen[] in display order sent an index belonging to a
+            // still to a different uploaded file - the "face index N out of
+            // range" error whenever the two kinds were mixed.
+            const filePhotos = photos.filter((p) => p.file);
+            const stillPhotos = photos.filter((p) => !p.file && p.still);
+            const chosen = filePhotos.concat(stillPhotos).map((p) => p.chosen);
+            filePhotos.forEach((p) => fd.append("files", p.file));
             fd.append("faces", JSON.stringify(chosen));
-            fd.append("stills", JSON.stringify(stills));
+            fd.append("stills", JSON.stringify(stillPhotos.map((p) => p.still)));
             fd.append("metadata", JSON.stringify({
               name: meta.name.value.trim(), family_name: meta.family_name.value.trim(),
               age: meta.age.value || null, gender: meta.gender.value, role: meta.role.value,
