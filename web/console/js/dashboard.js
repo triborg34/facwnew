@@ -540,14 +540,17 @@
     const panel = panelFor(key);
     if (!panel) return;
     const badge = panel.querySelector(".card-head .badge");
-    if (badge) badge.textContent = I.num(items.length);
+    if (badge) {
+      const n = I.num(items.length);
+      if (badge.textContent !== n) badge.textContent = n;  // avoid needless mutation
+    }
     const list = panel.querySelector(".det-list");
     if (!list) return;
-    const body = list.querySelector("[data-empty]");
-    if (body) body.remove();
     if (!items.length) {
-      const prior = list.querySelector("[data-empty]");
-      if (!prior) {
+      // An empty panel must keep its placeholder: removing and re-adding it on
+      // every poll (the old code did exactly that, 4x a second) makes the whole
+      // list visibly blink.
+      if (!list.querySelector("[data-empty]")) {
         clear(list);
         const e = empty(emptyText);
         e.dataset.empty = "1";
@@ -556,6 +559,9 @@
       S.rendered = {};
       return;
     }
+    // Rows exist: drop the placeholder once, and only if it is still there.
+    const body = list.querySelector("[data-empty]");
+    if (body) body.remove();
     // drop rows whose track disappeared
     const alive = new Set(items.map((d) => String(d.track_id)));
     Array.from(list.children).forEach((el) => {
