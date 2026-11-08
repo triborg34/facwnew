@@ -2334,3 +2334,16 @@ TypeError: getaddrinfo() argument 1 must be string or None
 08:36:42 INFO    web                    slow request  path=/video/7/snapshot ms=1259
 08:36:43 INFO    web                    slow request  path=/video/7/snapshot ms=1228
 08:36:44 INFO    pipeline               event stored  id=121 identity=\u0639\u0627\u0631\u0641 camera=\u062f\u0648\u0631\u0628\u06cc\u0646 \u0648\u0631\u0648\u062f\u06cc track=1
+13:06:04 INFO    store.db               database ready  path=D:\Codes\facwnew\data\facw.db schema=1
+13:06:04 INFO    core.device            processing device resolved  device=opencl requested=auto cuda_devices=0 opencv_cuda=False dnn_cuda=False dnn_opencl=True ort_cuda=False ort_usable=False reason=auto: no CUDA device, using OpenCL (T-API)
+[ WARN:0@0.491] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.553] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+13:06:04 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=opencl backend=cv device_reason=auto: no CUDA device, using OpenCL (T-API)
+[ WARN:0@0.585] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+13:06:04 INFO    vision.person          person detector loaded  model=D:\Codes\facwnew\models\persondet.onnx device=opencl backend=opencl reason=auto: no CUDA device, using OpenCL (T-API)
+13:06:04 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=1
+13:06:05 INFO    app                    service ready  port=8770
+13:06:05 INFO    server                 console opened in the default browser  url=http://127.0.0.1:8770
+13:06:07 INFO    pipeline               event stored  id=31 identity=\u0639\u0627\u0631\u0641 camera=asd track=1
+13:06:38 INFO    pipeline               event stored  id=32 identity=\u0639\u0627\u0631\u0641 camera=asd track=3
+13:07:14 INFO    pipeline               event stored  id=33 identity=\u0639\u0627\u0631\u0641 camera=asd track=9

@@ -6173,3 +6173,6 @@
 {"ts": "2026-11-08T13:06:04.978", "level": "INFO", "logger": "pipeline.matching", "msg": "match index rebuilt", "rows": 1, "identities": 1, "version": 1}
 {"ts": "2026-11-08T13:06:05.016", "level": "INFO", "logger": "app", "msg": "service ready", "port": 8770}
 {"ts": "2026-11-08T13:06:05.540", "level": "INFO", "logger": "server", "msg": "console opened in the default browser", "url": "http://127.0.0.1:8770"}
+{"ts": "2026-11-08T13:06:07.784", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 31, "identity": "عارف", "camera": "asd", "track": 1}
+{"ts": "2026-11-08T13:06:38.833", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 32, "identity": "عارف", "camera": "asd", "track": 3}
+{"ts": "2026-11-08T13:07:14.449", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 33, "identity": "عارف", "camera": "asd", "track": 9}
