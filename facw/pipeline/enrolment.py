@@ -95,13 +95,16 @@ class EnrolmentService:
         the numbers a user sees always match the chips they can choose.
         """
         faces = self.face.detect(image, min(0.3, s.face_accept_threshold))
+        # Only offer faces that can actually be enrolled.  The list used to
+        # include every detection, so a crowd scene filled the picker with
+        # 9-19px false positives; choosing one failed later with "the selected
+        # face is too small or too low quality".  If nothing passes the gate we
+        # fall back to the raw detections so the operator still sees why.
+        usable = [f for f in faces if quality_gate(f, s.min_face_width, s.min_face_score)]
+        pool = usable or faces
         kept = sorted(
-            faces,
-            key=lambda f: (
-                quality_gate(f, s.min_face_width, s.min_face_score),
-                f.w * f.h,
-                f.score,
-            ),
+            pool,
+            key=lambda f: (f.w * f.h, f.score),
             reverse=True,
         )[:MAX_CANDIDATES]
         kept.sort(key=lambda f: f.x)

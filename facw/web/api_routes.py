@@ -442,6 +442,30 @@ def _data_url(frame: np.ndarray, quality: int = 88, max_side: int = 1280) -> str
     return "data:image/jpeg;base64," + base64.b64encode(buf.tobytes()).decode()
 
 
+def _still_and_view(frame: np.ndarray, quality: int = 88, max_side: int = 1280):
+    """(downscaled image, its data URL) - both from the SAME pixels.
+
+    ``save`` re-decodes the data URL and detects faces in it, so the candidate
+    indices offered to the operator must be computed on that exact image.  They
+    used to come from the full-size frame, which for a 4K camera detected many
+    more faces than the 1280px copy did - picking anything past the smaller
+    count failed with "face index N out of range".
+    """
+    import base64
+
+    if frame is None or getattr(frame, "size", 0) == 0:
+        return None, ""
+    img = frame
+    h, w = img.shape[:2]
+    scale = min(1.0, float(max_side) / float(max(h, w, 1)))
+    if scale < 1.0:
+        img = cv2.resize(img, (max(1, int(w * scale)), max(1, int(h * scale))), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), int(quality)])
+    if not ok:
+        return img, ""
+    return img, "data:image/jpeg;base64," + base64.b64encode(buf.tobytes()).decode()
+
+
 @router.post("/enrolment/detect")
 async def enrolment_detect(request: Request, file: UploadFile = File(...), user=Depends(require_admin)) -> Dict[str, Any]:
     """Detect every face in an upload and return selectable candidates."""
@@ -517,11 +541,14 @@ def enrolment_capture(request: Request, payload: Dict[str, Any] = Body(...), use
     frame = _grab_still(app, cam_id)
     if frame is None:
         raise HTTPException(status_code=503, detail="no frame available from camera")
-    candidates, preview = app.enrolment.candidates_for(frame)
+    # Detect on the exact copy the console will submit, so the face indices in
+    # the picker are valid when the form is saved.
+    view, still_url = _still_and_view(frame)
+    candidates, preview = app.enrolment.candidates_for(view if view is not None else frame)
     return {
         "faces": [c.as_dict() for c in candidates],
         "preview": preview,
-        "still": _data_url(frame),
+        "still": still_url,
         "frame_size": [int(frame.shape[1]), int(frame.shape[0])],
         "camera_id": cam_id,
         "detail": "" if candidates else "no face found in the captured still",
