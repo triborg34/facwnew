@@ -451,18 +451,27 @@
         // not streaming: drop the LIVE badge and show the reason.  The earlier
         // version only updated an existing overlay, so a camera that stopped
         // kept its LIVE dot forever.
+        // A tile whose stream is actually painting must never carry a
+        // "connecting" label: the status field lags the video by up to one
+        // poll, which left the live picture sitting under a permanent
+        // "در حال اتصال…" caption.
+        const streamingNow = tile.dataset.hasFrame === "1";
         const live = tile.querySelector(".live-dot");
         if (live) live.remove();
         const box = tile.querySelector(".video-box");
         if (box) {
           let msg = box.querySelector(".overlay-msg");
-          if (!msg) {
-            msg = h("div", { class: "overlay-msg" });
-            box.appendChild(msg);
+          if (streamingNow && state !== "offline") {
+            if (msg) msg.remove();      // frames are flowing: no label at all
+          } else {
+            if (!msg) {
+              msg = h("div", { class: "overlay-msg" });
+              box.appendChild(msg);
+            }
+            msg.textContent = state === "offline"
+              ? (cam.last_error || "دوربین آفلاین است")
+              : "در حال اتصال…";
           }
-          msg.textContent = state === "offline"
-            ? (cam.last_error || "دوربین آفلاین است")
-            : "در حال اتصال…";
         }
       }
     });
@@ -510,6 +519,11 @@
     S.rendered = {};
     S.version = "";
     S.detHost = null;
+    // The mosaic signature must be cleared too.  Leaving it set made the next
+    // mount believe the tiles were already built, so refreshMosaic() returned
+    // early and the page stayed on its "loading" placeholder - the dashboard
+    // looked permanently stuck after switching tabs and coming back.
+    S.mosaicSig = null;
     root = null;
   }
 
@@ -628,6 +642,14 @@
     const el = entry.el;
     if (!el || !el.isConnected) return;
     entry.streaming = true;
+    const tileEl = el.closest("[data-tile]");
+    if (tileEl) tileEl.dataset.hasFrame = "0";
+    el.onload = () => {
+      if (tileEl) tileEl.dataset.hasFrame = "1";
+      const box = el.closest(".video-box");
+      const msg = box && box.querySelector(".overlay-msg");
+      if (msg) msg.remove();
+    };
     // The stream fills the visible buffer; the hidden one stays empty while
     // streaming and is only used by the snapshot fallback below.
     el.classList.add("front");
