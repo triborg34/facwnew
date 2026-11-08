@@ -441,6 +441,20 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
 }
 .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+/* compact tab row used inside dialogs (enrolment sources) */
+.mini-tabs {
+  display: flex; gap: 4px; background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 3px; margin-bottom: 12px;
+}
+.mini-tabs button {
+  flex: 1; border: 0; background: transparent; cursor: pointer; color: var(--text-dim);
+  padding: 7px 10px; border-radius: calc(var(--radius-sm) - 2px); font-size: 12.5px;
+  font-weight: 700; white-space: nowrap; transition: background var(--speed), color var(--speed);
+}
+.mini-tabs button:hover { color: var(--text); }
+.mini-tabs button.active { background: var(--bg-elev); color: var(--accent); box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.12)); }
+.mini-tabs button .b { font-variant-numeric: tabular-nums; opacity: .75; margin-inline-start: 4px; }
+
 /* report lock */
 .lock-note { display: flex; gap: 8px; align-items: center; color: var(--warn); font-size: 12.5px; }
 

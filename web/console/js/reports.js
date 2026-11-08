@@ -205,8 +205,58 @@
 
   async function openEvent(ev) {
     const body = h("div", {}, loading());
+    // An unknown person in the report can be registered without leaving the
+    // screen: the same enrolment dialog the dashboard uses, fed with this
+    // event's stored frame.
+    const isAdmin = store.state.user && store.state.user.role === "admin";
+    const registerFromEvent = async (c) => {
+      let still = "";
+      let faces = [];
+      let preview = "";
+      // Prefer a fresh frame from the camera; fall back to the stored one.
+      const camId = ev.camera_id || 0;
+      if (camId) {
+        try {
+          const res = await window.API.post("/api/enrolment/capture", { camera_id: camId });
+          still = res.still || "";
+          faces = res.faces || [];
+          preview = res.preview || "";
+        } catch (e) { /* camera unreachable - use the stored frame */ }
+      }
+      if (!still && ev.frame_file) {
+        try {
+          const blob = await (await fetch(window.API.mediaUrl(ev.frame_file), { credentials: "same-origin" })).blob();
+          still = await new Promise((resolve) => {
+            const r = new FileReader();
+            r.onload = () => resolve(String(r.result || ""));
+            r.onerror = () => resolve("");
+            r.readAsDataURL(blob);
+          });
+          // The stored frame has not been through the candidate detector yet,
+          // so the dialog would fall back to the crop editor even though the
+          // person is plainly visible.  Detect on it before handing it over.
+          try {
+            const det = await window.API.post("/api/enrolment/detect-b64", { image: still });
+            faces = det.faces || [];
+            preview = det.preview || "";
+          } catch (e) { /* let the operator crop manually */ }
+        } catch (e) { /* nothing to fall back to */ }
+      }
+      if (!still) { toast("تصویری برای ثبت در دسترس نیست", "warn"); return; }
+      c();
+      window.PagePeople.openEnrolFromEvent(ev, {
+        still, faces, preview, cameraId: camId,
+        source: "گزارش‌ها / " + (ev.camera_source || ""),
+        onSaved: () => load(),
+      });
+    };
+
+    const actions = [{ label: "بستن", kind: "ghost", onClick: (c) => c() }];
+    if (isAdmin && ev.identity_name === "unknown") {
+      actions.unshift({ label: "➕ ثبت این شخص در فهرست", kind: "primary", onClick: registerFromEvent });
+    }
     const m = modal({ title: ev.identity_name === "unknown" ? L.unknown : ev.identity_name, size: "lg", body,
-      actions: [{ label: "بستن", kind: "ghost", onClick: (c) => c() }] });
+      actions });
     try {
       const detail = await window.API.get("/api/events/" + ev.id);
       const e = detail.event;

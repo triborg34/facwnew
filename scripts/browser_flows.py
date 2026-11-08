@@ -148,7 +148,35 @@ def main() -> int:
         else:
             notes.append("no unknown track on the dashboard right now; skipping step 2")
 
-        # ---------- 3. cameras -> discovery ----------
+        # ---------- 3. enrolment dialog is tabbed ----------
+        # Each source (file / camera / handed-over still) gets its own tab;
+        # the dialog used to show all of them at once.
+        page.evaluate("() => window.PagePeople.openEnrolment(null, {})")
+        page.wait_for_timeout(1200)
+        tabs = page.evaluate(
+            """() => [...document.querySelectorAll('.modal .mini-tabs button')]
+                     .map(b => ({tab: b.dataset.tab, active: b.classList.contains('active')}))"""
+        )
+        check("enrolment dialog has source tabs", len(tabs) == 3, str(tabs))
+        check("file tab is active first", bool(tabs and tabs[0].get("active")), str(tabs))
+
+        # switching tabs must swap the visible pane
+        swapped = page.evaluate(
+            """async () => {
+                const btn = document.querySelector('.modal .mini-tabs button[data-tab="camera"]');
+                if (!btn) return false;
+                btn.click();
+                await new Promise(r => setTimeout(r, 400));
+                const fileInput = document.querySelector('.modal input[type=file]');
+                return !!btn.classList.contains('active')
+                    && (!fileInput || fileInput.offsetParent === null);
+            }"""
+        )
+        check("camera tab hides the file pane", bool(swapped))
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(600)
+
+        # ---------- 4. cameras -> discovery ----------
         page.locator(".topnav button:has-text('دوربین')").first.click()
         page.wait_for_timeout(1500)
         disc = page.locator("#disc-host")

@@ -16,7 +16,8 @@
   };
 
   async function loadGrid() {
-    const host = root.querySelector("#people-host");
+    const host = root && root.querySelector("#people-host");
+    if (!host) return;   // not on the people page (dialog opened elsewhere)
     clear(host);
     host.appendChild(loading());
     try {
@@ -316,22 +317,54 @@
       description: h("textarea", {}),
     };
 
-    const body = h("div", {},
-      h("div", { class: "muted", style: "font-size:12.5px;margin-bottom:6px" },
-        `حداکثر ${I.num(MAX_PHOTOS)} تصویر. اگر چند چهره در یک تصویر باشد، با کلیک روی کاشی‌ها چهرهٔ درست را انتخاب کنید.`),
-      h("div", { class: "row" },
-        h("div", { class: "field" }, h("label", {}, "افزودن عکس از فایل"), fileInput),
-        h("div", { class: "field" }, h("label", {}, "دوربین"), camSelect),
-        h("div", { class: "field", style: "flex:none;width:auto" }, h("label", {}, "\u00A0"),
-          h("div", { style: "display:flex;gap:6px;align-items:center" }, liveBtn, captureBtn))
-      ),
+    // --- source tabs ----------------------------------------------------
+    // The dialog used to show every way of adding a photo at once (file,
+    // camera, live preview, crop, chip list), which read as a wall of
+    // controls.  Each source now gets its own small tab; chosen photos stay in
+    // a shared strip below so they remain visible from any tab.
+    const filePane = h("div", {},
+      h("div", { class: "field" }, h("label", {}, "انتخاب تصویر از فایل"), fileInput),
+      h("div", { class: "muted", style: "font-size:12px;margin-top:6px" },
+        "می‌توانید چند فایل را هم‌زمان انتخاب کنید."));
+
+    const cameraPane = h("div", {},
+      h("div", { class: "row", style: "align-items:flex-end" },
+        h("div", { class: "field", style: "flex:1" }, h("label", {}, "دوربین"), camSelect),
+        h("div", { class: "field", style: "flex:none;width:auto" }, h("label", {}, " "),
+          h("div", { style: "display:flex;gap:6px;align-items:center" }, liveBtn, captureBtn))),
       h("div", { style: "margin-top:8px" },
         h("div", { style: "display:flex;align-items:center;gap:8px;margin-bottom:4px" },
           h("span", { class: "muted", style: "font-size:12px" }, "پیش‌نمایش دوربین"), liveState,
           h("div", { style: "flex:1" })),
-        camPreview, camZoom),
+        camPreview, camZoom));
+
+    // Stills handed over by another screen (report row / dashboard card).
+    const inboxPane = h("div", {});
+    const inboxBadge = h("span", { class: "b", style: "display:none" });
+    let activeTab = "file";
+
+    const panes = { file: filePane, camera: cameraPane, inbox: inboxPane };
+
+    function setTab(name) {
+      if (!panes[name]) return;
+      activeTab = name;
+      Object.keys(panes).forEach((k) => { panes[k].style.display = k === name ? "" : "none"; });
+      tabButtons.forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+      if (name !== "camera") stopLive();   // do not keep polling from a hidden tab
+    }
+
+    const tabButtons = [
+      { key: "file", label: "از فایل" },
+      { key: "camera", label: "از دوربین" },
+      { key: "inbox", label: "قاب ارسالی", badge: inboxBadge },
+    ].map((t) => h("button", { type: "button", "data-tab": t.key, onclick: () => setTab(t.key) },
+      t.label, t.badge || null));
+
+    const body = h("div", {},
+      h("div", { class: "mini-tabs" }, tabButtons),
+      filePane, cameraPane, inboxPane,
       stillBox,
-      h("div", { class: "field", style: "margin-top:8px" }, h("label", {}, "تصاویر افزوده‌شده"), photoStrip),
+      h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "تصاویر افزوده‌شده"), photoStrip),
       live,
       h("div", { class: "card", style: "margin-top:12px" }, h("div", { class: "card-head" }, "اطلاعات هویتی"),
         h("div", { class: "card-body" },
@@ -384,7 +417,15 @@
               toast(target ? "تصویر مرجع افزوده شد" : "شخص ثبت شد", "ok");
               closeLive();
               c();
-              if (target) openPerson(target); else loadGrid();
+              // loadGrid() only makes sense when the people page is mounted.
+              // This dialog is also opened from the dashboard and from the
+              // report screen, where root is null (or a different page) and
+              // refreshing it threw "Cannot read properties of null".
+              if (target) {
+                if (root) openPerson(target);
+              } else if (root && root.querySelector("#people-host")) {
+                loadGrid();
+              }
               if (opts.onSaved) opts.onSaved();
             } catch (e) {
               err.style.display = "";
@@ -397,20 +438,54 @@
     renderPhotos();
     renderFaces(-1);
 
-    // an unknown person from the dashboard arrives with its reviewed still
-    if (opts.still) {
-      lastStillCamera = opts.cameraId || 0;
-      if (opts.faces && opts.faces.length) {
-        pushPhoto({ still: opts.still, cameraId: opts.cameraId || 0, faces: opts.faces, previewFull: opts.preview || "", source: opts.source || "ناشناس" });
+    // A still handed over by another screen (dashboard card or report row).
+    // It lands in its own tab so it is obvious where it came from, and it is
+    // added to the photo strip straight away unless it still needs cropping.
+    function receiveStill(still, o) {
+      o = o || {};
+      if (!still) return;
+      lastStillCamera = o.cameraId || 0;
+      clear(inboxPane);
+      const faces = o.faces || [];
+      const label = o.source || "قاب ارسالی";
+      inboxPane.appendChild(h("div", { class: "muted", style: "font-size:12px;margin-bottom:8px" }, label));
+      inboxPane.appendChild(h("div", { class: "img-box", style: "max-height:260px" },
+        h("img", { src: still, alt: "", style: "width:100%;object-fit:contain" })));
+      if (faces.length) {
+        inboxBadge.style.display = "";
+        inboxBadge.textContent = I.num(faces.length);
+        pushPhoto({ still: still, cameraId: o.cameraId || 0, faces: faces,
+                    previewFull: o.preview || "", source: label });
+        setTab("inbox");
       } else {
-        crop.load(opts.still).then(() => { stillBox.style.display = ""; }).catch(() => { /* ignore */ });
+        // No face found on the full frame: hand it to the crop editor.
+        crop.load(still).then(() => { stillBox.style.display = ""; }).catch(() => { /* ignore */ });
+        setTab("inbox");
       }
     }
+    receiveStill(opts.still, opts);
+    setTab(opts.still ? "inbox" : "file");
     return dialog;
   }
 
   // Entry point used by the dashboard for an unknown detection: enrol the
   // exact frame the operator is looking at.
+  function openEnrolFromEvent(ev, info) {
+    info = info || {};
+    return openEnrolment(null, {
+      title: info.title || "ثبت شخص از گزارش",
+      still: info.still || "",
+      faces: info.faces || [],
+      preview: info.preview || "",
+      cameraId: info.cameraId || 0,
+      age: ev ? ev.age : undefined,
+      gender: ev ? ev.gender : undefined,
+      role: info.role || "visitor",
+      source: info.source || "گزارش‌ها",
+      onSaved: info.onSaved,
+    });
+  }
+
   function openEnrolFromDetection(info) {
     info = info || {};
     return openEnrolment(null, {
@@ -575,5 +650,5 @@
     await loadGrid();
   }
 
-  window.PagePeople = { mount, openEnrolment, openPerson, openEnrolFromDetection };
+  window.PagePeople = { mount, openEnrolment, openPerson, openEnrolFromDetection, openEnrolFromEvent };
 })();
