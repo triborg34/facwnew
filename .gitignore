@@ -8,3 +8,4 @@ logs/boot.log
 facw/core/__pycache__
 logs/boot.log
 logs
+logs/facw.log

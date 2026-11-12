@@ -6176,3 +6176,22 @@
 {"ts": "2026-11-08T13:06:07.784", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 31, "identity": "عارف", "camera": "asd", "track": 1}
 {"ts": "2026-11-08T13:06:38.833", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 32, "identity": "عارف", "camera": "asd", "track": 3}
 {"ts": "2026-11-08T13:07:14.449", "level": "INFO", "logger": "pipeline", "msg": "event stored", "id": 33, "identity": "عارف", "camera": "asd", "track": 9}
+{"ts": "2026-11-12T10:38:09.231", "level": "INFO", "logger": "store.db", "msg": "database ready", "path": "D:\\Codes\\facwnew\\data\\facw.db", "schema": 1}
+{"ts": "2026-11-12T10:38:09.444", "level": "INFO", "logger": "core.device", "msg": "processing device resolved", "device": "opencl", "requested": "auto", "cuda_devices": 0, "opencv_cuda": false, "dnn_cuda": false, "dnn_opencl": true, "ort_cuda": false, "ort_usable": false, "reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-12T10:38:09.620", "level": "INFO", "logger": "vision.face", "msg": "face engine ready", "models": "yunet.onnx,sface.onnx", "device": "opencl", "backend": "cv", "device_reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-12T10:38:09.672", "level": "INFO", "logger": "vision.person", "msg": "person detector loaded", "model": "D:\\Codes\\facwnew\\models\\persondet.onnx", "device": "opencl", "backend": "opencl", "reason": "auto: no CUDA device, using OpenCL (T-API)"}
+{"ts": "2026-11-12T10:38:09.677", "level": "INFO", "logger": "pipeline.matching", "msg": "match index rebuilt", "rows": 1, "identities": 1, "version": 1}
+{"ts": "2026-11-12T10:38:09.773", "level": "INFO", "logger": "app", "msg": "service ready", "port": 8770}
+{"ts": "2026-11-12T10:38:10.256", "level": "INFO", "logger": "server", "msg": "console opened in the default browser", "url": "http://127.0.0.1:8770"}
+{"ts": "2026-11-12T10:38:11.288", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:13.307", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:15.816", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:19.332", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:24.846", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:34.356", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:38:50.875", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:39:07.390", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:39:23.900", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:39:40.413", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:39:56.929", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}
+{"ts": "2026-11-12T10:40:13.442", "level": "WARNING", "logger": "capture", "msg": "camera host unreachable", "camera": "asd", "host": "192.168.1.110", "port": 554}

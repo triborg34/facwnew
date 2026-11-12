@@ -2347,3 +2347,25 @@ TypeError: getaddrinfo() argument 1 must be string or None
 13:06:07 INFO    pipeline               event stored  id=31 identity=\u0639\u0627\u0631\u0641 camera=asd track=1
 13:06:38 INFO    pipeline               event stored  id=32 identity=\u0639\u0627\u0631\u0641 camera=asd track=3
 13:07:14 INFO    pipeline               event stored  id=33 identity=\u0639\u0627\u0631\u0641 camera=asd track=9
+10:38:09 INFO    store.db               database ready  path=D:\Codes\facwnew\data\facw.db schema=1
+10:38:09 INFO    core.device            processing device resolved  device=opencl requested=auto cuda_devices=0 opencv_cuda=False dnn_cuda=False dnn_opencl=True ort_cuda=False ort_usable=False reason=auto: no CUDA device, using OpenCL (T-API)
+[ WARN:0@0.855] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+[ WARN:0@0.974] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+10:38:09 INFO    vision.face            face engine ready  models=yunet.onnx,sface.onnx device=opencl backend=cv device_reason=auto: no CUDA device, using OpenCL (T-API)
+[ WARN:0@1.024] global net_impl_backend.cpp:345 cv::dnn::dnn5_v20260605::Net::Impl::setPreferableTarget Targets are not supported by the new graph engine for now
+10:38:09 INFO    vision.person          person detector loaded  model=D:\Codes\facwnew\models\persondet.onnx device=opencl backend=opencl reason=auto: no CUDA device, using OpenCL (T-API)
+10:38:09 INFO    pipeline.matching      match index rebuilt  rows=1 identities=1 version=1
+10:38:09 INFO    app                    service ready  port=8770
+10:38:10 INFO    server                 console opened in the default browser  url=http://127.0.0.1:8770
+10:38:11 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:13 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:15 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:19 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:24 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:34 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:38:50 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:39:07 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:39:23 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:39:40 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:39:56 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
+10:40:13 WARNING capture                camera host unreachable  camera=asd host=192.168.1.110 port=554
