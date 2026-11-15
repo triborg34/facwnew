@@ -1,4 +1,4 @@
-/* FACW console - settings: engine tuning, access control, users, theme. */
+/* Aman Negar console - settings: engine tuning, access control, users, theme. */
 (function () {
   "use strict";
   const { h, clear, toast, modal, loading, empty, errorState, store, applyTheme } = window.UI;

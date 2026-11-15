@@ -690,7 +690,7 @@ def _filters_from_params(request: Request) -> Dict[str, Any]:
     keys = (
         "name", "national_number", "gender", "role", "age_min", "age_max",
         "date_from", "date_to", "time_from", "time_to", "identified_only",
-        "similarity_max", "camera_id", "sort", "order",
+        "unknown_only", "similarity_max", "camera_id", "sort", "order",
     )
     return {k: q.get(k) for k in keys if q.get(k) not in (None, "")}
 
@@ -731,7 +731,7 @@ def export_events(request: Request, user=Depends(current_user)):
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="facw-report.pdf"'},
+        headers={"Content-Disposition": 'attachment; filename="aman-negar-report.pdf"'},
     )
 
 @router.post("/events/search-image")

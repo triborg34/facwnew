@@ -1,4 +1,4 @@
-"""FACW zone editor (spec 11.3).
+"""Aman Negar zone editor (spec 11.3).
 
 A desktop polygon editor for access zones.  It loads a live camera snapshot so
 the operator can draw the area that must contain a person before access is
@@ -27,7 +27,7 @@ import numpy as np
 class ZoneEditor(tk.Tk):
     def __init__(self, base: str) -> None:
         super().__init__()
-        self.title("FACW — ویرایشگر ناحیه")
+        self.title("امن نگار — ویرایشگر ناحیه")
         self.geometry("980x680")
         self.base = base.rstrip("/")
         self.cookie = ""
@@ -100,7 +100,7 @@ class ZoneEditor(tk.Tk):
             self.status.config(text=str(exc))
             return
         if self._me.get("role") != "admin":
-            messagebox.showerror("FACW", "ویرایش ناحیه فقط برای مدیر مجاز است")
+            messagebox.showerror("امن نگار", "ویرایش ناحیه فقط برای مدیر مجاز است")
             return
         self._build_editor()
 
@@ -256,11 +256,11 @@ class ZoneEditor(tk.Tk):
             self.status.config(text=str(exc))
             return
         self.status.config(text=f"ناحیه ذخیره شد ({len(zone['points'])} نقطه)")
-        messagebox.showinfo("FACW", f"ناحیه برای «{cam['name']}» ذخیره شد.")
+        messagebox.showinfo("امن نگار", f"ناحیه برای «{cam['name']}» ذخیره شد.")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="FACW zone editor")
+    ap = argparse.ArgumentParser(description="Aman Negar zone editor")
     ap.add_argument("--url", default=os.environ.get("FACW_URL", "http://127.0.0.1:8770"))
     args = ap.parse_args(argv)
     ZoneEditor(args.url).mainloop()

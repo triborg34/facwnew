@@ -1,4 +1,4 @@
-"""Install / remove FACW autostart (spec 11.1).
+"""Install / remove Aman Negar autostart (spec 11.1).
 
 Registers the service to come up automatically after a reboot, so a single
 launch of the machine brings the whole system up (data store included).
@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-TASK_NAME = "FACW-Service"
+TASK_NAME = "AmanNegar-Service"
 UNIT_NAME = "facw.service"
 
 
@@ -87,7 +87,7 @@ def _systemd_dir() -> Path:
 
 def _posix_install(port: int) -> int:
     unit = f"""[Unit]
-Description=FACW face access control service
+Description=Aman Negar face access control service
 After=network.target
 
 [Service]
@@ -114,7 +114,7 @@ WantedBy=default.target
     auto.mkdir(parents=True, exist_ok=True)
     entry = auto / "facw.desktop"
     entry.write_text(
-        "[Desktop Entry]\nType=Application\nName=FACW\n"
+        "[Desktop Entry]\nType=Application\nName=امن نگار\n"
         f"Exec=sh -c 'cd {ROOT} && FACW_PORT={port} {sys.executable} -m facw.server'\n"
         "X-GNOME-Autostart-enabled=true\n",
         encoding="utf-8",
@@ -152,7 +152,7 @@ def _posix_remove() -> int:
 
 # --------------------------------------------------------------------------
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(prog="facw-autostart", description="FACW autostart control")
+    ap = argparse.ArgumentParser(prog="aman-negar-autostart", description="Aman Negar autostart control")
     ap.add_argument("--port", type=int, default=int(os.environ.get("FACW_PORT", "8770")))
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("install")

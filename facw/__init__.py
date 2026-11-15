@@ -1,4 +1,4 @@
-"""FACW - Face Access Control Watch
+"""Aman Negar - Face Access Control Watch
 
 Single-host, on-premise face recognition and access-control system.
 

@@ -1,5 +1,5 @@
 ================================================================================
-FACW - FACE ACCESS CONTROL WATCH
+AMAN NEGAR - FACE ACCESS CONTROL WATCH
 Project summary: what was built, and what it does
 Generated: 2026-11-07
 ================================================================================
@@ -20,7 +20,7 @@ CONTENTS
 1. OVERVIEW
 ================================================================================
 
-FACW is a complete, self-contained, on-premise face-recognition and
+Aman Negar is a complete, self-contained, on-premise face-recognition and
 access-control system. It watches cameras, identifies people against an enrolled
 database, writes an auditable event log, actuates physical door relays, and
 provides a Persian (RTL) operator console.

@@ -1,4 +1,4 @@
-"""Download the three ONNX models FACW needs (build-time only).
+"""Download the three ONNX models Aman Negar needs (build-time only).
 
     python scripts/fetch_models.py [--dest models]
 
@@ -60,7 +60,7 @@ def _download(url: str, dest: Path, min_size: int) -> None:
 
 
 def main(argv: "list[str] | None" = None) -> int:
-    ap = argparse.ArgumentParser(description="Fetch FACW model files")
+    ap = argparse.ArgumentParser(description="Fetch Aman Negar model files")
     ap.add_argument("--dest", default=str(ROOT / "models"))
     args = ap.parse_args(argv)
 

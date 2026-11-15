@@ -1,4 +1,4 @@
-/* FACW console - API client.
+/* Aman Negar console - API client.
  * One place for transport, error decoding and 401 handling.
  */
 (function () {

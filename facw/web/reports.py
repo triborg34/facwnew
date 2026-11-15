@@ -87,8 +87,8 @@ def register_font(font_path: Optional[str] = None) -> str:
             import os
 
             if path and os.path.exists(path):
-                pdfmetrics.registerFont(TTFont("FacwSans", path))
-                _FONT = "FacwSans"
+                pdfmetrics.registerFont(TTFont("AmanNegarSans", path))
+                _FONT = "AmanNegarSans"
                 return _FONT
         except Exception:  # noqa: BLE001 - fall back to Helvetica
             continue
@@ -126,8 +126,8 @@ def build_report(
         rightMargin=14 * mm,
         topMargin=14 * mm,
         bottomMargin=14 * mm,
-        title=rtl("گزارش شناسایی چهره"),
-        author="FACW",
+        title=rtl("گزارش شناسایی چهره — امن نگار"),
+        author="امن نگار",
     )
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle("t", parent=styles["Title"], fontName=font, fontSize=17, alignment=2)
@@ -137,7 +137,7 @@ def build_report(
                                 wordWrap="CJK")
 
     story: List[Any] = []
-    story.append(Paragraph(rtl("گزارش شناسایی چهره — FACW"), title_style))
+    story.append(Paragraph(rtl("گزارش شناسایی چهره — امن نگار"), title_style))
     generated = meta.get("generated") or datetime.now()
     story.append(
         Paragraph(

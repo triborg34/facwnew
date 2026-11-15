@@ -1,4 +1,4 @@
-# FACW — work log and backlog
+# Aman Negar — work log and backlog
 
 _Last updated: 2026-11-08. Author: Particle-1 (AI assistant)._
 
@@ -9,7 +9,7 @@ be read before starting new work so the same bugs are not fixed twice.
 
 ## 1. Where the project stands
 
-FACW is a face-recognition access-control system:
+Aman Negar is a face-recognition access-control system:
 
 ```
 facw/

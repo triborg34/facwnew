@@ -56,7 +56,7 @@ def main() -> None:
     api = create_app(app_state)
     port = app_state.settings.get().port
     url = f"http://127.0.0.1:{port}"
-    print(f"FACW console:  {url}")
+    print(f"امن نگار console:  {url}")
 
     # FACW_OPEN_BROWSER=0 disables this (handy for servers and for the tests).
     if os.environ.get("FACW_OPEN_BROWSER", "1").strip().lower() not in ("0", "false", "no", "off"):

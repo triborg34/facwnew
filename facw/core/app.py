@@ -106,6 +106,16 @@ class App:
         self.settings.on_change(self._on_settings_change)
         self.db.bus.publish  # touch to assert availability
 
+        # Prime the system CPU sampler.  psutil reports 0.0 until it has seen
+        # two samples, so without this the first reading on the dashboard
+        # would be a lie.
+        try:
+            import psutil
+
+            psutil.cpu_percent(interval=None)
+        except Exception:  # noqa: BLE001 - psutil is optional
+            pass
+
     # -- runtime wiring -------------------------------------------------
     def _wire_relay(self, cfg) -> None:
         if cfg.relay_host and cfg.relay_host not in ("sim", "none"):
@@ -256,6 +266,31 @@ class App:
         }
         return self._accel
 
+    def _disk_usage(self) -> Optional[Dict[str, float]]:
+        """Disk usage of the data volume (database + media + backups).
+
+        ``shutil`` is stdlib and works on every platform, so the disk figure
+        is available even on a host without psutil; psutil only adds the
+        filesystem filter, which this does not need.
+        """
+        try:
+            import shutil
+
+            du = shutil.disk_usage(str(self.paths.data_dir))
+            total = float(du.total)
+            used = float(du.used)
+            free = float(du.free)
+            if total <= 0:
+                return None
+            return {
+                "total_mb": round(total / 1048576.0, 1),
+                "used_mb": round(used / 1048576.0, 1),
+                "free_mb": round(free / 1048576.0, 1),
+                "percent": round(used / total * 100.0, 1),
+            }
+        except Exception:  # noqa: BLE001 - a missing disk figure must not break the view
+            return None
+
     def resources(self) -> Dict[str, Any]:
         """Resource view.  Every value is read from its real owner - the
         queue depths come from the writer/pipeline objects themselves, not
@@ -265,12 +300,23 @@ class App:
 
         cpu_pct = None
         mem_mb = None
+        cpu_system_pct = None
+        mem_pct = None
+        mem_total_mb = None
+        mem_used_mb = None
         try:
             import psutil  # optional
 
             proc = psutil.Process(os.getpid())
             cpu_pct = round(proc.cpu_percent(interval=0.0), 1)
             mem_mb = round(proc.memory_info().rss / 1048576.0, 1)
+            # System-wide figures.  The dashboard charts show the whole machine
+            # (all cores, all processes), not just this service.
+            cpu_system_pct = round(psutil.cpu_percent(interval=None), 1)
+            vm = psutil.virtual_memory()
+            mem_pct = round(float(vm.percent), 1)
+            mem_total_mb = round(float(vm.total) / 1048576.0, 1)
+            mem_used_mb = round(float(vm.total - vm.available) / 1048576.0, 1)
         except Exception:  # noqa: BLE001
             try:
                 import resource  # unix only
@@ -295,7 +341,12 @@ class App:
         pmetrics = self.pipeline.metrics()
         return {
             "cpu_percent": cpu_pct,
+            "cpu_system_percent": cpu_system_pct,
             "memory_mb": mem_mb,
+            "memory_percent": mem_pct,
+            "memory_total_mb": mem_total_mb,
+            "memory_used_mb": mem_used_mb,
+            "disk": self._disk_usage(),
             "accelerator": accel,
             "device": self.device.as_dict(),
             "face_backend": getattr(self.face, "backend", "-"),

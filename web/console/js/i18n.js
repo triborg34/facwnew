@@ -1,4 +1,4 @@
-/* FACW console - internationalisation.
+/* Aman Negar console - internationalisation.
  *
  * Right-to-left layout is the default.  Dates are shown in the Persian
  * (Jalali) calendar, digits are localised to Persian, and both directions are

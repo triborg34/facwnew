@@ -1,4 +1,4 @@
-"""FACW service control (spec 11.1).
+"""Aman Negar service control (spec 11.1).
 
 Start, stop, restart and inspect the service without hunting for PIDs by hand.
 Works on Windows and POSIX, and is the module referenced by
@@ -207,7 +207,7 @@ def cmd_logs(args) -> int:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(prog="facw-service", description="FACW service control")
+    ap = argparse.ArgumentParser(prog="aman-negar-service", description="Aman Negar service control")
     ap.add_argument("--port", type=int, default=int(os.environ.get("FACW_PORT", "8770")))
     sub = ap.add_subparsers(dest="cmd", required=True)
 

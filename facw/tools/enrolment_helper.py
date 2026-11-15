@@ -1,4 +1,4 @@
-"""FACW enrolment helper (spec 11.2).
+"""Aman Negar enrolment helper (spec 11.2).
 
 A small desktop client for batch/desk enrolment that talks to the running
 service over its authenticated API - it never touches the database or the
@@ -101,7 +101,7 @@ class Api:
 class EnrolmentHelper(tk.Tk):
     def __init__(self, base: str) -> None:
         super().__init__()
-        self.title("FACW — ثبت‌نام شخص")
+        self.title("امن نگار — ثبت‌نام شخص")
         self.geometry("760x620")
         self.api = Api(base)
         self.photos: list[Path] = []
@@ -270,7 +270,7 @@ class EnrolmentHelper(tk.Tk):
         except Exception as exc:  # noqa: BLE001
             self.status.config(text=str(exc))
             return
-        messagebox.showinfo("FACW", f"«{name}» ثبت شد.")
+        messagebox.showinfo("امن نگار", f"«{name}» ثبت شد.")
         self._clear_photos()
         for var in self.fields.values():
             var.set("")
@@ -279,7 +279,7 @@ class EnrolmentHelper(tk.Tk):
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="FACW enrolment helper")
+    ap = argparse.ArgumentParser(description="Aman Negar enrolment helper")
     ap.add_argument("--url", default=os.environ.get("FACW_URL", "http://127.0.0.1:8770"))
     args = ap.parse_args(argv)
     EnrolmentHelper(args.url).mainloop()

@@ -57,7 +57,7 @@ class Notifier:
     ) -> Optional[Notification]:
         if not settings.alarm_enabled:
             return None
-        subject = f"FACW detection: {identity}"
+        subject = f"امن نگار detection: {identity}"
         body = (
             f"Identity: {identity}\n"
             f"Date/time: {when_text}\n"

@@ -1,4 +1,4 @@
-/* FACW console - shared UI helpers: DOM, modals, toasts, client state. */
+/* Aman Negar console - shared UI helpers: DOM, modals, toasts, client state. */
 (function () {
   "use strict";
 

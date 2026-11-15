@@ -1,4 +1,4 @@
-/* FACW console - cameras screen: inventory, add/edit, discovery. */
+/* Aman Negar console - cameras screen: inventory, add/edit, discovery. */
 (function () {
   "use strict";
   const { h, clear, toast, modal, loading, empty, errorState, store } = window.UI;

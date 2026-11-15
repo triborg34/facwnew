@@ -294,7 +294,7 @@ def audit_log(request: Request, limit: int = 200, action: str = "", user=Depends
 def backup(request: Request, user=Depends(require_admin)) -> Dict[str, Any]:
     app = _app(request)
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    dest = app.paths.backup_dir / f"facw-{stamp}.db"
+    dest = app.paths.backup_dir / f"aman-negar-{stamp}.db"
     app.db.backup_to(dest)
     app.audit.record("backup", actor=user["login_name"], detail=str(dest))
     return {"ok": True, "path": str(dest), "bytes": dest.stat().st_size if dest.exists() else 0}

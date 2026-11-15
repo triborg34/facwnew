@@ -1,6 +1,6 @@
-# FACW — سامانه شناسایی چهره و کنترل دسترسی
+# امن نگار — سامانه شناسایی چهره و کنترل دسترسی
 
-**FACW** (Face Access Control Watch) is a complete, self-contained, on-premise
+**Aman Negar** (امن نگار) is a complete, self-contained, on-premise
 face-recognition access-control system. It watches cameras, identifies people,
 logs every event with a permanent audit trail, actuates physical door relays,
 and exposes a Persian RTL operator console — all on one host with no cloud and
@@ -391,6 +391,6 @@ facw/
   (Apache-2.0).
 - The demo clip is synthetic; the bundled fixture photos are public-domain
   test images (Lena, Messi, Largest Selfie).
-- FACW is designed as a **security-critical** system: keep the console on a
+- Aman Negar is designed as a **security-critical** system: keep the console on a
   private VLAN, rotate the default passwords, and treat the audit log as the
   source of truth.

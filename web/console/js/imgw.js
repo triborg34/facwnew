@@ -1,4 +1,4 @@
-/* FACW console - image helpers: zoom/pan stage and an interactive crop editor.
+/* Aman Negar console - image helpers: zoom/pan stage and an interactive crop editor.
  *
  * Both are plain DOM components (no canvas dependency for the zoom stage) so
  * the very same widget serves the enrolment preview, the unknown-person

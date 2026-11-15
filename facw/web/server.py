@@ -38,7 +38,7 @@ def _allowed_origins(port: int) -> list[str]:
 def create_app(app_state: App) -> FastAPI:
     cfg = app_state.settings.get()
     api = FastAPI(
-        title="FACW - Face Access Control Watch",
+        title="امن نگار — سامانه شناسایی چهره و کنترل دسترسی",
         version="1.0.0",
         docs_url=None,
         redoc_url=None,

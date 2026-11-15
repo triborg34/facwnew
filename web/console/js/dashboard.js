@@ -1,4 +1,4 @@
-/* FACW console - monitoring dashboard: mosaic, detections, detail panel. */
+/* Aman Negar console - monitoring dashboard: mosaic, detections, detail panel. */
 (function () {
   "use strict";
   const { h, clear, toast, modal, loading, empty, errorState, store, alertChime } = window.UI;
@@ -19,6 +19,11 @@
     rendered: {},          // track id -> {node, key, cls} for targeted repaints
     detHost: null,
     lastEventId: 0,
+    resTimer: null,        // resource-chart poll
+    resPanel: null,        // window.Charts.resourcePanel() instance
+    recent: {},            // "identified" | "unknown" -> recent-faces widget
+    recentHost: null,
+    recentBusy: false,
   };
 
   const roleBadge = (role) => {
@@ -186,6 +191,126 @@
       ),
       stateBadge(d.state, d.identity_name)
     );
+  }
+
+  // ------------------------------------------------------- recent faces
+  //
+  // Two panels of the *stored* faces, newest first: the ones the system
+  // recognised and the ones it could not.  They are deliberately separate
+  // from the live detection panels above, which show the tracks currently on
+  // screen (and carry no picture at all).
+  const RECENT_STEP = 10;
+
+  function recentFacesPanel(kind) {
+    const st = { items: [], total: 0, limit: RECENT_STEP, loading: false };
+    const grid = h("div", { class: "face-grid" });
+    const badge = h("span", { class: "badge" }, I.num(0));
+    const moreBtn = h("button", {
+      class: "btn sm",
+      onclick: () => { st.limit += RECENT_STEP; load(); },
+    }, "بارگذاری بیشتر");
+    const moreWrap = h("div", { class: "face-more" }, moreBtn);
+
+    const el = h("div", { class: "card", "data-recent": kind },
+      h("div", { class: "card-head" },
+        h("span", {}, kind === "identified" ? "آخرین چهره‌های شناسایی‌شده" : "آخرین چهره‌های ناشناس"),
+        badge,
+        h("div", { class: "spacer" })),
+      grid);
+
+    async function load() {
+      if (st.loading) return;
+      st.loading = true;
+      try {
+        const q = kind === "identified" ? { identified_only: 1 } : { unknown_only: 1 };
+        const res = await window.API.get("/api/events", Object.assign({}, q, {
+          page: 1, page_size: st.limit, sort: "created_ts", order: "desc",
+        }));
+        st.items = res.items || [];
+        st.total = res.total || 0;
+      } catch (e) {
+        st.items = [];
+        st.total = 0;
+      }
+      st.loading = false;
+      paint();
+    }
+
+    function paint() {
+      badge.textContent = I.num(st.total);
+      clear(grid);
+      if (!st.items.length) {
+        grid.appendChild(empty(kind === "identified"
+          ? "هنوز چهره‌ای شناسایی نشده"
+          : "چهره ناشناسی ثبت نشده"));
+        return;
+      }
+      st.items.forEach((ev) => grid.appendChild(faceCell(ev)));
+      if (st.items.length < st.total) grid.appendChild(moreWrap);
+    }
+
+    paint();
+    return { el, load, state: st };
+  }
+
+  function faceCell(ev) {
+    const src = window.API.mediaUrl(ev.face_file || ev.frame_file);
+    const name = ev.identity_name === "unknown" ? L.unknown : ev.identity_name;
+    const when = `${I.formatDate(ev.event_date)} – ${I.formatTime(ev.event_time)}`;
+    return h("div", {
+      class: "face-cell",
+      title: `${name} · ${when} · ${ev.camera_source || ""}`,
+      onclick: () => openRecent(ev),
+    },
+      src
+        ? h("img", { src, alt: name, loading: "lazy" })
+        : h("div", { class: "face-cell", style: "aspect-ratio:1/1;background:var(--bg-inset)" }),
+      h("div", { class: "cap" },
+        h("div", { class: "n" }, name),
+        h("div", { class: "m" }, when),
+        h("div", { class: "m" }, ev.camera_source || ""))
+    );
+  }
+
+  function openRecent(ev) {
+    const faceImg = window.API.mediaUrl(ev.face_file || "");
+    const frameImg = window.API.mediaUrl(ev.frame_file || "");
+    const name = ev.identity_name === "unknown" ? L.unknown : ev.identity_name;
+    const row = (k, v) => h("tr", {}, h("td", { class: "muted" }, k), h("td", {}, v));
+
+    modal({
+      title: name,
+      size: "lg",
+      body: h("div", {},
+        h("div", { class: "grid-2" },
+          h("div", {},
+            h("table", { class: "data" },
+              h("tbody", {},
+                row("نام", name),
+                row("تاریخ", I.formatDate(ev.event_date)),
+                row("ساعت", I.formatTime(ev.event_time)),
+                row("دوربین", ev.camera_source || "—"),
+                row("ناحیه", ev.zone_name || "—"),
+                row("شباهت", I.pct(ev.score, 1)),
+                row("نقش", L[ev.role] || ev.role || L.notset),
+                row("جنسیت", L[ev.gender] || L.notset),
+                row("سن", ev.age !== null && ev.age !== undefined ? I.num(ev.age) : "—"),
+                row("شماره ملی", ev.national_number ? I.num(ev.national_number) : "—")
+              ))),
+          h("div", {},
+            h("div", { class: "muted", style: "font-size:12px;margin-bottom:4px" }, "چهره ثبت‌شده"),
+            h("div", { class: "img-box", style: "aspect-ratio:1/1" },
+              faceImg
+                ? h("img", { src: faceImg, alt: "face", style: "width:100%;height:100%;object-fit:contain;cursor:zoom-in", onclick: () => zoomImage(faceImg) })
+                : empty("چهره‌ای ثبت نشده")))),
+        frameImg
+          ? h("div", { style: "margin-top:12px" },
+              h("div", { class: "muted", style: "font-size:12px;margin-bottom:4px" }, "قاب کامل — چهره در این تصویر دیده شد"),
+              h("div", { class: "img-box contain", style: "max-height:320px" },
+                h("img", { src: frameImg, alt: "frame", style: "max-height:320px;cursor:zoom-in", onclick: () => zoomImage(frameImg) })))
+          : null),
+      actions: [{ label: "بستن", kind: "ghost", onClick: (c) => c() }],
+    });
   }
 
   // --------------------------------------------------------- detail panel
@@ -491,6 +616,27 @@
     } catch (e) { /* transient: the next tick retries */ }
   }
 
+  // ---- resources & recent faces -------------------------------------------
+  async function loadResources() {
+    if (!S.resPanel) return;
+    try {
+      const res = await window.API.get("/api/resources");
+      S.resPanel.update(res);
+    } catch (e) { /* transient: the next tick retries */ }
+  }
+
+  async function loadRecent() {
+    if (S.recentBusy) return;
+    S.recentBusy = true;
+    try {
+      await Promise.all([
+        S.recent.identified ? S.recent.identified.load() : null,
+        S.recent.unknown ? S.recent.unknown.load() : null,
+      ]);
+    } catch (e) { /* transient */ }
+    S.recentBusy = false;
+  }
+
   async function mount(host) {
     root = host;
     clear(root);
@@ -501,13 +647,30 @@
       h("button", { class: "btn sm", onclick: loadCameras }, "\u0628\u0627\u0632\u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC")
     ));
     const mosaicHost = h("div", { id: "mosaic-host" }, loading());
+
+    // System vitals: CPU, RAM and disk (three live charts).
+    S.resPanel = window.Charts.resourcePanel();
+
+    // The last stored faces: recognised and unrecognised, newest first.
+    const recentHost = h("div", { id: "recent-host", class: "recent-panels" });
+    S.recent.identified = recentFacesPanel("identified");
+    S.recent.unknown = recentFacesPanel("unknown");
+    recentHost.appendChild(S.recent.identified.el);
+    recentHost.appendChild(S.recent.unknown.el);
+
     const detHost = h("div", { id: "det-host", class: "det-panels", style: "margin-top:14px" });
+
+    root.appendChild(S.resPanel.el);
     root.appendChild(mosaicHost);
+    root.appendChild(recentHost);
     root.appendChild(detHost);
+    S.recentHost = recentHost;
     S.detHost = detHost;
     mounted = true;
     await loadCameras();
     await loadDetections();
+    loadResources();
+    loadRecent();
     startTimers();
   }
 
@@ -522,6 +685,9 @@
     S.rendered = {};
     S.version = "";
     S.detHost = null;
+    S.resPanel = null;
+    S.recent = {};
+    S.recentHost = null;
     // The mosaic signature must be cleared too.  Leaving it set made the next
     // mount believe the tiles were already built, so refreshMosaic() returned
     // early and the page stayed on its "loading" placeholder - the dashboard
@@ -721,6 +887,8 @@
     stopTimers();
     // detections: 4 Hz - the backend answers "unchanged" when nothing moved
     S.detTimer = setInterval(() => { if (mounted) loadDetections(); }, 260);
+    // resource charts (CPU / RAM / disk): every 3 s
+    S.resTimer = setInterval(() => { if (mounted) loadResources(); }, 3000);
     // camera status (fps / online): every 4 s, in place
     S.camTimer = setInterval(async () => {
       if (!mounted) return;
@@ -735,18 +903,23 @@
 
   function stopTimers() {
     if (S.detTimer) clearInterval(S.detTimer);
+    if (S.resTimer) clearInterval(S.resTimer);
     if (S.camTimer) clearInterval(S.camTimer);
     S.detTimer = null;
+    S.resTimer = null;
     S.camTimer = null;
   }
 
   // push updates: a new event or a camera change arrives over SSE
+  const refreshRecent = window.UI.debounce(() => { if (mounted) loadRecent(); }, 800);
+
   window.addEventListener("facw:change", (ev) => {
     if (!mounted) return;
     const d = ev.detail || {};
     if (d.topic === "events" && d.data && d.data.action === "created") {
       // instant: ask for the tracks right away instead of waiting for the tick
       loadDetections();
+      refreshRecent();
       if (d.data.id && d.data.id !== S.lastEventId) S.lastEventId = d.data.id;
     }
     if (d.topic === "cameras") loadCameras();

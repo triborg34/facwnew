@@ -1,4 +1,4 @@
-/* FACW console - people: identity grid, enrolment dialog, person detail. */
+/* Aman Negar console - people: identity grid, enrolment dialog, person detail. */
 (function () {
   "use strict";
   const { h, clear, toast, modal, loading, empty, errorState, store } = window.UI;

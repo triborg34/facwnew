@@ -1,4 +1,4 @@
-/* FACW console - application shell: auth, routing, live updates. */
+/* Aman Negar console - application shell: auth, routing, live updates. */
 (function () {
   "use strict";
   const { h, clear, toast, loading, store } = window.UI;
@@ -46,7 +46,7 @@
         h("div", { class: "card-body" },
           h("div", { style: "text-align:center;margin-bottom:14px" },
             h("div", { class: "brand-mark", style: "margin:0 auto 10px;width:44px;height:44px;font-size:20px" }, "\u25C9"),
-            h("h1", { style: "margin:0;font-size:19px" }, "FACW"),
+            h("h1", { style: "margin:0;font-size:19px" }, "امن نگار"),
             h("div", { class: "muted", style: "font-size:12.5px" }, "\u0633\u06CC\u0633\u062A\u0645 \u0634\u0646\u0627\u0633\u0627\u06CC\u06CC \u0686\u0647\u0631\u0647 \u0648 \u06A9\u0646\u062A\u0631\u0644 \u062F\u0633\u062A\u0631\u0633\u06CC")),
           h("div", { class: "field" }, h("label", {}, "\u0646\u0627\u0645 \u06A9\u0627\u0631\u0628\u0631\u06CC"), login),
           h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "\u0631\u0645\u0632 \u0639\u0628\u0648\u0631"), pass),
@@ -84,7 +84,7 @@
     rootEl.appendChild(h("div", { class: "topbar" },
       h("div", { class: "brand" },
         h("div", { class: "brand-mark" }, "\u25C9"),
-        h("span", { class: "text" }, "FACW")),
+        h("span", { class: "text" }, "امن نگار")),
       nav,
       h("div", { class: "topbar-spacer" }),
       alarmBadge,

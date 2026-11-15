@@ -142,6 +142,11 @@ class EventRepo:
         if str(f.get("identified_only", "")).lower() in ("1", "true", "on", "yes"):
             where.append("identity_name <> 'unknown'")
 
+        # The inverse of ``identified_only``: only the faces the system could
+        # not recognise.  The dashboard keeps a separate panel for them.
+        if str(f.get("unknown_only", "")).lower() in ("1", "true", "on", "yes"):
+            where.append("identity_name = 'unknown'")
+
         sim_max = f.get("similarity_max")
         if sim_max not in (None, "", "null"):
             try:

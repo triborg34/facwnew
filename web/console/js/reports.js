@@ -1,4 +1,4 @@
-/* FACW console - reports: filters, pagination, export, row actions. */
+/* Aman Negar console - reports: filters, pagination, export, row actions. */
 (function () {
   "use strict";
   const { h, clear, toast, modal, loading, empty, errorState, store, debounce } = window.UI;
@@ -161,26 +161,32 @@
     if (!d.items || !d.items.length) { tableHost.appendChild(empty("هیچ رویدادی با این فیلترها یافت نشد")); return; }
 
     const isAdmin = store.state.user && store.state.user.role === "admin";
-    const rows = d.items.map((ev) => h("tr", {},
-      h("td", {}, window.API.mediaUrl(ev.frame_file)
-        ? h("img", { class: "thumb", src: window.API.mediaUrl(ev.frame_file), alt: "", loading: "lazy", style: "cursor:pointer",
-            onclick: () => openEvent(ev) })
-        : h("div", { class: "thumb skeleton" }, "")),
-      h("td", {}, h("b", {}, ev.identity_name === "unknown" ? L.unknown : ev.identity_name)),
-      h("td", { class: "mono" }, I.pct(ev.score, 1)),
-      h("td", {}, L[ev.gender] || L.notset),
-      h("td", { class: "mono" }, ev.age === null || ev.age === undefined ? "\u2014" : I.num(ev.age)),
-      h("td", {}, roleBadge(ev.role)),
-      h("td", { class: "mono" }, ev.national_number ? I.num(ev.national_number) : "\u2014"),
-      h("td", {}, ev.camera_source),
-      h("td", { class: "mono" }, I.formatDate(ev.event_date)),
-      h("td", { class: "mono" }, I.formatTime(ev.event_time)),
-      h("td", { style: "white-space:nowrap" },
-        h("button", { class: "btn sm ghost", title: "نمایش", onclick: () => openEvent(ev) }, "\u{1F441}"),
-        h("a", { class: "btn sm ghost", title: "دانلود", href: "/api/events/" + ev.id + "/download" }, "\u2B07"),
-        isAdmin ? h("button", { class: "btn sm ghost", title: "حذف", onclick: () => removeEvent(ev) }, "\u{1F5D1}") : null
-      )
-    ));
+    const rows = d.items.map((ev) => {
+      // The thumbnail shows the FACE, not the whole frame: the frame is a
+      // full-resolution scene and makes the table heavy to render and to
+      // read.  The full frame is still one click away in the detail dialog.
+      const thumbFile = ev.face_file || ev.frame_file;
+      return h("tr", {},
+        h("td", {}, window.API.mediaUrl(thumbFile)
+          ? h("img", { class: "thumb", src: window.API.mediaUrl(thumbFile), alt: "", loading: "lazy", style: "cursor:pointer",
+              onclick: () => openEvent(ev) })
+          : h("div", { class: "thumb skeleton" }, "")),
+        h("td", {}, h("b", {}, ev.identity_name === "unknown" ? L.unknown : ev.identity_name)),
+        h("td", { class: "mono" }, I.pct(ev.score, 1)),
+        h("td", {}, L[ev.gender] || L.notset),
+        h("td", { class: "mono" }, ev.age === null || ev.age === undefined ? "\u2014" : I.num(ev.age)),
+        h("td", {}, roleBadge(ev.role)),
+        h("td", { class: "mono" }, ev.national_number ? I.num(ev.national_number) : "\u2014"),
+        h("td", {}, ev.camera_source),
+        h("td", { class: "mono" }, I.formatDate(ev.event_date)),
+        h("td", { class: "mono" }, I.formatTime(ev.event_time)),
+        h("td", { style: "white-space:nowrap" },
+          h("button", { class: "btn sm ghost", title: "نمایش", onclick: () => openEvent(ev) }, "\u{1F441}"),
+          h("a", { class: "btn sm ghost", title: "دانلود", href: "/api/events/" + ev.id + "/download" }, "\u2B07"),
+          isAdmin ? h("button", { class: "btn sm ghost", title: "حذف", onclick: () => removeEvent(ev) }, "\u{1F5D1}") : null
+        )
+      );
+    });
 
     tableHost.appendChild(h("div", { class: "table-wrap" },
       h("table", { class: "data" },

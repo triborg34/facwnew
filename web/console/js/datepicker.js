@@ -1,4 +1,4 @@
-/* FACW console - Jalali date picker (locale-aware, RTL/LTR safe).
+/* Aman Negar console - Jalali date picker (locale-aware, RTL/LTR safe).
  * Emits an ISO Gregorian date ("YYYY-MM-DD") because the API filters by ISO,
  * but every displayed value is Jalali with localised digits.
  */

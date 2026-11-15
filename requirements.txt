@@ -1,4 +1,4 @@
-# FACW - Face Access Control Watch
+# Aman Negar - Face Access Control Watch
 # Every dependency installs once at build time; nothing is fetched at runtime,
 # so the system runs on an isolated LAN (spec 1.3).
 
@@ -9,6 +9,7 @@ reportlab>=4.0
 opencv-python-headless>=4.8        # YuNet / SFace / MediaPipe-onnx via cv2.dnn
 numpy>=1.24
 cryptography>=42.0                 # AES-GCM sealing + password hashing
+psutil>=5.9                        # CPU / RAM / disk metrics for the dashboard charts
 
 # --- report rendering only (Persian shaping in PDF exports) -----------------
 arabic-reshaper>=3.0
