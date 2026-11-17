@@ -26,6 +26,7 @@ log = get_logger("auth")
 
 SESSION_COOKIE = "facw_session"
 SESSION_TTL_SECONDS = 8 * 3600
+REMEMBER_TTL_SECONDS = 30 * 24 * 3600
 MAX_LOGIN_ATTEMPTS = 8
 LOGIN_WINDOW = 300  # seconds
 
@@ -56,6 +57,10 @@ class LoginThrottle:
 
 
 throttle = LoginThrottle()
+# The report lock asks for an administrator password on every export, so it
+# gets its own throttle bucket: guessing that password must not be able to
+# lock the real sign-in out (and vice versa).
+report_lock_throttle = LoginThrottle()
 
 
 def token_hash(token: str) -> str:
@@ -117,7 +122,15 @@ def require_admin(user: Dict = Depends(current_user)) -> Dict:
     return user
 
 
-def sign_in(app, login: str, password: str, user_agent: str = "") -> Dict:
+def sign_in(app, login: str, password: str, user_agent: str = "", remember: bool = False) -> Dict:
+    """Verify the credentials and open a session.
+
+    ``remember`` gives the session a long life (30 days) and makes the
+    browser store the cookie permanently, so the console opens straight into
+    the dashboard on the next visit instead of asking for the password again.
+    Without it the session lasts a working day and the cookie dies with the
+    browser window.
+    """
     key = f"{login}|{user_agent[:40]}"
     throttle.check(key)
     record = app.users.get_by_login(login, with_hash=True)
@@ -128,8 +141,9 @@ def sign_in(app, login: str, password: str, user_agent: str = "") -> Dict:
         app.audit.record("sign_in_failed", actor=login, outcome="failed")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid credentials")
     throttle.clear(key)
+    ttl = REMEMBER_TTL_SECONDS if remember else SESSION_TTL_SECONDS
     token = issue_token()
-    app.users.create_session(record["id"], token_hash(token), SESSION_TTL_SECONDS, user_agent)
+    app.users.create_session(record["id"], token_hash(token), ttl, user_agent)
     app.audit.record("sign_in", actor=login, outcome="ok")
     return {
         "token": token,
@@ -140,8 +154,34 @@ def sign_in(app, login: str, password: str, user_agent: str = "") -> Dict:
             "role": record["role"],
             "email": record["email"],
         },
-        "expires_in": SESSION_TTL_SECONDS,
+        "expires_in": ttl,
     }
+
+
+def unlock_report(app, user: Dict, password: str, explicit_login: str = "") -> Optional[str]:
+    """Check the report lock.
+
+    Returns the login name of the administrator whose password unlocked the
+    export, or ``None`` when the password does not match.
+
+    An administrator only has to type their *own* password - the account is
+    taken from the session, so no user name has to be entered.  Anyone else
+    has to name the administrator the password belongs to.
+    """
+    from ..core.security import verify_password
+
+    candidates = []
+    own = app.users.get_by_login(str(user.get("login_name", "")), with_hash=True)
+    if own and own.get("role") == "admin":
+        candidates.append(own)
+    if explicit_login:
+        named = app.users.get_by_login(explicit_login, with_hash=True)
+        if named and named.get("role") == "admin":
+            candidates.append(named)
+    for candidate in candidates:
+        if verify_password(password, candidate["password_hash"]):
+            return candidate["login_name"]
+    return None
 
 
 def sign_out(app, request: Request) -> None:

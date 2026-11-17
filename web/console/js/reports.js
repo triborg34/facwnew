@@ -325,31 +325,79 @@
     } catch (e) { toast("خطا: " + e.message, "danger"); }
   }
 
+  // The export is fetched instead of navigated to, so a refused report (wrong
+  // password) shows an error inside the dialog instead of replacing the page
+  // with a raw JSON body.
+  async function downloadReport(params, adminPassword) {
+    const headers = {};
+    if (adminPassword) headers["X-Admin-Password"] = adminPassword;
+    const res = await fetch(window.API.exportUrl(params), { credentials: "same-origin", headers });
+
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const j = await res.json();
+        if (j && j.detail) detail = j.detail;
+      } catch (e) { /* not JSON */ }
+      throw new Error(detail === "report lock: administrator password required"
+        ? "رمز عبور مدیر نادرست است"
+        : ("ساخت گزارش ناموفق بود: " + detail));
+    }
+    const blob = await res.blob();
+    const href = URL.createObjectURL(blob);
+    const a = h("a", { href, download: "aman-negar-report.pdf" });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 5000);
+  }
+
   function exportReport() {
     const f = Object.assign({}, state.filters);
     delete f.event_ids;
     const locked = store.state.settings && store.state.settings.report_lock;
     if (!locked) {
-      window.location.href = window.API.exportUrl(f);
+      downloadReport(f).catch((e) => toast(e.message, "danger"));
       return;
     }
-    // report-lock: require the administrator password
+    // report-lock: the administrator password unlocks the export.  An
+    // administrator only types their own password - the account is taken from
+    // the session - while an observer also has to name the administrator.
+    const user = store.state.user || {};
+    const isAdmin = user.role === "admin";
     const login = h("input", { type: "text", placeholder: "نام کاربری مدیر" });
-    const pass = h("input", { type: "password", placeholder: "رمز عبور مدیر" });
+    const pass = h("input", { type: "password", placeholder: "رمز عبور مدیر", autocomplete: "current-password" });
+    const err = h("div", { class: "state error", style: "display:none;margin-top:10px" });
+    const busy = h("div", { class: "muted", style: "font-size:12px;margin-top:8px;display:none" },
+      "در حال ساخت گزارش، لطفاً صبر کنید…");
+    const submit = async (c) => {
+      err.style.display = "none";
+      busy.style.display = "";
+      const p = Object.assign({}, f, {
+        admin_login: isAdmin ? (user.login_name || "") : login.value.trim(),
+      });
+      try {
+        await downloadReport(p, pass.value);
+        busy.style.display = "none";
+        c();
+      } catch (e) {
+        busy.style.display = "none";
+        err.style.display = "";
+        err.textContent = e.message || "رمز عبور نادرست است";
+      }
+    };
     modal({
       title: "قفل گزارش",
       size: "sm",
       body: h("div", {},
         h("div", { class: "lock-note" }, "\u{1F512} قفل گزارش فعال است. برای خروجی گرفتن رمز مدیر لازم است."),
-        h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "نام کاربری"), login),
-        h("div", { class: "field" }, h("label", {}, "رمز عبور"), pass)),
+        isAdmin ? null : h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "نام کاربری مدیر"), login),
+        h("div", { class: "field", style: isAdmin ? "margin-top:10px" : "" }, h("label", {}, "رمز عبور"), pass),
+        busy,
+        err),
       actions: [
         { label: "انصراف", kind: "ghost", onClick: (c) => c() },
-        { label: "دریافت گزارش", kind: "primary", onClick: (c) => {
-            const p = Object.assign({}, f, { admin_login: login.value, admin_password: pass.value });
-            window.location.href = window.API.exportUrl(p);
-            c();
-          } },
+        { label: "دریافت گزارش", kind: "primary", onClick: submit },
       ],
     });
   }

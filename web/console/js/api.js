@@ -66,8 +66,8 @@
     del: (p) => request("DELETE", p),
     form: (p, formData) => request("POST", p, formData),
     me: () => request("GET", "/api/auth/me", undefined, { allow401: true, probe: true }),
-    login: (login_name, password) =>
-      request("POST", "/api/auth/login-cookie", { login_name, password }, { allow401: true, probe: true }),
+    login: (login_name, password, remember) =>
+      request("POST", "/api/auth/login-cookie", { login_name, password, remember: !!remember }, { allow401: true, probe: true }),
     logout: () => request("POST", "/api/auth/logout", {}, { allow401: true }),
     exportUrl: (params) => "/api/events/export" + qs(params),
     videoUrl: (id, flavour) => `/video/${id}?flavour=${flavour || "annotated"}`,

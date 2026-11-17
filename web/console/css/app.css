@@ -202,6 +202,17 @@ textarea { resize: vertical; min-height: 68px; }
 .field.slider input[type="range"] { width: 100%; accent-color: var(--accent); }
 .slider-value { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
 
+/* "remember me" row on the sign-in card */
+.signin-remember {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 11px; cursor: pointer; user-select: none;
+  font-size: 12.5px; color: var(--text-dim); font-weight: 600;
+}
+.signin-remember:hover { color: var(--text); }
+.signin-remember input[type="checkbox"] {
+  width: 16px; height: 16px; margin: 0; accent-color: var(--accent); cursor: pointer;
+}
+
 /* switches */
 .switch { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }
 .switch input { display: none; }

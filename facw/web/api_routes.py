@@ -39,20 +39,36 @@ def _app(request: Request):
 def login(request: Request, payload: Dict[str, Any] = Body(...)) -> Dict[str, Any]:
     app = _app(request)
     ua = request.headers.get("user-agent", "")
-    return sign_in(app, str(payload.get("login_name", "")).strip(), str(payload.get("password", "")), ua)
+    return sign_in(
+        app,
+        str(payload.get("login_name", "")).strip(),
+        str(payload.get("password", "")),
+        ua,
+        remember=bool(payload.get("remember")),
+    )
 
 
 @router.post("/auth/login-cookie")
 def login_cookie(request: Request, response: Response, payload: Dict[str, Any] = Body(...)) -> Dict[str, Any]:
     """Sign-in that also sets the HttpOnly session cookie used by the UI."""
     app = _app(request)
-    result = sign_in(app, str(payload.get("login_name", "")).strip(), str(payload.get("password", "")), request.headers.get("user-agent", ""))
-    from .auth import SESSION_COOKIE, SESSION_TTL_SECONDS
+    remember = bool(payload.get("remember"))
+    result = sign_in(
+        app,
+        str(payload.get("login_name", "")).strip(),
+        str(payload.get("password", "")),
+        request.headers.get("user-agent", ""),
+        remember=remember,
+    )
+    from .auth import REMEMBER_TTL_SECONDS, SESSION_COOKIE, SESSION_TTL_SECONDS
 
+    ttl = REMEMBER_TTL_SECONDS if remember else SESSION_TTL_SECONDS
     response.set_cookie(
         SESSION_COOKIE,
         result["token"],
-        max_age=SESSION_TTL_SECONDS,
+        # "remember me" -> permanent cookie, so the next visit signs in on its
+        # own.  Otherwise the cookie lives only as long as the browser window.
+        max_age=ttl if remember else None,
         httponly=True,
         samesite="strict",
         secure=str(request.url.scheme) == "https",
@@ -717,14 +733,28 @@ def export_events(request: Request, user=Depends(current_user)):
     app = _app(request)
     filters = _filters_from_params(request)
     if app.settings.get().report_lock:
-        # report-lock: an administrator password is required
-        password = request.query_params.get("admin_password", "")
-        admin = app.users.get_by_login(str(request.query_params.get("admin_login", "")), with_hash=True)
-        from ..core.security import verify_password
+        # report-lock: the administrator password is required.  It travels in
+        # the X-Admin-Password header (the query parameter stays supported for
+        # older callers), so it never ends up in a URL or a proxy log.  An
+        # administrator only has to type their own password - the account is
+        # taken from the session; anyone else has to name the administrator.
+        password = str(
+            request.headers.get("x-admin-password")
+            or request.query_params.get("admin_password", "")
+        )
 
-        if not admin or admin["role"] != "admin" or not verify_password(password, admin["password_hash"]):
+        explicit_login = str(request.query_params.get("admin_login", "")).strip()
+        from .auth import report_lock_throttle, unlock_report
+
+        throttle_key = f"report_lock|{explicit_login or user['login_name']}"
+        report_lock_throttle.check(throttle_key)
+        unlocked_by = unlock_report(app, user, password, explicit_login)
+        if unlocked_by is None:
+            report_lock_throttle.fail(throttle_key)
+            app.audit.record("report_export_refused", actor=user["login_name"], detail="wrong password")
             raise HTTPException(status_code=403, detail="report lock: administrator password required")
-        app.audit.record("report_export_unlocked", actor=admin["login_name"], detail=str(filters))
+        report_lock_throttle.clear(throttle_key)
+        app.audit.record("report_export_unlocked", actor=unlocked_by, detail=str(filters))
     rows = app.events.all_for_export(filters)
     pdf = build_report(rows, filters, app.media, meta={"generated": datetime.now()})
     app.audit.record("report_exported", actor=user["login_name"], detail=f"rows={len(rows)}")

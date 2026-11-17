@@ -56,7 +56,7 @@ def create_app(app_state: App) -> FastAPI:
         allow_origins=_allowed_origins(cfg.port),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Authorization", "Content-Type", "X-Admin-Password"],
         max_age=600,
     )
 

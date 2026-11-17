@@ -15,20 +15,30 @@
   let currentPageId = null;
   let es = null;
 
+  // The last used login name is kept locally so the sign-in form can offer it
+  // again.  Only the *name* is stored - never the password.
+  const LAST_LOGIN_KEY = "facw.last_login";
+
   function signInScreen() {
     const rootEl = document.getElementById("app");
     clear(rootEl);
     const err = h("div", { class: "state error", style: "display:none" });
     const login = h("input", { type: "text", autocomplete: "username", placeholder: "\u0646\u0627\u0645 \u06A9\u0627\u0631\u0628\u0631\u06CC" });
     const pass = h("input", { type: "password", autocomplete: "current-password", placeholder: "\u0631\u0645\u0632 \u0639\u0628\u0648\u0631" });
+    const remember = h("input", { type: "checkbox", id: "signin-remember" });
+    try {
+      const last = localStorage.getItem(LAST_LOGIN_KEY);
+      if (last) login.value = last;
+    } catch (e) { /* private mode */ }
     const submit = async (ev) => {
       if (ev) ev.preventDefault();
       err.style.display = "none";
       const btnEl = rootEl.querySelector("#signin-btn");
       btnEl.disabled = true;
       try {
-        const r = await window.API.login(login.value.trim(), pass.value);
+        const r = await window.API.login(login.value.trim(), pass.value, remember.checked);
         if (r && r.user) {
+          try { localStorage.setItem(LAST_LOGIN_KEY, login.value.trim()); } catch (e) { /* ignore */ }
           store.set({ user: r.user });
           await boot();
         } else {
@@ -50,6 +60,9 @@
             h("div", { class: "muted", style: "font-size:12.5px" }, "\u0633\u06CC\u0633\u062A\u0645 \u0634\u0646\u0627\u0633\u0627\u06CC\u06CC \u0686\u0647\u0631\u0647 \u0648 \u06A9\u0646\u062A\u0631\u0644 \u062F\u0633\u062A\u0631\u0633\u06CC")),
           h("div", { class: "field" }, h("label", {}, "\u0646\u0627\u0645 \u06A9\u0627\u0631\u0628\u0631\u06CC"), login),
           h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "\u0631\u0645\u0632 \u0639\u0628\u0648\u0631"), pass),
+          h("label", { class: "signin-remember", for: "signin-remember" },
+            remember,
+            h("span", {}, "\u0645\u0631\u0627 \u0628\u0647 \u062E\u0627\u0637\u0631 \u0628\u0633\u067E\u0627\u0631")),
           h("div", { style: "margin-top:14px" },
             h("button", { id: "signin-btn", class: "btn primary", type: "submit", style: "width:100%" }, "\u0648\u0631\u0648\u062F")),
           err,
@@ -168,6 +181,9 @@
   // initial entry
   (async () => {
     const rootEl = document.getElementById("app");
+    // index.html ships a static spinner; drop it before adding our own, so the
+    // page never shows two of them at once.
+    clear(rootEl);
     rootEl.appendChild(loading("\u062F\u0631 \u062D\u0627\u0644 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC\u2026"));
     try {
       const me = await window.API.me();

@@ -17,5 +17,4 @@ facenv/
 
 # Local scratch artefacts
 docs/_rebrand_report_*.png
-scripts/_scan_check.py
-scripts/_cam_probe.py
+scripts/_*.py

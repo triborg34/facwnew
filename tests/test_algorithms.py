@@ -569,3 +569,121 @@ def test_tcp_sweep_survives_a_host_that_raises_type_error():
         scanner._tcp_sweep("192.168.99.0/29", 1.0)
 
     assert len(attempts) > 1, "the scan stopped at the first failing host"
+
+
+# ==========================================================================
+# Sign-in: the "remember me" session
+# ==========================================================================
+class _StubUsers:
+    """Just enough of the users repository for the auth helpers."""
+
+    def __init__(self, records):
+        self._records = {r["login_name"]: r for r in records}
+        self.sessions = []
+
+    def get_by_login(self, login, with_hash=False):
+        row = self._records.get(login)
+        if row is None:
+            return None
+        return dict(row) if with_hash else {k: v for k, v in row.items() if k != "password_hash"}
+
+    def create_session(self, user_id, token_hash, ttl, user_agent=""):
+        self.sessions.append({"user_id": user_id, "token_hash": token_hash, "ttl": ttl})
+
+
+class _StubAudit:
+    def record(self, *args, **kwargs):
+        pass
+
+
+class _StubApp:
+    def __init__(self, records):
+        self.users = _StubUsers(records)
+        self.audit = _StubAudit()
+
+
+def _stub_accounts():
+    from facw.core.security import hash_password
+
+    return [
+        {
+            "id": 1,
+            "login_name": "admin",
+            "display_name": "Administrator",
+            "role": "admin",
+            "email": "admin@example.local",
+            "password_hash": hash_password("admin12345"),
+        },
+        {
+            "id": 2,
+            "login_name": "observer",
+            "display_name": "Observer",
+            "role": "observer",
+            "email": "observer@example.local",
+            "password_hash": hash_password("observer12345"),
+        },
+    ]
+
+
+def test_sign_in_without_remember_keeps_the_short_session():
+    """A normal sign-in lasts a working day."""
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    out = auth.sign_in(app, "admin", "admin12345", "test-agent")
+    assert out["expires_in"] == auth.SESSION_TTL_SECONDS
+    assert app.users.sessions[0]["ttl"] == auth.SESSION_TTL_SECONDS
+
+
+def test_sign_in_with_remember_gives_a_long_lived_session():
+    """"Remember me" keeps the console signed in for a month."""
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    out = auth.sign_in(app, "admin", "admin12345", "test-agent", remember=True)
+    assert out["expires_in"] == auth.REMEMBER_TTL_SECONDS
+    assert auth.REMEMBER_TTL_SECONDS > auth.SESSION_TTL_SECONDS
+    assert app.users.sessions[0]["ttl"] == auth.REMEMBER_TTL_SECONDS
+
+
+def test_sign_in_rejects_a_wrong_password():
+    from fastapi import HTTPException
+
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    with pytest.raises(HTTPException):
+        auth.sign_in(app, "admin", "not-the-password", "test-agent")
+
+
+# ==========================================================================
+# Report lock
+# ==========================================================================
+def test_report_lock_unlocks_with_the_signed_in_administrator_password():
+    """The administrator types only their own password - no user name."""
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    user = {"login_name": "admin", "role": "admin"}
+    assert auth.unlock_report(app, user, "admin12345") == "admin"
+    assert auth.unlock_report(app, user, "wrong") is None
+
+
+def test_report_lock_refuses_an_observer_without_an_administrator_name():
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    observer = {"login_name": "observer", "role": "observer"}
+    # the observer's own password is not an administrator password
+    assert auth.unlock_report(app, observer, "observer12345") is None
+    # naming the administrator unlocks it
+    assert auth.unlock_report(app, observer, "admin12345", "admin") == "admin"
+
+
+def test_report_lock_refuses_an_empty_password():
+    from facw.web import auth
+
+    app = _StubApp(_stub_accounts())
+    user = {"login_name": "admin", "role": "admin"}
+    assert auth.unlock_report(app, user, "") is None
+    assert auth.unlock_report(app, user, "", "admin") is None
