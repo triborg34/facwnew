@@ -660,10 +660,15 @@
 
     const detHost = h("div", { id: "det-host", class: "det-panels", style: "margin-top:14px" });
 
-    root.appendChild(S.resPanel.el);
+    // Section order (top to bottom):
+    //   1. the camera mosaic          - what is happening right now
+    //   2. identified / unknown tracks - the live rows under the mosaic
+    //   3. the last stored faces       - the recent-face panels
+    //   4. system resources            - CPU / RAM / disk, at the bottom
     root.appendChild(mosaicHost);
-    root.appendChild(recentHost);
     root.appendChild(detHost);
+    root.appendChild(recentHost);
+    root.appendChild(S.resPanel.el);
     S.recentHost = recentHost;
     S.detHost = detHost;
     mounted = true;

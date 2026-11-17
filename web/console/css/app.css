@@ -294,7 +294,7 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
 .det-item .info .m { font-size: 11.5px; color: var(--text-dim); }
 
 /* ---------- resource charts ---------- */
-.res-card { margin-bottom: var(--gap); }
+.res-card { margin-top: var(--gap); }
 .res-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--gap); padding: 12px; }
 .chart-cell {
   border: 1px solid var(--border); border-radius: var(--radius-sm);
