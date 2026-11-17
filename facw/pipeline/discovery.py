@@ -344,7 +344,12 @@ class DiscoveryScanner:
             net = ipaddress.ip_network(subnet, strict=False)
         except ValueError:
             return
-        hosts = list(net.hosts())[:254]
+        # ``net.hosts()`` yields IPv4Address/IPv6Address *objects*, and
+        # socket.getaddrinfo() only accepts a string, bytes or None - passing
+        # the object straight through raised
+        #   TypeError: getaddrinfo() argument 1 must be string or None
+        # and killed every scan thread on its first host.
+        hosts = [str(h) for h in net.hosts()][:254]
         self.progress = f"scanning {subnet}"
 
         def check(ip: str, port: int) -> Optional[tuple]:
@@ -353,7 +358,9 @@ class DiscoveryScanner:
             try:
                 with socket.create_connection((ip, port), timeout=0.25):
                     return ip, port
-            except OSError:
+            except (OSError, TypeError, ValueError):
+                # One unreachable or malformed host must never take the whole
+                # worker thread down.
                 return None
 
         results: List[tuple] = []

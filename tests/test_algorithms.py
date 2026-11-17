@@ -507,3 +507,65 @@ def test_apply_dnn_target_is_a_noop_on_cpu():
 
     assert apply_dnn_target(Net(), DeviceInfo(device="cpu")) == "cpu"
     assert calls == []
+
+
+# ==========================================================================
+# Camera discovery: the TCP sweep
+# ==========================================================================
+def test_tcp_sweep_passes_string_addresses_to_the_socket_layer():
+    """``ipaddress.ip_network().hosts()`` yields address *objects*.
+
+    socket.getaddrinfo() only accepts a string, bytes or None, so passing the
+    object straight through raised
+    ``TypeError: getaddrinfo() argument 1 must be string or None`` and killed
+    every scan thread on its first host - the network scan found nothing and
+    dumped tracebacks on the console.
+    """
+    from unittest import mock
+
+    from facw.pipeline.discovery import DiscoveryScanner
+
+    seen = []
+
+    class FakeSock:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def close(self):
+            pass
+
+    def fake_create_connection(addr, timeout=None):
+        seen.append(addr)
+        return FakeSock()
+
+    scanner = DiscoveryScanner(10.0)
+    with mock.patch("facw.pipeline.discovery.socket.create_connection", fake_create_connection):
+        scanner._tcp_sweep("192.168.99.0/29", 1.0)
+
+    assert seen, "the sweep never tried a single host"
+    for host, _port in seen:
+        assert isinstance(host, str), f"getaddrinfo got a {type(host).__name__}, not a string"
+
+
+def test_tcp_sweep_survives_a_host_that_raises_type_error():
+    """One bad host must not take the whole worker thread down."""
+    from unittest import mock
+
+    from facw.pipeline.discovery import DiscoveryScanner
+
+    attempts = []
+
+    def fake_create_connection(addr, timeout=None):
+        attempts.append(addr)
+        if len(attempts) == 1:
+            raise TypeError("getaddrinfo() argument 1 must be string or None")
+        return None
+
+    scanner = DiscoveryScanner(10.0)
+    with mock.patch("facw.pipeline.discovery.socket.create_connection", fake_create_connection):
+        scanner._tcp_sweep("192.168.99.0/29", 1.0)
+
+    assert len(attempts) > 1, "the scan stopped at the first failing host"
