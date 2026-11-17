@@ -152,6 +152,41 @@ def cmd_stop(args) -> int:
     return 0
 
 
+def _spawn_detached(env: dict, log) -> subprocess.Popen:
+    """Start the service so that it outlives the shell that launched it.
+
+    On Windows the service is started from a console that may itself be torn
+    down (a terminal session, an IDE task, a CI step).  Without an explicit
+    breakaway the child belongs to the parent's job object and is killed
+    together with it - the service then vanishes with no trace in the log.
+    ``CREATE_BREAKAWAY_FROM_JOB`` puts the child in its own job, and
+    ``DETACHED_PROCESS`` detaches it from the console, so the service keeps
+    running once the launching shell exits.
+
+    Both flags are best-effort: on a host that forbids a breakaway we fall
+    back to a plain detached process group rather than failing to start.
+    """
+    argv = [sys.executable, "-m", "facw.server"]
+    if os.name != "nt":
+        return subprocess.Popen(
+            argv, cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    breakaway = getattr(subprocess, "CREATE_BREAKAWAY_FROM_JOB", 0x01000000)
+    detached = getattr(subprocess, "DETACHED_PROCESS", 0x00000008)
+    new_group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0x00000200)
+    last_error: Optional[OSError] = None
+    for flags in (breakaway | detached | new_group, detached | new_group, new_group):
+        try:
+            return subprocess.Popen(
+                argv, cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT,
+                creationflags=flags,
+            )
+        except OSError as exc:  # pragma: no cover - depends on the host policy
+            last_error = exc
+    raise last_error  # type: ignore[misc]
+
+
 def cmd_start(args) -> int:
     if not _free(args.port):
         print(f"port {args.port} is already in use; run 'stop' first", file=sys.stderr)
@@ -163,12 +198,7 @@ def cmd_start(args) -> int:
     # that must not spawn a window (tests, servers) set FACW_OPEN_BROWSER=0.
     env.setdefault("FACW_OPEN_BROWSER", "1")
     with open(BOOT_LOG, "ab") as log:
-        creation = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
-        proc = subprocess.Popen(
-            [sys.executable, "-m", "facw.server"],
-            cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT,
-            creationflags=creation,
-        )
+        proc = _spawn_detached(env, log)
     PID_FILE.parent.mkdir(parents=True, exist_ok=True)
     PID_FILE.write_text(str(proc.pid), encoding="utf-8")
     print(f"started pid {proc.pid}; waiting for health")
