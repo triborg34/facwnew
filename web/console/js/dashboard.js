@@ -675,15 +675,15 @@
     const detHost = h("div", { id: "det-host", class: "det-panels", style: "margin-top:14px" });
 
     // Section order (top to bottom):
-    //   1. the overall statistics      - the head-line numbers
-    //   2. the camera mosaic            - what is happening right now
-    //   3. identified / unknown tracks  - the live rows under the mosaic
-    //   4. the last stored faces        - the recent-face panels
+    //   1. the camera mosaic            - what is happening right now
+    //   2. identified / unknown tracks  - the live rows under the mosaic
+    //   3. the last stored faces        - the recent-face panels
+    //   4. the overall statistics       - the head-line numbers
     //   5. system resources             - CPU / RAM / disk, at the bottom
-    root.appendChild(S.statsPanel.el);
     root.appendChild(mosaicHost);
     root.appendChild(detHost);
     root.appendChild(recentHost);
+    root.appendChild(S.statsPanel.el);
     root.appendChild(S.resPanel.el);
     S.recentHost = recentHost;
     S.detHost = detHost;
