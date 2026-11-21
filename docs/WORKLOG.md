@@ -1,6 +1,6 @@
 # Aman Negar — work log and backlog
 
-_Last updated: 2026-11-08. Author: Particle-1 (AI assistant)._
+_Last updated: 2026-11-21. Author: Particle-1 (AI assistant), revised by MiniMax Code._
 
 This file records what was changed, why, and what is still open. It is meant to
 be read before starting new work so the same bugs are not fixed twice.
@@ -51,6 +51,34 @@ Key runtime facts:
 | `29a96cd` | Dashboard stuck on "connecting": `unmount()` didn't clear `S.mosaicSig` |
 | `354836e` | Enrolment dialog split into tabs (file / camera / handed-over still); register action added to the report screen; fixed `loadGrid()` null crash |
 | `b21fde1` | New people appear immediately (people page now listens to `facw:change`); report detail shows face + frame |
+| `5f4f9a1` | Rebrand **FACW → امن نگار / Aman Negar** (branding only — seals, `facw.db`, the `facw_session` cookie and every `FACW_*` variable were left alone so the running install kept working); unknown-face filter; CPU/RAM/disk charts; recent-face panels |
+| `b28902d` | `TypeError: getaddrinfo() argument 1 must be string or None` — `ipaddress.ip_network().hosts()` yields address *objects*; the TCP sweep now passes strings |
+| `d0939e8` | Dashboard section order: cameras → live tracks → recent faces → resources |
+| `486867a` | "Remember me" sign-in (30-day cookie + session) and a report lock that asks for the **password only**; the password travels in a header, not the URL |
+| `5dca954` | The service was killed whenever the shell that started it exited (it was a plain child in that shell's job object); it is now spawned with `CREATE_BREAKAWAY_FROM_JOB` |
+| (this change) | Overall statistics panel: `/api/stats` + KPI tiles, an identification-rate donut and a 30-day detection chart |
+
+### Notes from the 2026-11-17 → 2026-11-21 session
+
+- The rebrand was deliberately **branding only**. Everything that identifies
+  data on disk was left untouched: the seal prefixes (`facw-seal-v1`,
+  `facw-ref-v1`, `facw-camera-v1`), the `facw/` package directory, the
+  `FACW_*` environment variables, `facw.db` / `facw.log` / `facw.pid`, the
+  `facw_session` cookie, the `facw:*` DOM events and the `facw.theme`
+  localStorage key. Renaming any of them would have invalidated the existing
+  installation (1 identity, 32 events, the camera credentials).
+- Latin prose (docstrings, argparse help) uses **"Aman Negar"**; every
+  user-visible string uses **"امن نگار"**.
+- The console has no build step, so the charts are hand-written SVG / HTML.
+  The console is served with `Cache-Control: no-cache` precisely so a
+  changed `dashboard.js` is picked up after a restart.
+- `docs/screens/` holds real face images, so it is now **ignored** and
+  untracked; the same applies to `logs/` and `__pycache__`, which used to be
+  tracked and pushed runtime noise into the public repository.
+- The LAN console works out of the box: uvicorn binds `0.0.0.0`, so
+  `http://<host-ip>:8770` reaches the console from another machine.
+- `playwright` is needed for `tests/browser_smoke.py` (it drives the real
+  console with the default account and fails on any console error).
 
 ### Root causes worth remembering
 
@@ -127,13 +155,19 @@ Notes:
 
 ### Low priority / polish
 
-- [ ] Screenshots in `docs/screens/` are stale after the UI changes; regenerate.
-- [ ] `logs/facw.log` is tracked and modified constantly; consider untracking.
-- [ ] `__pycache__` is still tracked in the index (ignored for new files only);
-      `git rm -r --cached` would clean it up.
+- [x] Screenshots in `docs/screens/` were stale after the UI changes; regenerated.
+- [x] `logs/facw.log` was tracked and modified constantly; untracked.
+- [x] `__pycache__` was tracked in the index; untracked.
 - [ ] Enrolment dialog: the "قاب ارسالی" tab shows nothing when opened directly
       from the people page. Consider hiding the tab when it is empty.
 - [ ] Report export PDF was tested at 5–6 MB; check size with a large date range.
+- [ ] The event-artefact download still returns 500 for a Persian name
+      (`Content-Disposition` is latin-1). The RFC 5987 fix is validated but not
+      applied yet.
+- [ ] The report lock is only as strong as the admin password — the default
+      `admin12345` is still active on a LAN-reachable console.
+- [ ] Git history still contains the old face photos and `facw.db`; rewriting
+      history or making the repository private is still open.
 
 ---
 

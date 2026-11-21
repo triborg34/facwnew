@@ -197,6 +197,81 @@ class EventRepo:
         row = self.db.query_one("SELECT COUNT(*) AS c FROM events WHERE created_ts >= ?", (since_ts,))
         return int(row["c"]) if row else 0
 
+    # -- overall statistics ----------------------------------------------
+    def overview(self, days: int = 30) -> Dict[str, Any]:
+        """Head-line numbers for the dashboard.
+
+        One pass over the events table gives the totals; the per-day series
+        is what the dashboard bar chart is drawn from.  ``event_date`` is
+        stored as a local ``YYYY-MM-DD`` string, so the daily buckets need no
+        timezone maths.
+        """
+        days = max(1, int(days))
+        now = time.time()
+        today = datetime.now().strftime("%Y-%m-%d")
+        since = (datetime.now() - timedelta(days=days - 1)).strftime("%Y-%m-%d")
+
+        totals = self.db.query_one(
+            """SELECT COUNT(*) AS total,
+                      SUM(CASE WHEN identity_name <> 'unknown' THEN 1 ELSE 0 END) AS identified,
+                      COUNT(DISTINCT CASE WHEN identity_name <> 'unknown' THEN identity_name END) AS unique_people,
+                      AVG(score) AS avg_score,
+                      MIN(event_date) AS first_date
+                 FROM events"""
+        )
+        total = int(totals["total"] or 0) if totals else 0
+        identified = int(totals["identified"] or 0) if totals else 0
+
+        recent = self.db.query_one(
+            """SELECT
+                 SUM(CASE WHEN event_date = ? THEN 1 ELSE 0 END) AS today,
+                 SUM(CASE WHEN created_ts >= ? THEN 1 ELSE 0 END) AS last_hour,
+                 SUM(CASE WHEN created_ts >= ? THEN 1 ELSE 0 END) AS last_24h
+               FROM events""",
+            (today, now - 3600, now - 86400),
+        )
+
+        daily_rows = self.db.query(
+            """SELECT event_date AS d,
+                      COUNT(*) AS total,
+                      SUM(CASE WHEN identity_name <> 'unknown' THEN 1 ELSE 0 END) AS identified
+                 FROM events
+                WHERE event_date >= ?
+                GROUP BY event_date
+                ORDER BY event_date""",
+            (since,),
+        )
+        by_day = {r["d"]: r for r in daily_rows}
+
+        # Fill the gaps so the chart always shows the whole window, even on a
+        # day without a single detection.
+        daily = []
+        for i in range(days - 1, -1, -1):
+            day = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+            row = by_day.get(day)
+            daily.append(
+                {
+                    "date": day,
+                    "total": int(row["total"]) if row else 0,
+                    "identified": int(row["identified"] or 0) if row else 0,
+                }
+            )
+
+        return {
+            "total": total,
+            "identified": identified,
+            "unknown": max(0, total - identified),
+            "identify_rate": round(identified / total * 100.0, 1) if total else 0.0,
+            "unique_people": int(totals["unique_people"] or 0) if totals else 0,
+            "avg_score": round(float(totals["avg_score"] or 0.0), 3) if totals else 0.0,
+            "today": int(recent["today"] or 0) if recent else 0,
+            "last_hour": int(recent["last_hour"] or 0) if recent else 0,
+            "last_24h": int(recent["last_24h"] or 0) if recent else 0,
+            "per_minute": round(int(recent["last_hour"] or 0) / 60.0, 2) if recent else 0.0,
+            "first_date": (totals["first_date"] if totals else None) or None,
+            "daily": daily,
+        }
+
     def last_for_identity_camera(self, identity_name: str, camera_id: Optional[int]) -> Optional[float]:
         """Newest event ts for a dedup scope (identity + camera)."""
         if camera_id is None:

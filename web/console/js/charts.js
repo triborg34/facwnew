@@ -180,5 +180,122 @@
     return { el, update, history: hist };
   }
 
-  window.Charts = { areaChart, donut, resourcePanel, pct100, gb };
+  // ---- overall statistics -------------------------------------------------
+  // A KPI tile: label, the big number, and a small note underneath.
+  function statTile(label, value, sub, tone) {
+    return h("div", { class: "stat-tile" + (tone ? " stat-" + tone : "") },
+      h("div", { class: "stat-label" }, label),
+      h("div", { class: "stat-value" }, value),
+      h("div", { class: "stat-sub" }, sub || ""));
+  }
+
+  // Per-day detection bars.  Plain HTML instead of SVG: with thirty bars the
+  // rectangles are thin, and HTML keeps the date labels crisp instead of
+  // stretching them with the SVG view box.
+  function dailyBars(days) {
+    const list = days || [];
+    const max = Math.max(1, ...list.map((d) => d.total || 0));
+    const wrap = h("div", { class: "bars" });
+    list.forEach((d) => {
+      const idH = d.total ? ((d.identified || 0) / max) * 100 : 0;
+      const unkH = d.total ? ((d.total - (d.identified || 0)) / max) * 100 : 0;
+      wrap.appendChild(
+        h("div", {
+          class: "bar-col",
+          title: I.formatDate(d.date) + " — " + I.num(d.total) + " تشخیص",
+        },
+          h("div", { class: "bar-stack" },
+            h("div", { class: "bar-seg bar-unknown", style: "height:" + unkH.toFixed(2) + "%" }),
+            h("div", { class: "bar-seg bar-identified", style: "height:" + idH.toFixed(2) + "%" })))
+      );
+    });
+    return wrap;
+  }
+
+  // The dashboard summary: how many faces have been seen in total, how many
+  // were recognised, and the per-day series behind those numbers.
+  function statsPanel() {
+    const tiles = {
+      total: statTile("کل تشخیص‌ها", "—", ""),
+      identified: statTile("چهره‌های شناسایی‌شده", "—", "", "ok"),
+      unknown: statTile("چهره‌های ناشناس", "—", "", "dim"),
+      people: statTile("افراد یکتای دیده‌شده", "—", ""),
+      registered: statTile("افراد ثبت‌شده", "—", ""),
+      today: statTile("امروز", "—", ""),
+      day: statTile("۲۴ ساعت اخیر", "—", ""),
+      score: statTile("میانگین امتیاز تطابق", "—", ""),
+    };
+    const splitValue = h("div", { class: "chart-val" }, "—");
+    const splitBody = h("div", { class: "chart-body chart-body-donut" });
+    const splitNote = h("div", { class: "chart-note muted" }, "—");
+
+    const barsHost = h("div", { class: "bars-host" });
+    const barsAxis = h("div", { class: "bars-axis" });
+    const barsNote = h("div", { class: "chart-note muted" }, "—");
+
+    const el = h("div", { class: "card stats-card" },
+      h("div", { class: "card-head" },
+        h("span", {}, "آمار کلی"),
+        h("div", { class: "spacer" }),
+        h("span", { class: "badge" }, "از ابتدای کار")),
+      h("div", { class: "stat-grid" },
+        tiles.total, tiles.identified, tiles.unknown, tiles.people,
+        tiles.registered, tiles.today, tiles.day, tiles.score),
+      h("div", { class: "stats-charts" },
+        h("div", { class: "chart-cell" },
+          h("div", { class: "chart-head" }, h("span", { class: "chart-title" }, "تفکیک شناسایی"), splitValue),
+          splitBody,
+          splitNote),
+        h("div", { class: "chart-cell" },
+          h("div", { class: "chart-head" }, h("span", { class: "chart-title" }, "تشخیص‌های روزانه")),
+          barsHost,
+          barsAxis,
+          barsNote)));
+
+    function setTile(t, value, sub) {
+      t.querySelector(".stat-value").textContent = value;
+      t.querySelector(".stat-sub").textContent = sub || "";
+    }
+
+    function update(s) {
+      if (!s) return;
+      const total = Number(s.total) || 0;
+      const identified = Number(s.identified) || 0;
+      const unknown = Number(s.unknown) || 0;
+      const since = s.first_date ? I.formatDate(s.first_date) : "";
+
+      setTile(tiles.total, I.num(total), since ? "از " + since : "—");
+      setTile(tiles.identified, I.num(identified), "نرخ شناسایی " + I.num(s.identify_rate, 1) + "٪");
+      setTile(tiles.unknown, I.num(unknown), total ? I.num(Math.round((unknown / total) * 100)) + "٪ از کل" : "—");
+      setTile(tiles.people, I.num(s.unique_people), "نفر متفاوت");
+      setTile(tiles.registered, I.num(s.identities), I.num(s.reference_photos) + " عکس مرجع");
+      setTile(tiles.today, I.num(s.today), "تشخیص");
+      setTile(tiles.day, I.num(s.last_24h), I.num(s.per_minute, 2) + " در دقیقه");
+      setTile(tiles.score, s.avg_score ? I.num((Number(s.avg_score) * 100).toFixed(0)) + "٪" : "—", "میانگین شباهت");
+
+      const rate = Number(s.identify_rate) || 0;
+      splitValue.textContent = pct100(rate, 1);
+      splitBody.replaceChildren(donut(rate, { color: "#34d399", label: "نرخ شناسایی" }));
+      splitNote.textContent = I.num(identified) + " شناسایی‌شده · " + I.num(unknown) + " ناشناس";
+
+      const daily = s.daily || [];
+      barsHost.replaceChildren(dailyBars(daily));
+      if (daily.length) {
+        const peak = daily.reduce((a, b) => ((b.total || 0) > (a.total || 0) ? b : a), daily[0]);
+        const inWindow = daily.reduce((sum, d) => sum + (d.total || 0), 0);
+        barsAxis.replaceChildren(
+          h("span", {}, I.formatDate(daily[0].date)),
+          h("span", {}, I.formatDate(daily[daily.length - 1].date)));
+        barsNote.textContent = daily.length + " روز اخیر · " + I.num(inWindow) + " تشخیص"
+          + (peak.total ? " · بیشترین: " + I.num(peak.total) + " در " + I.formatDate(peak.date) : "");
+      } else {
+        barsAxis.replaceChildren();
+        barsNote.textContent = "—";
+      }
+    }
+
+    return { el, update };
+  }
+
+  window.Charts = { areaChart, donut, resourcePanel, statsPanel, statTile, dailyBars, pct100, gb };
 })();

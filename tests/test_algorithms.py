@@ -687,3 +687,96 @@ def test_report_lock_refuses_an_empty_password():
     user = {"login_name": "admin", "role": "admin"}
     assert auth.unlock_report(app, user, "") is None
     assert auth.unlock_report(app, user, "", "admin") is None
+
+
+# ==========================================================================
+# Dashboard statistics
+# ==========================================================================
+def _event(name, when, score=0.5):
+    return {
+        "identity_name": name,
+        "identity_id": None,
+        "score": score,
+        "age": None,
+        "gender": "unknown",
+        "role": "unknown",
+        "national_number": "",
+        "camera_source": "cam",
+        "camera_id": None,
+        "zone_name": "",
+        "track_id": 0,
+        "frame_file": "",
+        "face_file": "",
+        "person_file": "",
+        "event_date": when.strftime("%Y-%m-%d"),
+        "event_time": when.strftime("%H:%M:%S"),
+        "created_ts": when.timestamp(),
+    }
+
+
+def test_event_overview_counts_known_and_unknown_faces(tmp_path):
+    """The dashboard headline number: every face ever detected."""
+    from datetime import datetime, timedelta
+
+    from facw.storage.db import Database
+    from facw.storage.repos_more import EventRepo
+
+    db = Database(tmp_path / "test.db")
+    db.bootstrap()
+    repo = EventRepo(db)
+
+    now = datetime.now()
+    repo.create(_event("unknown", now - timedelta(days=1)))
+    repo.create(_event("unknown", now - timedelta(days=1)))
+    repo.create(_event("aref", now - timedelta(days=2), score=0.9))
+    repo.create(_event("aref", now - timedelta(days=2), score=0.7))
+
+    stats = repo.overview(days=30)
+    assert stats["total"] == 4
+    assert stats["identified"] == 2
+    assert stats["unknown"] == 2
+    assert stats["identify_rate"] == 50.0
+    assert stats["unique_people"] == 1
+    assert stats["avg_score"] == pytest.approx(0.65, abs=1e-3)
+
+
+def test_event_overview_fills_the_daily_gaps(tmp_path):
+    """A day without a detection still gets a bucket, so the chart has no holes."""
+    from datetime import datetime, timedelta
+
+    from facw.storage.db import Database
+    from facw.storage.repos_more import EventRepo
+
+    db = Database(tmp_path / "test.db")
+    db.bootstrap()
+    repo = EventRepo(db)
+
+    now = datetime.now()
+    repo.create(_event("aref", now - timedelta(days=1)))
+    repo.create(_event("unknown", now))
+
+    stats = repo.overview(days=7)
+    assert len(stats["daily"]) == 7
+    assert stats["daily"][0]["date"] == (now - timedelta(days=6)).strftime("%Y-%m-%d")
+    assert stats["daily"][-1]["date"] == now.strftime("%Y-%m-%d")
+    assert stats["daily"][-1]["total"] == 1
+    assert stats["daily"][-1]["identified"] == 0
+    assert stats["daily"][-2]["total"] == 1
+    assert stats["daily"][-2]["identified"] == 1
+    assert sum(d["total"] for d in stats["daily"]) == 2
+
+
+def test_event_overview_of_an_empty_table(tmp_path):
+    """An installation without a single event must not blow up the panel."""
+    from facw.storage.db import Database
+    from facw.storage.repos_more import EventRepo
+
+    db = Database(tmp_path / "test.db")
+    db.bootstrap()
+    stats = EventRepo(db).overview(days=7)
+    assert stats["total"] == 0
+    assert stats["identified"] == 0
+    assert stats["unknown"] == 0
+    assert stats["identify_rate"] == 0.0
+    assert stats["first_date"] is None
+    assert len(stats["daily"]) == 7

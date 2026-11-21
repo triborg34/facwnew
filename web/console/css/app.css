@@ -322,6 +322,51 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
 .chart-donut { width: 112px; height: 112px; display: block; }
 .chart-note { font-size: 11.5px; margin-top: 8px; text-align: center; }
 
+/* ---------- overall statistics ---------- */
+.stats-card { margin-bottom: var(--gap); }
+.stat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 10px; padding: 12px;
+}
+.stat-tile {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-soft); padding: 10px 12px; min-width: 0;
+}
+.stat-label { font-size: 11.5px; color: var(--text-dim); font-weight: 700; }
+.stat-value {
+  font-size: 23px; font-weight: 700; line-height: 1.25; margin-top: 2px;
+  font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis;
+}
+.stat-sub { font-size: 11px; color: var(--text-faint); margin-top: 1px; }
+.stat-ok .stat-value { color: var(--ok); }
+.stat-dim .stat-value { color: var(--text-dim); }
+
+.stats-charts {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--gap); padding: 0 12px 12px;
+}
+@media (max-width: 720px) { .stats-charts { grid-template-columns: minmax(0, 1fr); } }
+
+.bars-host { min-height: 86px; display: flex; align-items: stretch; border-bottom: 1px solid var(--border); }
+/* The time axis keeps its own direction: the oldest day on the left. */
+.bars {
+  flex: 1; display: flex; align-items: flex-end; gap: 2px;
+  direction: ltr; height: 86px;
+}
+.bars-axis {
+  display: flex; justify-content: space-between; direction: ltr;
+  font-size: 10.5px; color: var(--text-faint); margin-top: 4px;
+}
+.bar-col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
+.bar-stack {
+  width: 100%; height: 100%; display: flex; flex-direction: column;
+  justify-content: flex-end; gap: 1px;
+}
+.bar-seg { width: 100%; min-height: 0; border-radius: 2px; }
+.bar-identified { background: var(--ok); }
+.bar-unknown { background: var(--border-strong); }
+.bar-col:hover .bar-seg { filter: brightness(1.18); }
+
 /* ---------- recent faces ---------- */
 .recent-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
 .face-grid {

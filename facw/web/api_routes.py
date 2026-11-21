@@ -114,6 +114,12 @@ def resources(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
     return _app(request).resources()
 
 
+@router.get("/stats")
+def stats(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
+    """Head-line figures for the dashboard (spec 7.1 dashboard summary)."""
+    return _app(request).stats()
+
+
 # ==========================================================================
 # Cameras
 # ==========================================================================

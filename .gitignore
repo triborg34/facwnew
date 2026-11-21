@@ -18,3 +18,6 @@ facenv/
 # Local scratch artefacts
 docs/_rebrand_report_*.png
 scripts/_*.py
+
+# Screenshots of the console: they contain real face images
+docs/screens/

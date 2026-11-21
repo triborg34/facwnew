@@ -19,3 +19,4 @@ fonttools>=4.40                    # converts the bundled WOFF2 to TTF for PDF
 # --- optional: only needed to regenerate the demo clip / inspect PDFs -------
 # opencv-contrib-python-headless   (full build; the headless one above suffices)
 # pymupdf                          (PDF page rendering for visual checks)
+# playwright                       (drives the real console in tests/browser_smoke.py)

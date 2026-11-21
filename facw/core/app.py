@@ -291,6 +291,33 @@ class App:
         except Exception:  # noqa: BLE001 - a missing disk figure must not break the view
             return None
 
+    def stats(self, days: int = 30) -> Dict[str, Any]:
+        """Overall figures for the dashboard.
+
+        How many faces have been detected in total - known and unknown - plus
+        the rates and the per-day series the dashboard charts are drawn from.
+        Every number comes from the database, never from a cached counter.
+        """
+        out = self.events.overview(days=days)
+        try:
+            ident_row = self.db.query_one("SELECT COUNT(*) AS c FROM identities")
+            ref_row = self.db.query_one("SELECT COUNT(*) AS c FROM face_refs")
+            out["identities"] = int(ident_row["c"]) if ident_row else 0
+            out["reference_photos"] = int(ref_row["c"]) if ref_row else 0
+        except Exception:  # noqa: BLE001 - fall back to the match index
+            istats = self.index.stats()
+            out["identities"] = istats["identities"]
+            out["reference_photos"] = istats["rows"]
+        try:
+            out["cameras"] = len(self.cameras.list())
+        except Exception:  # noqa: BLE001
+            out["cameras"] = 0
+        try:
+            out["zones"] = len(self.zones.all())
+        except Exception:  # noqa: BLE001
+            out["zones"] = 0
+        return out
+
     def resources(self) -> Dict[str, Any]:
         """Resource view.  Every value is read from its real owner - the
         queue depths come from the writer/pipeline objects themselves, not

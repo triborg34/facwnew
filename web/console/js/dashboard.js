@@ -24,6 +24,8 @@
     recent: {},            // "identified" | "unknown" -> recent-faces widget
     recentHost: null,
     recentBusy: false,
+    statsPanel: null,      // window.Charts.statsPanel() instance
+    statsTimer: null,      // overall-statistics poll
   };
 
   const roleBadge = (role) => {
@@ -637,6 +639,15 @@
     S.recentBusy = false;
   }
 
+  // The overall numbers: how many faces have been detected since the start.
+  async function loadStats() {
+    if (!S.statsPanel) return;
+    try {
+      const res = await window.API.get("/api/stats");
+      S.statsPanel.update(res);
+    } catch (e) { /* transient: the next tick retries */ }
+  }
+
   async function mount(host) {
     root = host;
     clear(root);
@@ -651,6 +662,9 @@
     // System vitals: CPU, RAM and disk (three live charts).
     S.resPanel = window.Charts.resourcePanel();
 
+    // The overall figures since the system started counting.
+    S.statsPanel = window.Charts.statsPanel();
+
     // The last stored faces: recognised and unrecognised, newest first.
     const recentHost = h("div", { id: "recent-host", class: "recent-panels" });
     S.recent.identified = recentFacesPanel("identified");
@@ -661,10 +675,12 @@
     const detHost = h("div", { id: "det-host", class: "det-panels", style: "margin-top:14px" });
 
     // Section order (top to bottom):
-    //   1. the camera mosaic          - what is happening right now
-    //   2. identified / unknown tracks - the live rows under the mosaic
-    //   3. the last stored faces       - the recent-face panels
-    //   4. system resources            - CPU / RAM / disk, at the bottom
+    //   1. the overall statistics      - the head-line numbers
+    //   2. the camera mosaic            - what is happening right now
+    //   3. identified / unknown tracks  - the live rows under the mosaic
+    //   4. the last stored faces        - the recent-face panels
+    //   5. system resources             - CPU / RAM / disk, at the bottom
+    root.appendChild(S.statsPanel.el);
     root.appendChild(mosaicHost);
     root.appendChild(detHost);
     root.appendChild(recentHost);
@@ -674,6 +690,7 @@
     mounted = true;
     await loadCameras();
     await loadDetections();
+    loadStats();
     loadResources();
     loadRecent();
     startTimers();
@@ -894,6 +911,8 @@
     S.detTimer = setInterval(() => { if (mounted) loadDetections(); }, 260);
     // resource charts (CPU / RAM / disk): every 3 s
     S.resTimer = setInterval(() => { if (mounted) loadResources(); }, 3000);
+    // overall statistics: every 10 s - the totals move slowly
+    S.statsTimer = setInterval(() => { if (mounted) loadStats(); }, 10000);
     // camera status (fps / online): every 4 s, in place
     S.camTimer = setInterval(async () => {
       if (!mounted) return;
@@ -910,13 +929,16 @@
     if (S.detTimer) clearInterval(S.detTimer);
     if (S.resTimer) clearInterval(S.resTimer);
     if (S.camTimer) clearInterval(S.camTimer);
+    if (S.statsTimer) clearInterval(S.statsTimer);
     S.detTimer = null;
     S.resTimer = null;
     S.camTimer = null;
+    S.statsTimer = null;
   }
 
   // push updates: a new event or a camera change arrives over SSE
   const refreshRecent = window.UI.debounce(() => { if (mounted) loadRecent(); }, 800);
+  const refreshStats = window.UI.debounce(() => { if (mounted) loadStats(); }, 1200);
 
   window.addEventListener("facw:change", (ev) => {
     if (!mounted) return;
@@ -925,6 +947,7 @@
       // instant: ask for the tracks right away instead of waiting for the tick
       loadDetections();
       refreshRecent();
+      refreshStats();
       if (d.data.id && d.data.id !== S.lastEventId) S.lastEventId = d.data.id;
     }
     if (d.topic === "cameras") loadCameras();
