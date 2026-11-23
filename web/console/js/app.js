@@ -1,12 +1,13 @@
 /* Aman Negar console - application shell: auth, routing, live updates. */
 (function () {
   "use strict";
-  const { h, clear, toast, loading, store } = window.UI;
+  const { h, clear, toast, loading, modal, store } = window.UI;
 
   const PAGES = [
     { id: "dashboard", label: "\u0645\u0627\u0646\u06CC\u062A\u0648\u0631\u06CC\u0646\u06AF", mount: () => window.PageDashboard.mount, unmount: () => window.PageDashboard.unmount, adminOnly: false },
     { id: "reports", label: "\u06AF\u0632\u0627\u0631\u0634\u200C\u0647\u0627", mount: () => window.PageReports.mount, adminOnly: false },
     { id: "cameras", label: "\u062F\u0648\u0631\u0628\u06CC\u0646\u200C\u0647\u0627", mount: () => window.PageCameras.mount, adminOnly: true },
+    { id: "zones", label: "\u0646\u0648\u0627\u062D\u06CC", mount: () => window.PageZones.mount, adminOnly: true },
     { id: "people", label: "\u0627\u0634\u062E\u0627\u0635", mount: () => window.PagePeople.mount, adminOnly: false },
     { id: "settings", label: "\u062A\u0646\u0637\u06CC\u0645\u0627\u062A", mount: () => window.PageSettings.mount, adminOnly: false },
   ];
@@ -74,12 +75,68 @@
     login.focus();
   }
 
+  // The report lock hides the whole reports screen until the administrator
+  // password has been entered.  The unlock lasts for the browser session.
+  function reportLockActive() {
+    const s = store.state.settings;
+    return !!(s && s.report_lock && !store.state.reportUnlocked);
+  }
+
+  function askReportPassword() {
+    const user = store.state.user || {};
+    const isAdmin = user.role === "admin";
+    const login = h("input", { type: "text", placeholder: "نام کاربری مدیر" });
+    const pass = h("input", { type: "password", placeholder: "رمز عبور مدیر", autocomplete: "current-password" });
+    const err = h("div", { class: "state error", style: "display:none;margin-top:10px" });
+    modal({
+      title: "قفل گزارش",
+      size: "sm",
+      body: h("div", {},
+        h("div", { class: "lock-note" }, "\u{1F512} گزارش‌ها قفل است. برای دیدن آن‌ها رمز مدیر را وارد کنید."),
+        isAdmin ? null : h("div", { class: "field", style: "margin-top:10px" }, h("label", {}, "نام کاربری مدیر"), login),
+        h("div", { class: "field", style: isAdmin ? "margin-top:10px" : "" }, h("label", {}, "رمز عبور"), pass),
+        err),
+      actions: [
+        { label: "انصراف", kind: "ghost", onClick: (c) => c() },
+        { label: "باز کردن قفل", kind: "primary", onClick: async (c) => {
+            err.style.display = "none";
+            try {
+              await window.API.post("/api/reports/unlock", {
+                admin_login: isAdmin ? (user.login_name || "") : login.value.trim(),
+                admin_password: pass.value,
+              });
+              store.set({
+                reportUnlocked: true,
+                reportPassword: pass.value,
+                reportAdminLogin: isAdmin ? (user.login_name || "") : login.value.trim(),
+              });
+              c();
+              const host = shell();
+              await navigate("reports");
+            } catch (e) {
+              err.style.display = "";
+              err.textContent = e.message || "رمز عبور نادرست است";
+            }
+          } },
+      ],
+    });
+  }
+
   function shell() {
     const rootEl = document.getElementById("app");
     clear(rootEl);
     const user = store.state.user;
     const nav = h("div", { class: "topnav" });
     PAGES.filter((p) => !p.adminOnly || (user && user.role === "admin")).forEach((p) => {
+      if (p.id === "reports" && reportLockActive()) {
+        // locked: the screen is not reachable, only the unlock prompt is
+        nav.appendChild(h("button", {
+          class: "",
+          title: "گزارش‌ها قفل است",
+          onclick: askReportPassword,
+        }, "\u{1F512} " + p.label));
+        return;
+      }
       nav.appendChild(h("button", {
         class: currentPageId === p.id ? "active" : "",
         onclick: () => navigate(p.id),
@@ -119,6 +176,10 @@
       toast("\u062F\u0633\u062A\u0631\u0633\u06CC \u0628\u0647 \u0627\u06CC\u0646 \u0628\u062E\u0634 \u0641\u0642\u0637 \u0628\u0631\u0627\u06CC \u0645\u062F\u06CC\u0631 \u0645\u062C\u0627\u0632 \u0627\u0633\u062A", "warn");
       return;
     }
+    if (page.id === "reports" && reportLockActive()) {
+      askReportPassword();
+      return;
+    }
     if (currentPageId === id && current) return;
     // tear down the previous page so subscriptions/streams are released
     if (current && current.unmount) { try { current.unmount(); } catch (e) { /* ignore */ } }
@@ -135,7 +196,7 @@
     try { await window.API.logout(); } catch (e) { /* ignore */ }
     if (es) { es.close(); es = null; }
     if (window.PageDashboard && window.PageDashboard.unmount) window.PageDashboard.unmount();
-    store.set({ user: null });
+    store.set({ user: null, reportUnlocked: false, reportPassword: "", reportAdminLogin: "" });
     signInScreen();
   }
 
@@ -169,6 +230,12 @@
   }
 
   async function boot() {
+    // The report lock lives in the settings, so they have to be known before
+    // the navigation is drawn.
+    try {
+      const res = await window.API.get("/api/settings");
+      store.set({ settings: res.settings });
+    } catch (e) { /* the lock stays off if the settings cannot be read */ }
     startLive();
     await navigate("dashboard");
   }

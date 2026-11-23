@@ -731,6 +731,34 @@ def list_events(
 # api_more, and api_more's router is included *before* this one.  FastAPI matches
 # routes in registration order, so "/events/{event_id}" here must never be
 # registered ahead of it, or the feed 422s trying to parse "stream" as an int.
+@router.post("/reports/unlock")
+def unlock_reports(request: Request, payload: Dict[str, Any] = Body(default={}), user=Depends(current_user)) -> Dict[str, Any]:
+    """Check the report-lock password without exporting anything.
+
+    The console hides the whole reports screen while the lock is on, so the
+    operator has to unlock it once per session with the administrator
+    password before the screen appears at all.
+    """
+    app = _app(request)
+    if not app.settings.get().report_lock:
+        return {"ok": True, "locked": False}
+    data = payload or {}
+    password = str(request.headers.get("x-admin-password") or data.get("admin_password") or "")
+    explicit_login = str(data.get("admin_login") or "").strip()
+    from .auth import report_lock_throttle, unlock_report
+
+    throttle_key = f"report_unlock|{explicit_login or user['login_name']}"
+    report_lock_throttle.check(throttle_key)
+    unlocked_by = unlock_report(app, user, password, explicit_login)
+    if unlocked_by is None:
+        report_lock_throttle.fail(throttle_key)
+        app.audit.record("report_unlock_refused", actor=user["login_name"], detail="wrong password")
+        raise HTTPException(status_code=403, detail="رمز عبور مدیر نادرست است")
+    report_lock_throttle.clear(throttle_key)
+    app.audit.record("report_unlocked", actor=unlocked_by)
+    return {"ok": True, "locked": True}
+
+
 @router.get("/events/export")
 def export_events(request: Request, user=Depends(current_user)):
     """Printable multi-page report of the filtered result (spec 7.3)."""

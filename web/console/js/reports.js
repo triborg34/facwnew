@@ -365,6 +365,16 @@
     // the session - while an observer also has to name the administrator.
     const user = store.state.user || {};
     const isAdmin = user.role === "admin";
+    // The lock on the tab already asked for the password once; it is kept in
+    // memory for this session so the export does not ask the same thing twice.
+    const known = store.state.reportPassword || "";
+    if (known) {
+      const p = Object.assign({}, f, {
+        admin_login: isAdmin ? (user.login_name || "") : (store.state.reportAdminLogin || ""),
+      });
+      downloadReport(p, known).catch((e) => toast(e.message, "danger"));
+      return;
+    }
     const login = h("input", { type: "text", placeholder: "نام کاربری مدیر" });
     const pass = h("input", { type: "password", placeholder: "رمز عبور مدیر", autocomplete: "current-password" });
     const err = h("div", { class: "state error", style: "display:none;margin-top:10px" });
@@ -378,6 +388,11 @@
       });
       try {
         await downloadReport(p, pass.value);
+        // keep it for the next export of this session
+        store.set({
+          reportPassword: pass.value,
+          reportAdminLogin: isAdmin ? (user.login_name || "") : login.value.trim(),
+        });
         busy.style.display = "none";
         c();
       } catch (e) {
@@ -405,6 +420,20 @@
   async function mount(host) {
     root = host;
     clear(root);
+    // The lock hides the screen entirely; this is the safety net for the
+    // case where the page is opened directly.
+    const settings = store.state.settings;
+    if (settings && settings.report_lock && !store.state.reportUnlocked) {
+      root.appendChild(h("div", { class: "page-head" },
+        h("h1", {}, "\u06AF\u0632\u0627\u0631\u0634\u200C\u0647\u0627"),
+        h("span", { class: "sub" }, "\u0642\u0641\u0644 \u06AF\u0632\u0627\u0631\u0634 \u0627\u0641\u0639\u0627\u0644 \u0627\u0633\u062A")));
+      root.appendChild(h("div", { class: "card", style: "margin-top:12px" },
+        h("div", { class: "card-body" },
+          h("div", { class: "lock-note" }, "\u{1F512} \u0628\u0631\u0627\u06CC \u0645\u0634\u0627\u0647\u062F\u0647 \u0628\u0627\u06CC\u062F \u0645\u062D\u062A\u0648\u062C \u0627\u0632 \u0627\u0646\u0635\u0627\u0631 \u0628\u062F\u0647\u06CC\u062F."),
+          h("div", { class: "muted", style: "font-size:12px;margin-top:8px" },
+            "\u0628\u0631\u0627\u06CC \u0627\u0632 \u0646\u0648\u0627\u0628 \u0645\u0631\u0628\u0637 \u0628\u0647 \u0631\u0645\u0632 \u0645\u062F\u06CC\u0631 \u0627\u0646\u062F\u0627\u062F\u0647 \u0648 \u062F\u0627\u062F\u0647 \u0628\u0627 \u062F\u06A9\u0645\u0647 \u0628\u0631\u0645\u06AF\u0631\u062F\u0647 \u0627\u0646\u062A\u0642\u0627\u0644 \u0628\u0641\u062A\u0646\u062F."))));
+      return;
+    }
     root.appendChild(h("div", { class: "page-head" },
       h("h1", {}, "گزارش‌ها"),
       h("span", { class: "sub" }, "رویدادهای شناسایی با فیلترهای ترکیبی"),

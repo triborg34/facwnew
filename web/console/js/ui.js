@@ -126,6 +126,10 @@
       streamToken: "",
       page: "dashboard",
       detPanel: { identified: true, unknown: true },
+      settings: null,        // the service settings (the report lock lives here)
+      reportUnlocked: false, // set once the report lock password was entered
+      reportPassword: "",    // kept in memory only, so the export does not ask twice
+      reportAdminLogin: "",  // the administrator the password above belongs to
     },
     listeners: [],
     set(patch) {
