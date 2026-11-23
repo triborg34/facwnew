@@ -23,6 +23,13 @@ class Zone:
     colour: str = "#38bdf8"
     description: str = ""
     relay_channel: str = ""
+    # A zone may bind its own relay board, so one region opens a different
+    # door than another.  The password is never part of the model - it lives
+    # sealed in the database.
+    relay_host: str = ""
+    relay_port: int = 23
+    relay_number: int = 1
+    relay_user: str = "admin"
     image_w: int = 0
     image_h: int = 0
 
@@ -46,6 +53,10 @@ class Zone:
         colour: str = "#38bdf8",
         description: str = "",
         relay_channel: str = "",
+        relay_host: str = "",
+        relay_port: int = 23,
+        relay_number: int = 1,
+        relay_user: str = "admin",
     ) -> "Zone":
         """Pixel coordinates -> normalised coordinates (editor save path)."""
         w = max(1, int(image_w))
@@ -59,6 +70,10 @@ class Zone:
             colour=colour,
             description=description,
             relay_channel=relay_channel,
+            relay_host=relay_host,
+            relay_port=int(relay_port),
+            relay_number=int(relay_number),
+            relay_user=relay_user,
             image_w=int(image_w),
             image_h=int(image_h),
         )
@@ -73,6 +88,10 @@ class Zone:
             "colour": self.colour,
             "description": self.description,
             "relay_channel": self.relay_channel,
+            "relay_host": self.relay_host,
+            "relay_port": self.relay_port,
+            "relay_number": self.relay_number,
+            "relay_user": self.relay_user,
             "image_w": self.image_w,
             "image_h": self.image_h,
         }
@@ -87,6 +106,10 @@ class Zone:
             colour=str(d.get("colour", "#38bdf8")),
             description=str(d.get("description", "")),
             relay_channel=str(d.get("relay_channel", "")),
+            relay_host=str(d.get("relay_host", "")),
+            relay_port=int(d.get("relay_port") or 23),
+            relay_number=int(d.get("relay_number") or 1),
+            relay_user=str(d.get("relay_user") or "admin"),
             image_w=int(d.get("image_w") or d.get("img_w") or 0),
             image_h=int(d.get("image_h") or d.get("img_h") or 0),
         )

@@ -544,17 +544,72 @@ class UserRepo:
 # ==========================================================================
 class ZoneRepo:
     KINDS = ("polygon", "rect", "line")
+    RELAY_AAD = b"facw-zone-relay-v1"
 
-    def __init__(self, db: Database) -> None:
+    def __init__(self, db: Database, sealer: Optional[Sealer] = None) -> None:
         self.db = db
+        self.sealer = sealer
 
     def _to_public(self, row) -> Dict[str, Any]:
         d = dict(row)
+        # The row id is an internal counter; the zone's own identifier is
+        # ``zone_uid``.  The console edits and sends that one, so it must be
+        # the ``id`` of the public answer.
+        row_id = d.pop("id", None)
+        d["row_id"] = row_id
         try:
             d["points"] = json.loads(d.pop("points_json") or "[]")
         except json.JSONDecodeError:
             d["points"] = []
+        d["id"] = str(d.get("zone_uid") or row_id or "")
+        # The relay password is stored sealed and never leaves the repository.
+        d.pop("relay_password_sealed", None)
+        d["has_relay_password"] = bool(row["relay_password_sealed"]) if "relay_password_sealed" in row.keys() else False
         return d
+
+    def _open_secret(self, sealed: str) -> str:
+        if not sealed or self.sealer is None:
+            return ""
+        try:
+            return self.sealer.open_bytes(sealed, aad=self.RELAY_AAD).decode("utf-8")
+        except Exception:
+            return ""
+
+    def _seal_secret(self, password: str) -> str:
+        if not password or self.sealer is None:
+            return ""
+        try:
+            return self.sealer.seal_bytes(str(password).encode(), aad=self.RELAY_AAD)
+        except Exception:
+            return ""
+
+    def relay_password_for(self, zone_row) -> str:
+        """The relay password of a stored zone (opened only to actuate it)."""
+        if isinstance(zone_row, dict):
+            sealed = zone_row.get("relay_password_sealed", "")
+        else:
+            try:
+                sealed = zone_row["relay_password_sealed"]
+            except (KeyError, IndexError, TypeError):
+                sealed = ""
+        return self._open_secret(sealed or "")
+
+    def relay_secrets_for_camera(self, camera_key: str) -> Dict[str, str]:
+        """The sealed relay passwords of one camera's zones, opened on demand.
+
+        Only the pipeline asks for this, and only to actuate a relay; the
+        passwords never reach a log line or an API answer.
+        """
+        out: Dict[str, str] = {}
+        rows = self.db.query(
+            "SELECT zone_uid, relay_password_sealed FROM zones WHERE camera_key=?",
+            (camera_key,),
+        )
+        for row in rows:
+            secret = self._open_secret(row["relay_password_sealed"] or "")
+            if secret:
+                out[str(row["zone_uid"])] = secret
+        return out
 
     def list_for_camera(self, camera_key: str) -> List[Dict[str, Any]]:
         rows = self.db.query("SELECT * FROM zones WHERE camera_key=? ORDER BY id", (camera_key,))
@@ -565,21 +620,46 @@ class ZoneRepo:
         return [self._to_public(r) for r in rows]
 
     def replace_for_camera(self, camera_key: str, zones: List[Dict[str, Any]]) -> int:
-        """Atomically replace every zone of one camera (used by the editor)."""
+        """Atomically replace every zone of one camera (used by the editor).
+
+        A zone whose payload carries no ``relay_password`` keeps the password
+        it already had: the console never receives the sealed value, so a
+        plain "save" must not silently clear the credential.
+        """
         now = now_iso()
+        rows = self.db.query(
+            "SELECT zone_uid, relay_password_sealed FROM zones WHERE camera_key=? ORDER BY id",
+            (camera_key,),
+        )
+        existing = {str(r["zone_uid"]): (r["relay_password_sealed"] or "") for r in rows}
+        previous = [(str(r["zone_uid"]), (r["relay_password_sealed"] or "")) for r in rows]
         with self.db.transaction() as c:
             c.execute("DELETE FROM zones WHERE camera_key=?", (camera_key,))
-            for z in zones:
+            for index, z in enumerate(zones):
                 kind = z.get("kind", "polygon")
                 if kind not in self.KINDS:
                     kind = "polygon"
+                uid = str(z.get("id") or z.get("zone_uid") or "").strip()
+                if not uid:
+                    uid = f"z{int(time.time()*1000)}"
+                password = str(z.get("relay_password") or "")
+                if password:
+                    sealed = self._seal_secret(password)
+                else:
+                    sealed = existing.get(uid, "")
+                    if not sealed and z.get("has_relay_password") and index < len(previous):
+                        # The identifier was renamed in the editor: the zone
+                        # that stood in the same place keeps its credential.
+                        sealed = previous[index][1]
                 c.execute(
                     """INSERT INTO zones(camera_key, zone_uid, name, description, colour, kind,
-                           points_json, image_w, image_h, relay_channel, created_at, updated_at)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                           points_json, image_w, image_h, relay_channel,
+                           relay_host, relay_port, relay_number, relay_user, relay_password_sealed,
+                           created_at, updated_at)
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (
                         camera_key,
-                        str(z.get("id") or z.get("zone_uid") or f"z{int(time.time()*1000)}"),
+                        uid,
                         str(z.get("name", "zone"))[:80],
                         str(z.get("description", ""))[:400],
                         str(z.get("colour", "#38bdf8")),
@@ -590,6 +670,11 @@ class ZoneRepo:
                         int(z.get("image_w") or z.get("img_w") or 0),
                         int(z.get("image_h") or z.get("img_h") or 0),
                         str(z.get("relay_channel") or ""),
+                        str(z.get("relay_host") or "")[:120],
+                        int(z.get("relay_port") or 23),
+                        int(z.get("relay_number") or 1),
+                        str(z.get("relay_user") or "admin")[:60],
+                        sealed,
                         now,
                         now,
                     ),

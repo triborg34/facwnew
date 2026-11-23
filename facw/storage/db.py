@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS identities (
     name           TEXT NOT NULL,
     family_name    TEXT NOT NULL DEFAULT '',
     age            INTEGER,
+    birth_date     TEXT NOT NULL DEFAULT '',       -- YYYY-MM-DD; the age is derived
     gender         TEXT NOT NULL DEFAULT 'unknown',
     role           TEXT NOT NULL DEFAULT 'colleague',  -- approve|deny|visitor|colleague
     national_number TEXT NOT NULL DEFAULT '',
@@ -194,6 +195,11 @@ CREATE TABLE IF NOT EXISTS zones (
     image_w     INTEGER NOT NULL DEFAULT 0,
     image_h     INTEGER NOT NULL DEFAULT 0,
     relay_channel TEXT NOT NULL DEFAULT '',
+    relay_host    TEXT NOT NULL DEFAULT '',        -- the zone's own relay board
+    relay_port    INTEGER NOT NULL DEFAULT 23,
+    relay_number  INTEGER NOT NULL DEFAULT 1,
+    relay_user    TEXT NOT NULL DEFAULT 'admin',
+    relay_password_sealed TEXT NOT NULL DEFAULT '',
     created_at  TEXT NOT NULL,
     updated_at  TEXT NOT NULL
 );
@@ -223,6 +229,46 @@ CREATE TABLE IF NOT EXISTS biometric_access (
 );
 CREATE INDEX IF NOT EXISTS ix_bio_ts ON biometric_access(ts DESC);
 """
+
+
+# Columns added after the first release.  ``CREATE TABLE IF NOT EXISTS`` never
+# touches a table that already exists, so an installation that was created
+# earlier needs these added with ALTER TABLE.  Every column carries a default,
+# which is what SQLite requires for that operation.
+EXTRA_COLUMNS: dict = {
+    "zones": {
+        "relay_host": "TEXT NOT NULL DEFAULT ''",
+        "relay_port": "INTEGER NOT NULL DEFAULT 23",
+        "relay_number": "INTEGER NOT NULL DEFAULT 1",
+        "relay_user": "TEXT NOT NULL DEFAULT 'admin'",
+        "relay_password_sealed": "TEXT NOT NULL DEFAULT ''",
+    },
+    "identities": {
+        "birth_date": "TEXT NOT NULL DEFAULT ''",
+    },
+}
+
+
+def migrate(conn: sqlite3.Connection) -> None:
+    """Add the columns that were introduced after the first schema version.
+
+    Idempotent: a column that already exists is left alone, so this can run on
+    every start-up.
+    """
+    for table, columns in EXTRA_COLUMNS.items():
+        try:
+            existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        except sqlite3.Error:
+            continue
+        if not existing:
+            continue  # the table does not exist yet - the schema script creates it
+        for name, spec in columns.items():
+            if name in existing:
+                continue
+            try:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {spec}")
+            except sqlite3.Error as exc:  # pragma: no cover - concurrent start-up
+                log.warning("column migration failed", extra={"table": table, "column": name, "error": str(exc)})
 
 
 class Database:
@@ -273,6 +319,7 @@ class Database:
         """Create the schema if needed.  Idempotent."""
         c = self.conn()
         c.executescript(SCHEMA_SQL)
+        migrate(c)
         c.execute(
             "INSERT INTO meta(key, value) VALUES('schema_version', ?) "
             "ON CONFLICT(key) DO UPDATE SET value=excluded.value",

@@ -33,7 +33,7 @@ from ..vision.face import FaceEngine, FaceBox, best_face, estimate_attributes, p
 from ..vision.person import Detection, PersonDetector, nms
 from .capture import CameraStream, StreamRegistry, redact
 from .matching import MatchIndex, MatchResult
-from .relay import RelayController
+from .relay import RelayController, RelayTarget
 from .tracking import Track, TrackManager, Vote, resolve_votes
 from .zones import Zone, apply_zone_mask, attribute_zone
 
@@ -343,6 +343,7 @@ class PipelineWorker:
         self.annotations: "LatestAnnotated" = LatestAnnotated()
         self.zones: List[Zone] = []
         self._zones_loaded_at = 0.0
+        self._zone_secrets: Dict[str, str] = {}
         self._fps_marks: List[float] = []
         self._last_detect_at = 0.0
 
@@ -371,6 +372,13 @@ class PipelineWorker:
             self._zones_loaded_at = time.time()
         except Exception as exc:  # noqa: BLE001
             log.warning("zone load failed", extra={"camera": self.camera_key, "error": str(exc)})
+        try:
+            # The relay passwords are sealed in the database and opened here,
+            # only so a zone can actuate its own board.
+            self._zone_secrets = self.ctx.zone_repo.relay_secrets_for_camera(self.camera_key)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("zone relay secrets unavailable", extra={"camera": self.camera_key, "error": str(exc)})
+            self._zone_secrets = {}
 
     # -- main loop -----------------------------------------------------
     def _run(self) -> None:
@@ -590,14 +598,28 @@ class PipelineWorker:
         # Stage 12 - access control
         if ident.get("name") != "unknown" and str(ident.get("role")) == "approve":
             zone_channel = ""
+            target = None
             if settings.zone_mode and track.zone_name:
                 for z in self.zones:
                     if z.name == track.zone_name:
                         zone_channel = z.relay_channel
+                        if z.relay_host:
+                            # Region mode: the zone carries its own board and
+                            # relay number, so one region opens a different
+                            # door than another.
+                            target = RelayTarget(
+                                host=z.relay_host,
+                                port=int(z.relay_port or 23),
+                                username=z.relay_user or "admin",
+                                password=self._zone_secrets.get(z.zone_uid, "")
+                                or getattr(settings, "relay_password", "admin"),
+                                number=int(z.relay_number or 1),
+                            )
                         break
             results = self.ctx.relay.actuate(
                 settings,
                 zone_channel=zone_channel or None,
+                target=target,
                 reason=f"identity={ident.get('name')} camera={self.camera_id}",
             )
             if results and self.ctx.audit:

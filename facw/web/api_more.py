@@ -27,10 +27,26 @@ def _app(request: Request):
 # ==========================================================================
 # Settings
 # ==========================================================================
+# The relay password is a device credential.  It is stored in the local
+# settings file, but it never leaves the server: every answer that carries
+# the settings replaces it with a flag, so neither an observer nor an audit
+# log can read the credential back.
+SECRET_SETTINGS = ("relay_password",)
+
+
+def _mask_settings(data: Dict[str, Any]) -> Dict[str, Any]:
+    out = dict(data)
+    for key in SECRET_SETTINGS:
+        if key in out:
+            out[key] = ""
+            out["has_" + key] = bool(data.get(key))
+    return out
+
+
 @router.get("/settings")
 def get_settings(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
     app = _app(request)
-    return {"settings": app.settings.get_dict(), "index": app.index.stats()}
+    return {"settings": _mask_settings(app.settings.get_dict()), "index": app.index.stats()}
 
 
 @router.put("/settings")
@@ -44,7 +60,7 @@ def update_settings(request: Request, payload: Dict[str, Any] = Body(...), user=
     before = app.settings.get_dict()
     after = app.settings.update(payload)
     changes = {k: after.as_dict()[k] for k in payload if before.get(k) != after.as_dict()[k]}
-    return {"settings": after.as_dict(), "changed": changes}
+    return {"settings": _mask_settings(after.as_dict()), "changed": _mask_settings(changes)}
 
 
 @router.post("/settings/relay-test")
@@ -68,6 +84,76 @@ def relay_pulse(request: Request, payload: Dict[str, Any] = Body(default={}), us
 @router.get("/settings/relay-log")
 def relay_log(request: Request, user=Depends(current_user)) -> Dict[str, Any]:
     return {"items": _app(request).relay.recent(50)}
+
+
+@router.post("/relay/test")
+def relay_target_test(request: Request, payload: Dict[str, Any] = Body(default={}), user=Depends(require_admin)) -> Dict[str, Any]:
+    """Check that a relay board is reachable and accepts the given credentials.
+
+    Used by the zone editor: every region may bind its own board, and the
+    operator needs to know whether that board answers before relying on it.
+    """
+    from ..pipeline.nrc import NrcClient
+
+    data = payload or {}
+    host = str(data.get("host") or "").strip()
+    if not host:
+        raise HTTPException(status_code=422, detail="relay host is required")
+    port = int(data.get("port") or 23)
+    username = str(data.get("username") or "admin")
+    password = str(data.get("password") or "")
+    app = _app(request)
+    protocol = str(data.get("protocol") or app.settings.get().relay_protocol or "nrc").strip().lower()
+    if protocol == "http":
+        from ..pipeline.relay import HttpRelay
+
+        ok = HttpRelay(host, port).ping()
+        detail = "reachable" if ok else "the board did not answer"
+        return {"ok": bool(ok), "detail": detail, "host": host, "port": port}
+    client = NrcClient(host, port, username, password, timeout=float(data.get("timeout") or 3.0))
+    try:
+        ok = client.login()
+        detail = "reachable" if ok else "the board refused the credentials"
+        return {"ok": bool(ok), "detail": detail, "host": host, "port": port}
+    except Exception as exc:  # noqa: BLE001 - a test must not 500
+        return {"ok": False, "detail": str(exc), "host": host, "port": port}
+    finally:
+        client.close()
+
+
+@router.post("/relay/pulse")
+def relay_target_pulse(request: Request, payload: Dict[str, Any] = Body(default={}), user=Depends(require_admin)) -> Dict[str, Any]:
+    """Fire one relay of one board, whatever board that is."""
+    from ..pipeline.relay import HttpRelay, NrcRelay, RelayTarget
+
+    data = payload or {}
+    host = str(data.get("host") or "").strip()
+    if not host:
+        raise HTTPException(status_code=422, detail="relay host is required")
+    target = RelayTarget(
+        host=host,
+        port=int(data.get("port") or 23),
+        username=str(data.get("username") or "admin"),
+        password=str(data.get("password") or ""),
+        number=int(data.get("number") or 1),
+    )
+    app = _app(request)
+    s = app.settings.get()
+    # The board of a region is addressed directly: the globally configured
+    # transport may point at a different host, or at the simulator.
+    protocol = str(data.get("protocol") or s.relay_protocol or "nrc").strip().lower()
+    if protocol == "http":
+        transport = HttpRelay(target.host, target.port)
+    else:
+        transport = NrcRelay(target.host, target.port, target.username, target.password)
+    try:
+        ok = transport.pulse_target(target, int(s.relay_pulse_ms))
+    except Exception as exc:  # noqa: BLE001
+        ok, detail = False, str(exc)
+    else:
+        detail = "" if ok else "the board refused the pulse"
+    app.audit.record("relay_manual", actor=user["login_name"], detail=f"{target.host}#{target.number} ok={ok}")
+    return {"ok": bool(ok), "detail": detail, "target": target.as_dict()}
 
 
 # ==========================================================================

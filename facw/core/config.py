@@ -95,9 +95,13 @@ class RuntimeSettings:
     access_control: bool = False                # relay mode (stage 12)
     relay_host: str = "192.168.1.100"
     relay_port: int = 5000
+    relay_protocol: str = "nrc"                    # nrc (telnet, port 23) | http
+    relay_user: str = "admin"                     # NRC board user name
+    relay_password: str = "admin"                  # NRC board password
     relay_channel_1: str = "relay1"             # cross-platform name of channel 1
     relay_channel_2: str = "relay2"             # second channel; blank = single
     relay_pulse_ms: int = 1500                  # bounded pulse duration
+    relay_gap_ms: int = 1000                    # wait between two channels
     samples_required: int = 5                   # votes before an identity is committed
     fast_sample_ms: int = 120                   # cadence for undecided tracks (stage 16)
     slow_sample_ms: int = 900                   # cadence for decided tracks
@@ -169,6 +173,7 @@ class RuntimeSettings:
         clamp("snapshot_quality", 30, 100)
         clamp("overlap_threshold", 0.05, 0.95)
         clamp("relay_pulse_ms", 100, 10_000)
+        clamp("relay_gap_ms", 0, 10_000)
         clamp("samples_required", 1, 50)
         clamp("fast_sample_ms", 30, 5_000)
         clamp("slow_sample_ms", 60, 10_000)

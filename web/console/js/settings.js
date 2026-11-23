@@ -59,6 +59,26 @@
         h("span", { class: "track" }), h("span", {}, label));
 
     const insight = h("div", { class: "badge accent" }, "اعمال بدون راه‌اندازی مجدد");
+
+    // The port belongs to the protocol: an NRC board listens on 23, the old
+    // HTTP default of 5000 never applies to it.  The two fields know each
+    // other, so they are built before the layout that places them.
+    const portInput = h("input", {
+      type: "number",
+      value: dirty.relay_port !== undefined ? dirty.relay_port : s.relay_port,
+      onchange: (ev) => mark("relay_port", Number(ev.target.value)),
+    });
+    const protocolSelect = h("select", {
+      onchange: (ev) => {
+        mark("relay_protocol", ev.target.value);
+        if (ev.target.value === "nrc" && Number(portInput.value) === 5000) {
+          portInput.value = 23;
+          mark("relay_port", 23);
+        }
+      },
+    }, [["nrc", "NRC (تلنت روی پورت ۲۳)"], ["http", "HTTP relay board"]].map(([v, t]) =>
+      h("option", { value: v, selected: (dirty.relay_protocol !== undefined ? dirty.relay_protocol : s.relay_protocol) === v ? true : null }, t)));
+
     host.appendChild(h("div", { class: "grid-2" },
       // engine
       h("div", { class: "card" },
@@ -89,15 +109,26 @@
             h("div", { class: "row", style: "margin-top:12px" },
               h("div", { class: "field" }, h("label", {}, "آدرس رله"),
                 h("input", { type: "text", value: dirty.relay_host !== undefined ? dirty.relay_host : s.relay_host, onchange: (ev) => mark("relay_host", ev.target.value) })),
-              h("div", { class: "field" }, h("label", {}, "پورت رله"),
-                h("input", { type: "number", value: dirty.relay_port !== undefined ? dirty.relay_port : s.relay_port, onchange: (ev) => mark("relay_port", Number(ev.target.value)) })),
+              h("div", { class: "field" }, h("label", {}, "پورت رله (NRC = ۲۳)"),
+                portInput),
               h("div", { class: "field" }, h("label", {}, "طول پالس (ms)"),
                 h("input", { type: "number", value: dirty.relay_pulse_ms !== undefined ? dirty.relay_pulse_ms : s.relay_pulse_ms, onchange: (ev) => mark("relay_pulse_ms", Number(ev.target.value)) }))),
             h("div", { class: "row", style: "margin-top:10px" },
-              h("div", { class: "field" }, h("label", {}, "کانال ۱"),
+              h("div", { class: "field" }, h("label", {}, "کانال ۱ (شماره رله در NRC)"),
                 h("input", { type: "text", value: dirty.relay_channel_1 !== undefined ? dirty.relay_channel_1 : s.relay_channel_1, onchange: (ev) => mark("relay_channel_1", ev.target.value) })),
               h("div", { class: "field" }, h("label", {}, "کانال ۲ (خالی = تک‌کانال)"),
                 h("input", { type: "text", value: dirty.relay_channel_2 !== undefined ? dirty.relay_channel_2 : s.relay_channel_2, onchange: (ev) => mark("relay_channel_2", ev.target.value) }))),
+            h("div", { class: "row", style: "margin-top:10px" },
+              h("div", { class: "field" }, h("label", {}, "پروتکل رله"),
+                protocolSelect),
+              h("div", { class: "field" }, h("label", {}, "نام کاربری رله"),
+                h("input", { type: "text", value: dirty.relay_user !== undefined ? dirty.relay_user : (s.relay_user || "admin"), onchange: (ev) => mark("relay_user", ev.target.value) })),
+              h("div", { class: "field" }, h("label", {}, "رمز عبور رله"),
+                h("input", { type: "password", value: dirty.relay_password !== undefined ? dirty.relay_password : "", autocomplete: "new-password",
+                  placeholder: s.has_relay_password ? "ذخیره شده — برای تغییر بنویسید" : "admin",
+                  onchange: (ev) => mark("relay_password", ev.target.value) })),
+              h("div", { class: "field" }, h("label", {}, "فاصله بین دو کانال (ms)"),
+                h("input", { type: "number", value: dirty.relay_gap_ms !== undefined ? dirty.relay_gap_ms : (s.relay_gap_ms || 1000), onchange: (ev) => mark("relay_gap_ms", Number(ev.target.value)) }))),
             h("div", { style: "display:flex;gap:8px;margin-top:12px" },
               h("button", { class: "btn sm", onclick: testRelay }, "تست اتصال"),
               h("button", { class: "btn sm", onclick: () => pulseRelay("") }, "پالس کانال‌های عمومی"))

@@ -21,7 +21,7 @@ from ..pipeline.engine import EventWriter, Pipeline, PipelineContext, PipelineMe
 from ..pipeline.enrolment import EnrolmentService
 from ..pipeline.matching import MatchIndex
 from ..pipeline.notifications import Notifier
-from ..pipeline.relay import HttpRelay, RelayController, SimRelay
+from ..pipeline.relay import HttpRelay, NrcRelay, RelayController, SimRelay
 from ..pipeline.tracking import TrackManager
 from ..storage.db import Database
 from ..storage.media import MediaStore
@@ -58,7 +58,7 @@ class App:
         self.events = EventRepo(self.db)
         self.cameras = CameraRepo(self.db, self.sealer)
         self.users = UserRepo(self.db)
-        self.zones = ZoneRepo(self.db)
+        self.zones = ZoneRepo(self.db, self.sealer)
         self.audit = AuditRepo(self.db)
 
         # --- vision ---
@@ -118,16 +118,35 @@ class App:
 
     # -- runtime wiring -------------------------------------------------
     def _wire_relay(self, cfg) -> None:
-        if cfg.relay_host and cfg.relay_host not in ("sim", "none"):
-            self.relay.configure(HttpRelay(cfg.relay_host, cfg.relay_port))
-        else:
+        """Pick the relay transport that matches the configured protocol.
+
+        ``nrc`` is the telnet-style board on port 23, ``http`` the common
+        HTTP relay board.  Anything else (or no host) falls back to the
+        in-memory simulator, so a demo run needs no hardware.
+        """
+        host = (cfg.relay_host or "").strip()
+        if not host or host in ("sim", "none"):
             self.relay.configure(SimRelay())
+            return
+        protocol = (cfg.relay_protocol or "nrc").strip().lower()
+        if protocol == "http":
+            self.relay.configure(HttpRelay(host, cfg.relay_port))
+        else:
+            self.relay.configure(
+                NrcRelay(
+                    host,
+                    cfg.relay_port,
+                    getattr(cfg, "relay_user", "admin"),
+                    getattr(cfg, "relay_password", "admin"),
+                )
+            )
 
     def _on_settings_change(self, new, changed: Dict[str, Any]) -> None:
         """Apply live settings changes to the running system."""
         if "log_level" in changed:
             set_level(new.log_level)
-        if any(k in changed for k in ("relay_host", "relay_port")):
+        if any(k in changed for k in ("relay_host", "relay_port", "relay_protocol",
+                                      "relay_user", "relay_password")):
             self._wire_relay(new)
         if "processing_device" in changed:
             # Reload the vision stages on the newly resolved device.  The
@@ -136,11 +155,13 @@ class App:
         if "discovery_rate_limit_seconds" in changed:
             self.discovery._rate_limit = new.discovery_rate_limit_seconds
         if changed:
+            # A changed password is recorded as "changed", never as its value.
+            safe = {k: ("***" if k == "relay_password" else getattr(new, k)) for k in changed}
             self.audit.record(
                 "settings_changed",
                 actor="console",
                 target=",".join(sorted(changed.keys())),
-                detail=str({k: getattr(new, k) for k in changed}),
+                detail=str(safe),
             )
         log.info("settings applied", extra={"changed": sorted(changed.keys())})
 

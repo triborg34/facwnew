@@ -71,6 +71,7 @@
     logout: () => request("POST", "/api/auth/logout", {}, { allow401: true }),
     exportUrl: (params) => "/api/events/export" + qs(params),
     videoUrl: (id, flavour) => `/video/${id}?flavour=${flavour || "annotated"}`,
+    snapshotUrl: (id, flavour) => `/video/${id}/snapshot?flavour=${flavour || "raw"}`,
     mediaUrl: (rel) => {
       if (!rel) return "";
       const parts = String(rel).split("/");
