@@ -122,11 +122,8 @@
     });
   }
 
-  function shell() {
-    const rootEl = document.getElementById("app");
-    clear(rootEl);
+  function buildNav(nav) {
     const user = store.state.user;
-    const nav = h("div", { class: "topnav" });
     PAGES.filter((p) => !p.adminOnly || (user && user.role === "admin")).forEach((p) => {
       if (p.id === "reports" && reportLockActive()) {
         // locked: the screen is not reachable, only the unlock prompt is
@@ -142,6 +139,29 @@
         onclick: () => navigate(p.id),
       }, p.label));
     });
+  }
+
+  // The report lock changes the menu: the reports tab is locked or unlocked
+  // without a reload.  The page itself is left alone - only the buttons of
+  // the navigation are rebuilt.
+  let lastLockState = null;
+  function syncNav() {
+    const nav = document.querySelector(".topnav");
+    if (!nav) return;
+    const state = reportLockActive() ? "locked" : "open";
+    if (state === lastLockState) return;
+    lastLockState = state;
+    clear(nav);
+    buildNav(nav);
+  }
+
+  function shell() {
+    const rootEl = document.getElementById("app");
+    clear(rootEl);
+    const user = store.state.user;
+    const nav = h("div", { class: "topnav" });
+    buildNav(nav);
+    lastLockState = reportLockActive() ? "locked" : "open";
 
     const themeBtn = h("button", { class: "btn ghost sm", title: "\u067E\u0648\u0633\u062A\u0647", onclick: () => {
       const next = store.state.theme === "dark" ? "light" : "dark";
@@ -244,6 +264,10 @@
     store.set({ user: null });
     signInScreen();
   });
+
+  // The menu follows the report lock: switching the lock on or off in the
+  // settings changes the reports tab right away, without a reload.
+  store.subscribe(() => syncNav());
 
   // initial entry
   (async () => {

@@ -30,6 +30,26 @@
 
   function mark(key, value) {
     dirty[key] = value;
+    renderDirtyBar();
+  }
+
+  // The bar with the save button.  It lives outside the re-rendered part of
+  // the page: the sliders change their value on every step, so rebuilding
+  // the whole page would break the drag.  Without this bar the change was
+  // marked but never offered to be saved - which is why a report lock could
+  // be switched on but never off again.
+  function renderDirtyBar() {
+    const bar = document.getElementById("settings-dirty");
+    if (!bar) return;
+    clear(bar);
+    const count = Object.keys(dirty).length;
+    if (!count) return;
+    bar.appendChild(h("div", { class: "card", style: "margin-top:12px" },
+      h("div", { class: "card-body", style: "display:flex;gap:10px;align-items:center" },
+        h("span", { class: "badge warn" }, I.num(count) + " تغییر ذخیره‌نشده"),
+        h("div", { style: "flex:1" }),
+        h("button", { class: "btn sm ghost", onclick: () => { dirty = {}; renderSettings(); } }, "لغو"),
+        h("button", { class: "btn sm primary", onclick: saveSettings }, "ذخیره و اعمال"))));
   }
 
   function renderSettings() {
@@ -158,15 +178,8 @@
       )
     ));
 
-    if (Object.keys(dirty).length) {
-      host.appendChild(h("div", { class: "card", style: "margin-top:12px" },
-        h("div", { class: "card-body", style: "display:flex;gap:10px;align-items:center" },
-          h("span", { class: "badge warn" }, I.num(Object.keys(dirty).length) + " تغییر ذخیره‌نشده"),
-          h("div", { style: "flex:1" }),
-          h("button", { class: "btn sm ghost", onclick: () => { dirty = {}; renderSettings(); } }, "لغو"),
-          h("button", { class: "btn sm primary", onclick: saveSettings }, "ذخیره و اعمال")
-        )));
-    }
+    // the unsaved-changes bar lives outside this function
+    renderDirtyBar();
   }
 
   async function saveSettings() {
@@ -296,9 +309,10 @@
     }
     const hostEl = h("div", { id: "settings-host" });
     root.appendChild(hostEl);
+    root.appendChild(h("div", { id: "settings-dirty" }));
     root.appendChild(h("div", { id: "accel-host" }));
     renderAccelerator();
-    if (isAdmin) { renderSettings(); }
+    if (isAdmin) { renderSettings(); renderDirtyBar(); }
     else {
       hostEl.appendChild(h("div", { class: "card" }, h("div", { class: "card-body" },
         h("div", { class: "state" }, "تغییر تنظیمات فقط برای مدیر مجاز است."),
