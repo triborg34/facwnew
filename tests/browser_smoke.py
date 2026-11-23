@@ -43,7 +43,12 @@ def main() -> int:
             errors.append(f"console.error: {m.text} @ {loc}")
         page.on("console", on_console)
         page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
-        page.on("requestfailed", lambda r: errors.append(f"requestfailed: {r.url} {r.failure}"))
+        def on_request_failed(r):
+            # A reload aborts the open event stream; that is the browser
+            # closing the connection, not a defect of the console.
+            if r.url.endswith("/api/events/stream"):
+                return
+            errors.append(f"requestfailed: {r.url} {r.failure}")
         # The very first /api/auth/me is expected to 401 (nobody is signed in
         # yet); the browser always logs failed HTTP requests, so that entry is
         # filtered rather than treated as a defect.
@@ -69,6 +74,10 @@ def main() -> int:
         page.wait_for_timeout(2500)
         page.screenshot(path=str(SHOTS / "02-dashboard.png"))
         print("dashboard title:", page.title())
+
+        # The report lock must be off before the walk: a locked tab opens the
+        # unlock prompt, which would swallow the next click.
+        page.request.put(BASE + "/api/settings", data={"report_lock": False})
 
         # every nav item loads without a JS error
         labels = page.locator(".topnav button").all()
@@ -97,6 +106,21 @@ def main() -> int:
         print("enrolment face chips:", chips)
         if chips == 0:
             errors.append("enrolment picker produced no faces")
+
+        # the form asks for a birth date, not for an age, and shows the age
+        # that is derived from it
+        birth = page.locator('.modal input[type="date"]')
+        print("birth date fields:", birth.count())
+        if birth.count() == 0:
+            errors.append("the enrolment form has no birth date field")
+        else:
+            birth.first.fill("1990-05-17")
+            page.wait_for_timeout(500)
+            modal_text = page.locator(".modal").inner_text()
+            if "سن" not in modal_text:
+                errors.append("the derived age is not shown next to the birth date")
+            else:
+                print("derived age shown:", [ln for ln in modal_text.splitlines() if "سن" in ln][:1])
         page.keyboard.press("Escape")
         page.wait_for_timeout(500)
 
@@ -106,6 +130,51 @@ def main() -> int:
         page.screenshot(path=str(SHOTS / "05-reports.png"))
         rows = page.locator("table.data tbody tr").count()
         print("report rows:", rows)
+
+        # the zones screen: the camera list, the drawing stage and the relay
+        # form of a region
+        page.get_by_role("button", name="نواحی").click()
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(SHOTS / "09-zones.png"))
+        zones_text = page.locator("#page-host").inner_text()
+        if "ناحیه" not in zones_text and "دوربین" not in zones_text:
+            errors.append("the zones screen rendered nothing")
+        print("zones screen:", "ok" if ("ناحیه" in zones_text or "دوربین" in zones_text) else "empty")
+
+        # report lock: the tab must stay closed until the administrator
+        # password is entered
+        try:
+            r = page.request.put(BASE + "/api/settings", data={"report_lock": True})
+            print("report_lock on ->", r.status)
+            # "networkidle" never fires here: the live event feed keeps an open
+            # request, so the reload waits for the document instead.
+            page.reload(wait_until="domcontentloaded")
+            page.wait_for_selector(".topnav", timeout=15000)
+            page.wait_for_timeout(1500)
+            nav_reports = page.locator(".topnav button", has_text="گزارش")
+            label = nav_reports.first.inner_text()
+            print("locked nav label:", label)
+            if "\U0001F512" not in label:
+                errors.append("the reports tab is not marked as locked")
+            page.screenshot(path=str(SHOTS / "10-report-lock.png"))
+            nav_reports.first.click()
+            page.wait_for_timeout(1000)
+            if page.locator(".modal").count() == 0:
+                errors.append("no unlock prompt appeared for the locked reports tab")
+            page.screenshot(path=str(SHOTS / "11-report-unlock-prompt.png"))
+            if page.locator(".modal input[type=password]").count():
+                page.fill('.modal input[type="password"]', "admin12345")
+                page.get_by_role("button", name="باز کردن قفل").click()
+                page.wait_for_timeout(2000)
+                unlocked_rows = page.locator("table.data tbody tr").count()
+                print("report rows after unlocking:", unlocked_rows)
+                if unlocked_rows == 0:
+                    errors.append("the reports screen stayed empty after the unlock")
+                page.screenshot(path=str(SHOTS / "12-report-unlocked.png"))
+        finally:
+            # the lock must never survive this test
+            r = page.request.put(BASE + "/api/settings", data={"report_lock": False})
+            print("report_lock off ->", r.status)
 
         # date picker opens and shows Persian digits
         page.locator(".datepicker, input[readonly]").first.click()
