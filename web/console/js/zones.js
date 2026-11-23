@@ -128,17 +128,42 @@
       // the points themselves
       ctx.save();
       ctx.fillStyle = "#ffffff";
-      S.points.forEach((p) => {
+      S.points.forEach((p, i) => {
         const [x, y] = normToPx(p);
         ctx.beginPath();
+        if (i === 0 && S.points.length >= 3) {
+          // the first point is the handle that closes the polygon
+          ctx.arc(x, y, 7, 0, Math.PI * 2);
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          return;
+        }
         ctx.arc(x, y, 3.5, 0, Math.PI * 2);
         ctx.fill();
       });
       ctx.restore();
     }
+
+    // the close button is only useful while a polygon is being drawn
+    const closeBtn = document.getElementById("zone-close");
+    if (closeBtn) {
+      const ready = S.mode === "polygon" && S.points.length >= 3;
+      closeBtn.disabled = !ready;
+      closeBtn.style.display = S.mode === "polygon" ? "" : "none";
+      closeBtn.textContent = ready
+        ? ("بستن ناحیه — " + S.points.length + " نقطه")
+        : "بستن ناحیه";
+    }
   }
 
   // ---------------------------------------------------------------- editing
+  // A polygon is closed in three ways: by clicking the first point again,
+  // by double clicking, by the right mouse button - and by the button in
+  // the toolbar.  The second click of a double click must not add a second
+  // point, otherwise the shape ends with a stray vertex.
+  const CLOSE_RADIUS = 0.02;   // normalised; how near the first point counts
+
   function newZone(kind) {
     return {
       id: "z" + Date.now().toString(36),
@@ -160,21 +185,44 @@
 
   function onCanvasClick(ev) {
     if (ev.button === 2) return;   // right click closes a polygon
-    if (S.mode === "polygon") {
-      S.points.push(eventToNorm(ev));
-      paint();
+    if (S.mode !== "polygon") return;
+    const p = eventToNorm(ev);
+    // clicking the first point again closes the polygon
+    if (S.points.length >= 3) {
+      const [fx, fy] = S.points[0];
+      if (Math.hypot(p[0] - fx, p[1] - fy) <= CLOSE_RADIUS) {
+        finishPolygon();
+        return;
+      }
     }
+    S.points.push(p);
+    paint();
   }
 
   function onCanvasDblClick(ev) {
     if (S.mode !== "polygon") return;
     ev.preventDefault();
-    finishPolygon();
+    if (!S.points.length) return;   // the first click already closed it
+    if (S.points.length === 1) {   // a stray point from the double click
+      S.points = [];
+      paint();
+      return;
+    }
+    // a double click adds the same point twice; the duplicates are dropped
+    while (S.points.length >= 2) {
+      const n = S.points.length;
+      const [ax, ay] = S.points[n - 1];
+      const [bx, by] = S.points[n - 2];
+      if (Math.hypot(ax - bx, ay - by) < 0.005) S.points.pop();
+      else break;
+    }
+    finishPolygon(true);
   }
 
-  function finishPolygon() {
+  function finishPolygon(silent) {
+    if (!S.points.length) return;
     if (S.points.length < 3) {
-      toast("برای بستن ناحیه حداقل سه نقطه لازم است", "warn");
+      if (!silent) toast("برای بستن ناحیه حداقل سه نقطه لازم است", "warn");
       return;
     }
     const zone = newZone("polygon");
@@ -368,8 +416,17 @@
     });
     try {
       const res = await window.API.put("/api/zones/" + S.cameraId, { zones: payload });
-      toast("ذخیره شد — " + res.count + " ناحیه", "ok");
+      if (res.zone_mode_enabled) {
+        // drawing a region means: from now on only the region is processed
+        zoneMode = true;
+        const sw = document.querySelector("#zone-mode-switch input");
+        if (sw) sw.checked = true;
+        toast("ذخیره شد — " + res.count + " ناحیه (پردازش ناحیه‌ای روشن شد)", "ok");
+      } else {
+        toast("ذخیره شد — " + res.count + " ناحیه", "ok");
+      }
       await loadZones();
+      renderZoneNote();
       store.set({ cameras: (await window.API.get("/api/cameras")).items || store.state.cameras });
     } catch (e) {
       toast("خطا در ذخیره: " + e.message, "danger");
@@ -393,6 +450,49 @@
   }
 
   // ---------------------------------------------------------------- the page
+  // The global switch decides whether the drawn regions are enforced: on,
+  // only what happens inside a region is processed.
+  let zoneMode = false;
+
+  function zoneModeSwitch() {
+    return h("label", { class: "switch", id: "zone-mode-switch" },
+      h("input", {
+        type: "checkbox", checked: zoneMode ? true : null,
+        onchange: async (ev) => {
+          const on = ev.target.checked;
+          try {
+            await window.API.put("/api/settings", { zone_mode: on });
+            zoneMode = on;
+            store.set({ settings: Object.assign({}, store.state.settings || {}, { zone_mode: on }) });
+            toast(on ? "پردازش فقط داخل ناحیه انجام می‌شود" : "پردازش در کل تصویر انجام می‌شود", on ? "ok" : "warn");
+            renderZoneNote();
+          } catch (e) {
+            toast("خطا: " + e.message, "danger");
+            ev.target.checked = !on;
+          }
+        },
+      }),
+      h("span", { class: "track" }),
+      h("span", {}, "پردازش فقط داخل ناحیه"));
+  }
+
+  function renderZoneNote() {
+    const host = document.getElementById("zone-note");
+    if (!host) return;
+    clear(host);
+    if (!zoneMode) {
+      host.appendChild(h("div", { class: "zone-note warn" },
+        h("span", { class: "badge warn" }, "حالت ناحیه خاموش"),
+        h("span", {}, "بیرون از ناحیه هم پردازش می‌شود. برای محدود کردن پردازش، کلید بالا را روشن کنید.")));
+      return;
+    }
+    host.appendChild(h("div", { class: "zone-note ok" },
+      h("span", { class: "badge ok" }, "حالت ناحیه فعال"),
+      h("span", {}, S.zones.length
+        ? "فقط داخل ناحیه پردازش می‌شود؛ بیرون از آن هیچ پردازشی انجام نمی‌گیرد."
+        : "برای این دوربین هنوز ناحیه‌ای تعریف نشده، بنابراین کل تصویر پردازش می‌شود.")));
+  }
+
   async function mount(host) {
     root = host;
     clear(root);
@@ -400,6 +500,7 @@
       h("h1", {}, "نواحی"),
       h("span", { class: "sub" }, "ناحیه‌ی فعال هر دوربین و رله‌ی هر ناحیه"),
       h("div", { style: "flex:1" }),
+      zoneModeSwitch(),
       h("button", { class: "btn sm", onclick: refreshSnapshot }, "به‌روزرسانی تصویر"),
       h("button", { class: "btn primary sm", onclick: save }, "ذخیره نواحی")));
 
@@ -422,12 +523,17 @@
       }, m.label));
     });
     modeBar.appendChild(h("button", { class: "btn sm", onclick: undoDraft }, "واگرد آخرین نقطه"));
+    modeBar.appendChild(h("button", {
+      class: "btn sm primary", id: "zone-close",
+      onclick: () => { if (S.mode === "polygon") finishPolygon(); },
+    }, "بستن ناحیه"));
     modeBar.appendChild(h("span", { class: "muted", style: "font-size:11.5px;margin-inline-start:auto" },
-      "چندضلعی: کلیک برای افزودن نقطه، دوبار کلیک برای بستن · مستطیل و خط: بکشید"));
+      "چندضلعی: کلیک برای افزودن نقطه، کلیک روی نقطه‌ی اول یا «بستن ناحیه» برای بستن · مستطیل و خط: بکشید"));
 
     root.appendChild(h("div", { class: "zone-toolbar" },
       h("div", { class: "field", style: "max-width:280px" }, h("label", {}, "دوربین"), camSelect),
       modeBar));
+    root.appendChild(h("div", { id: "zone-note" }));
 
     root.appendChild(h("div", { class: "zone-layout" },
       h("div", { class: "card" },
@@ -463,6 +569,16 @@
 
     S.mounted = true;
 
+    // the switch needs to know whether the regions are enforced
+    try {
+      const res = await window.API.get("/api/settings");
+      zoneMode = !!res.settings.zone_mode;
+      store.set({ settings: res.settings });
+    } catch (e) { zoneMode = false; }
+    // the switch was drawn before the settings were known
+    const modeBox = document.querySelector("#zone-mode-switch input");
+    if (modeBox) modeBox.checked = zoneMode;
+
     // the camera list
     try {
       const res = await window.API.get("/api/cameras");
@@ -475,6 +591,7 @@
         "از صفحهٔ «دوربین‌ها» یک دوربین اضافه کنید تا بتوانید برای آن ناحیه تعریف کنید"));
       renderList();
       renderForm();
+      renderZoneNote();
       return;
     }
     S.cameras.forEach((c) => {
@@ -496,6 +613,7 @@
     refreshSnapshot();
     renderList();
     renderForm();
+    renderZoneNote();
     window.addEventListener("resize", paint);
   }
 

@@ -266,6 +266,29 @@ def test_zone_keeps_its_password_when_the_identifier_is_renamed(tmp_path):
         db.close()
 
 
+def test_only_the_detections_inside_a_region_are_processed():
+    """With the zone mode on, everything outside the regions is ignored."""
+    from facw.pipeline.engine import detections_in_zones, zones_active
+    from facw.pipeline.zones import Zone
+    from facw.vision.person import Detection
+
+    zone = Zone("z1", "ورودی", points=[(0.1, 0.1), (0.5, 0.1), (0.5, 0.5), (0.1, 0.5)])
+    inside = Detection(150, 150, 250, 250, 0.9)   # centre 0.2, 0.2 - inside
+    outside = Detection(600, 400, 900, 700, 0.9)  # centre 0.75, 0.55 - outside
+    kept = detections_in_zones([inside, outside], [zone], 1000, 1000)
+    assert len(kept) == 1
+    assert kept[0][0] is inside
+    assert kept[0][1].name == "ورودی"
+
+    class S:
+        zone_mode = True
+
+    assert zones_active(S(), [zone]) is True
+    S.zone_mode = False
+    assert zones_active(S(), [zone]) is False   # the switch is the master
+    assert zones_active(S(), []) is False       # no regions, nothing to enforce
+
+
 def test_zone_carries_the_points_normalised():
     from facw.pipeline.zones import Zone
 

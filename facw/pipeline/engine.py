@@ -39,6 +39,31 @@ from .zones import Zone, apply_zone_mask, attribute_zone
 
 log = get_logger("pipeline")
 
+
+def zones_active(settings, zones) -> bool:
+    """Are the drawn regions enforced for this camera?
+
+    The switch in the settings is the master; a camera that has regions is
+    processed inside them and nowhere else.
+    """
+    return bool(getattr(settings, "zone_mode", False)) and bool(zones)
+
+
+def detections_in_zones(detections, zones, width: int, height: int):
+    """Keep the detections whose centre lies inside one of the regions.
+
+    With the zone mode on, everything outside the drawn regions is ignored:
+    it is not tracked, not analysed and never becomes an event.
+    """
+    kept = []
+    for d in detections or []:
+        cx = (d.x1 + d.x2) / 2.0 / max(1, width)
+        cy = (d.y1 + d.y2) / 2.0 / max(1, height)
+        z = attribute_zone(zones, cx, cy)
+        if z is not None:
+            kept.append((d, z))
+    return kept
+
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 COLOURS = {
     "identified": (60, 200, 90),
@@ -437,7 +462,7 @@ class PipelineWorker:
         work = frame
         # Stage 2 - zone masking.  No zones -> whole frame (never a hard-coded
         # rectangle).
-        if settings.zone_mode and self.zones:
+        if zones_active(settings, self.zones):
             work = apply_zone_mask(frame, self.zones)
 
         detections = self.ctx.person.detect(work, settings.person_confidence, getattr(settings, "person_max_side", 0))
@@ -454,15 +479,10 @@ class PipelineWorker:
                 detections = []
             else:
                 detections = None
-        if settings.zone_mode and self.zones:
+        if zones_active(settings, self.zones):
             # Attribute to the zone containing the box centre; also drop boxes
             # that the block mask left empty (nothing to detect outside zones).
-            kept = []
-            for d in detections or []:
-                cx, cy = (d.x1 + d.x2) / 2.0 / max(1, w), (d.y1 + d.y2) / 2.0 / max(1, h)
-                z = attribute_zone(self.zones, cx, cy)
-                if z is not None:
-                    kept.append((d, z))
+            kept = detections_in_zones(detections, self.zones, w, h)
             pairs = self.tracker.update(self.camera_key, [d for d, _ in kept], settings.overlap_threshold) if detection_update else []
             zone_by_id = {id(d): z for d, z in kept}
         else:
@@ -470,7 +490,7 @@ class PipelineWorker:
             zone_by_id = {}
 
         for track, det in pairs:
-            if settings.zone_mode and self.zones:
+            if zones_active(settings, self.zones):
                 z = zone_by_id.get(id(det))
                 if z is not None:
                     track.zone_name = z.name

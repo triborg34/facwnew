@@ -141,6 +141,53 @@ def main() -> int:
             errors.append("the zones screen rendered nothing")
         print("zones screen:", "ok" if ("ناحیه" in zones_text or "دوربین" in zones_text) else "empty")
 
+        # a polygon must be closable and must become a region
+        canvas = page.locator("canvas.zone-canvas")
+        if canvas.count():
+            before = page.locator(".zone-item").count()
+            box = canvas.bounding_box()
+            page.get_by_role("button", name="چندضلعی").click()
+            page.wait_for_timeout(250)
+            for fx, fy in [(0.2, 0.2), (0.45, 0.2), (0.45, 0.45), (0.2, 0.45)]:
+                page.mouse.click(box["x"] + box["width"] * fx, box["y"] + box["height"] * fy)
+                page.wait_for_timeout(200)
+            close = page.locator("#zone-close")
+            if not close.count() or close.is_disabled():
+                errors.append("the close button of a polygon is not usable")
+            else:
+                close.click()
+                page.wait_for_timeout(700)
+                after = page.locator(".zone-item").count()
+                print("regions after closing a polygon:", after)
+                if after <= before:
+                    errors.append("a closed polygon did not become a region")
+                page.screenshot(path=str(SHOTS / "09b-zones-polygon.png"))
+            # the drawn polygon is only a working copy - it is not saved here
+
+        # a changed setting must be offered to be saved
+        page.get_by_role("button", name="تنطیمات").click()
+        page.wait_for_timeout(1200)
+        sw = page.locator(".switch", has_text="قفل گزارش")
+        was_locked = sw.locator("input").is_checked()
+        sw.click()
+        page.wait_for_timeout(400)
+        save = page.get_by_role("button", name="ذخیره و اعمال")
+        print("save button after a change:", save.count())
+        if not save.count():
+            errors.append("a changed setting is not offered to be saved")
+        else:
+            save.click()
+            page.wait_for_timeout(1200)
+        # put the lock back the way it was
+        page.get_by_role("button", name="تنطیمات").click()
+        page.wait_for_timeout(1200)
+        sw = page.locator(".switch", has_text="قفل گزارش")
+        if sw.locator("input").is_checked() != was_locked:
+            sw.click()
+            page.wait_for_timeout(400)
+            page.get_by_role("button", name="ذخیره و اعمال").click()
+            page.wait_for_timeout(1200)
+
         # report lock: the tab must stay closed until the administrator
         # password is entered
         try:

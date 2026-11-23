@@ -240,7 +240,21 @@ def put_zones(request: Request, camera_id: int, payload: Dict[str, Any] = Body(.
     count = app.zones.replace_for_camera(key, zones)
     app.pipeline.reload_zones()
     app.audit.record("zones_saved", actor=user["login_name"], target=key, detail=f"count={count}")
-    return {"ok": True, "count": count, "zones": app.zones.list_for_camera(key)}
+    # Drawing a region means: from now on only what happens inside a region is
+    # processed.  The switch is turned on with it, so the operator does not
+    # have to look for it in the settings.
+    zone_mode_enabled = False
+    if count and not app.settings.get().zone_mode:
+        app.settings.update({"zone_mode": True})
+        zone_mode_enabled = True
+        app.audit.record("zone_mode_enabled", actor=user["login_name"], target=key)
+    return {
+        "ok": True,
+        "count": count,
+        "zones": app.zones.list_for_camera(key),
+        "zone_mode": bool(app.settings.get().zone_mode),
+        "zone_mode_enabled": zone_mode_enabled,
+    }
 
 
 @router.delete("/zones/{camera_id}")
