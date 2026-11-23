@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 import numpy as np
 
+from ..core.birthdate import age_from_birth_date
 from ..core.security import Sealer
 from .db import Database
 
@@ -93,19 +94,24 @@ class IdentityRepo:
         gender = data.get("gender", "unknown")
         if gender not in GENDERS:
             raise ValueError(f"invalid gender: {gender}")
-        age = data.get("age")
-        age = int(age) if age not in (None, "", "null") else None
+        # A birth date wins over a hand typed age: the age is derived from it.
+        birth_date = str(data.get("birth_date") or "").strip()[:10]
+        age = age_from_birth_date(birth_date)
+        if age is None:
+            age = data.get("age")
+            age = int(age) if age not in (None, "", "null") else None
         now = now_iso()
         with self.db.transaction() as c:
             cur = c.execute(
                 """INSERT INTO identities(
-                     name, family_name, age, gender, role, national_number, description,
+                     name, family_name, age, birth_date, gender, role, national_number, description,
                      registered_by, avatar_file, reference_file, created_at, updated_at)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     str(data.get("name", "")).strip() or "unnamed",
                     str(data.get("family_name", "")).strip(),
                     age,
+                    birth_date,
                     gender,
                     role,
                     str(data.get("national_number", "")).strip(),
@@ -126,7 +132,7 @@ class IdentityRepo:
         if existing is None:
             return None
         allowed = {
-            "name", "family_name", "age", "gender", "role",
+            "name", "family_name", "age", "birth_date", "gender", "role",
             "national_number", "description", "registered_by",
             "avatar_file", "reference_file",
         }
@@ -140,6 +146,13 @@ class IdentityRepo:
                 raise ValueError(f"invalid gender: {val}")
             if key == "age":
                 val = int(val) if val not in (None, "", "null") else None
+            if key == "birth_date":
+                val = str(val or "").strip()[:10]
+                # A new birth date makes the stored age stale, so it is
+                # recalculated from the date.
+                age = age_from_birth_date(val)
+                fields.append("age=?")
+                params.append(age)
             fields.append(f"{key}=?")
             params.append(val)
         if not fields:

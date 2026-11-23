@@ -147,6 +147,33 @@
     return g2j(+m[1], +m[2], +m[3]);
   }
 
+  // --- birth date and the age derived from it ------------------------------
+  // The birth date is the source of truth; the age always follows from it.
+  function ageFromBirthDate(iso) {
+    const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const born = new Date(+m[1], +m[2] - 1, +m[3]);
+    if (isNaN(born.getTime()) || born.getTime() > Date.now()) return null;
+    const now = new Date();
+    let years = now.getFullYear() - born.getFullYear();
+    const beforeBirthday =
+      now.getMonth() < born.getMonth() ||
+      (now.getMonth() === born.getMonth() && now.getDate() < born.getDate());
+    if (beforeBirthday) years -= 1;
+    return years < 0 ? null : years;
+  }
+
+  // The rough age a detector guessed is turned into a plausible birth date,
+  // so the form can start from something instead of an empty field.
+  function birthDateFromAge(age) {
+    const years = Number(age);
+    if (!age || !isFinite(years) || years < 0 || years > 120) return "";
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - Math.floor(years));
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
   window.I18N = {
     dir: "rtl",
     locale: "fa-IR",
@@ -164,6 +191,8 @@
     jalaliMonthLength: jalaliMonthLength,
     jalaliToIso: jalaliToIso,
     isoToJalaliParts: isoToJalaliParts,
+    ageFromBirthDate: ageFromBirthDate,
+    birthDateFromAge: birthDateFromAge,
   };
 })();
 

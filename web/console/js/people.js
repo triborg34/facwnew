@@ -5,6 +5,8 @@
   const I = window.I18N;
   const L = window.LABELS;
   const MAX_PHOTOS = 10;
+  const ageFromBirthDate = window.I18N.ageFromBirthDate;
+  const birthDateFromAge = window.I18N.birthDateFromAge;
 
   let root = null;
 
@@ -307,10 +309,22 @@
     });
 
     // --- identity fields ------------------------------------------------
+    // The birth date is the source of truth; the age is derived from it and
+    // only shown, never typed - an age entered by hand is wrong tomorrow.
+    const ageOut = h("div", { class: "muted", style: "font-size:12px;margin-top:5px" }, "");
+    const birth = h("input", {
+      type: "date",
+      value: opts.birth_date || birthDateFromAge(opts.age),
+      onchange: () => refreshAge(),
+    });
+    const refreshAge = () => {
+      const years = ageFromBirthDate(birth.value);
+      ageOut.textContent = years === null ? "" : "سن: " + I.num(years) + " سال";
+    };
     const meta = {
       name: h("input", { type: "text", value: opts.name || "" }),
       family_name: h("input", { type: "text", value: opts.family_name || "" }),
-      age: h("input", { type: "number", min: 0, max: 120, value: opts.age || "" }),
+      birth_date: birth,
       gender: h("select", {}, [["unknown", L.notset], ["male", L.male], ["female", L.female]]
         .map(([v, t]) => h("option", { value: v, selected: opts.gender === v ? true : null }, t))),
       role: h("select", {}, [["colleague", L.colleague], ["approve", L.approve], ["visitor", L.visitor], ["deny", L.deny]]
@@ -318,6 +332,7 @@
       national_number: h("input", { type: "text" }),
       description: h("textarea", {}),
     };
+    refreshAge();
 
     // --- source tabs ----------------------------------------------------
     // The dialog used to show every way of adding a photo at once (file,
@@ -374,7 +389,7 @@
             h("div", { class: "field" }, h("label", {}, "نام *"), meta.name),
             h("div", { class: "field" }, h("label", {}, "نام خانوادگی"), meta.family_name)),
           h("div", { class: "row", style: "margin-top:10px" },
-            h("div", { class: "field" }, h("label", {}, "سن"), meta.age),
+            h("div", { class: "field" }, h("label", {}, "تاریخ تولد (میلادی)"), meta.birth_date, ageOut),
             h("div", { class: "field" }, h("label", {}, "جنسیت"), meta.gender),
             h("div", { class: "field" }, h("label", {}, "وضعیت مجوز"), meta.role)),
           h("div", { class: "row", style: "margin-top:10px" },
@@ -410,7 +425,7 @@
             fd.append("stills", JSON.stringify(stillPhotos.map((p) => p.still)));
             fd.append("metadata", JSON.stringify({
               name: meta.name.value.trim(), family_name: meta.family_name.value.trim(),
-              age: meta.age.value || null, gender: meta.gender.value, role: meta.role.value,
+              birth_date: meta.birth_date.value || "", gender: meta.gender.value, role: meta.role.value,
               national_number: meta.national_number.value.trim(), description: meta.description.value.trim(),
             }));
             if (target) fd.append("identity_id", String(target));
@@ -527,7 +542,10 @@
         )
       ),
       h("table", { class: "data" }, h("tbody", {},
-        h("tr", {}, h("td", { class: "muted" }, "سن"), h("td", {}, p.age === null ? "\u2014" : I.num(p.age))),
+        h("tr", {}, h("td", { class: "muted" }, "تاریخ تولد"), h("td", {},
+          p.birth_date ? I.formatDate(p.birth_date) : "\u2014")),
+        h("tr", {}, h("td", { class: "muted" }, "سن"), h("td", {},
+          p.age === null || p.age === undefined ? "\u2014" : I.num(p.age) + " سال")),
         h("tr", {}, h("td", { class: "muted" }, "جنسیت"), h("td", {}, L[p.gender] || L.notset)),
         h("tr", {}, h("td", { class: "muted" }, "شماره ملی"), h("td", { class: "mono" }, p.national_number ? I.num(p.national_number) : "\u2014")),
         h("tr", {}, h("td", { class: "muted" }, "ثبت‌کننده"), h("td", {}, p.registered_by || "\u2014")),
@@ -592,10 +610,20 @@
   }
 
   function openEdit(p) {
+    const ageOut = h("div", { class: "muted", style: "font-size:12px;margin-top:5px" }, "");
+    const birth = h("input", {
+      type: "date",
+      value: p.birth_date || birthDateFromAge(p.age),
+      onchange: () => {
+        const years = ageFromBirthDate(birth.value);
+        ageOut.textContent = years === null ? "" : "سن: " + I.num(years) + " سال";
+      },
+    });
+    birth.dispatchEvent(new Event("change"));
     const f = {
       name: h("input", { type: "text", value: p.name || "" }),
       family_name: h("input", { type: "text", value: p.family_name || "" }),
-      age: h("input", { type: "number", value: p.age === null ? "" : p.age }),
+      birth_date: birth,
       gender: h("select", {}, [["unknown", L.notset], ["male", L.male], ["female", L.female]].map(([v, t]) => h("option", { value: v, selected: p.gender === v ? true : null }, t))),
       role: h("select", {}, [["colleague", L.colleague], ["approve", L.approve], ["visitor", L.visitor], ["deny", L.deny]].map(([v, t]) => h("option", { value: v, selected: p.role === v ? true : null }, t))),
       national_number: h("input", { type: "text", value: p.national_number || "" }),
@@ -610,7 +638,7 @@
           h("div", { class: "field" }, h("label", {}, "نام"), f.name),
           h("div", { class: "field" }, h("label", {}, "نام خانوادگی"), f.family_name)),
         h("div", { class: "row", style: "margin-top:10px" },
-          h("div", { class: "field" }, h("label", {}, "سن"), f.age),
+          h("div", { class: "field" }, h("label", {}, "تاریخ تولد (میلادی)"), f.birth_date, ageOut),
           h("div", { class: "field" }, h("label", {}, "جنسیت"), f.gender),
           h("div", { class: "field" }, h("label", {}, "وضعیت مجوز"), f.role)),
         h("div", { class: "row", style: "margin-top:10px" },
@@ -624,7 +652,7 @@
             try {
               await window.API.put("/api/identities/" + p.id, {
                 name: f.name.value.trim(), family_name: f.family_name.value.trim(),
-                age: f.age.value || null, gender: f.gender.value, role: f.role.value,
+                birth_date: f.birth_date.value || "", gender: f.gender.value, role: f.role.value,
                 national_number: f.national_number.value.trim(),
                 description: f.description.value.trim(), registered_by: f.registered_by.value.trim(),
               });

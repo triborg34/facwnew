@@ -324,7 +324,7 @@ class EnrolmentService:
                 safe = {
                     k: v
                     for k, v in metadata.items()
-                    if k in ("name", "family_name", "age", "gender", "role",
+                    if k in ("name", "family_name", "age", "birth_date", "gender", "role",
                              "national_number", "description", "registered_by")
                 }
                 if safe:
