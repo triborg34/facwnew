@@ -255,18 +255,44 @@
     return { el, load, state: st };
   }
 
+  // An unknown face can be registered from here: the operator points at the
+  // face and wants it in the list of people.
+  async function registerRecent(ev) {
+    try {
+      await window.PagePeople.registerFromEvent(ev, {
+        source: "داشبورد / " + (ev.camera_source || ""),
+        title: "ثبت شخص ناشناس",
+        onSaved: () => loadRecent(),
+      });
+    } catch (e) { toast("خطا: " + e.message, "danger"); }
+  }
+
   function faceCell(ev) {
     const src = window.API.mediaUrl(ev.face_file || ev.frame_file);
     const name = ev.identity_name === "unknown" ? L.unknown : ev.identity_name;
     const when = `${I.formatDate(ev.event_date)} – ${I.formatTime(ev.event_time)}`;
+    const isAdmin = store.state.user && store.state.user.role === "admin";
+    const canRegister = isAdmin && ev.identity_name === "unknown";
+    const addBtn = canRegister
+      ? h("button", {
+          class: "face-add", type: "button",
+          title: "ثبت این شخص در فهرست افراد",
+          onclick: (e) => {
+            e.stopPropagation();       // the cell itself opens the detail
+            e.preventDefault();
+            registerRecent(ev);
+          },
+        }, "＋")
+      : null;
     return h("div", {
-      class: "face-cell",
+      class: "face-cell" + (canRegister ? " registerable" : ""),
       title: `${name} · ${when} · ${ev.camera_source || ""}`,
       onclick: () => openRecent(ev),
     },
       src
         ? h("img", { src, alt: name, loading: "lazy" })
         : h("div", { class: "face-cell", style: "aspect-ratio:1/1;background:var(--bg-inset)" }),
+      addBtn,
       h("div", { class: "cap" },
         h("div", { class: "n" }, name),
         h("div", { class: "m" }, when),
@@ -279,6 +305,16 @@
     const frameImg = window.API.mediaUrl(ev.frame_file || "");
     const name = ev.identity_name === "unknown" ? L.unknown : ev.identity_name;
     const row = (k, v) => h("tr", {}, h("td", { class: "muted" }, k), h("td", {}, v));
+    const isAdmin = store.state.user && store.state.user.role === "admin";
+    // An unknown face can be registered from here as well: the same enrolment
+    // dialog the reports page uses, fed with this event's stored face.
+    const actions = [{ label: "بستن", kind: "ghost", onClick: (c) => c() }];
+    if (isAdmin && ev.identity_name === "unknown") {
+      actions.unshift({
+        label: "➕ ثبت این شخص در فهرست", kind: "primary",
+        onClick: (c) => { c(); registerRecent(ev); },
+      });
+    }
 
     modal({
       title: name,
@@ -311,7 +347,7 @@
               h("div", { class: "img-box contain", style: "max-height:320px" },
                 h("img", { src: frameImg, alt: "frame", style: "max-height:320px;cursor:zoom-in", onclick: () => zoomImage(frameImg) })))
           : null),
-      actions: [{ label: "بستن", kind: "ghost", onClick: (c) => c() }],
+      actions,
     });
   }
 

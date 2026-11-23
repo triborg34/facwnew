@@ -419,8 +419,19 @@ table.data img.thumb { width: 62px; height: 46px; object-fit: cover; border-radi
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: var(--bg-soft); overflow: hidden; cursor: pointer;
   transition: border-color var(--speed), transform var(--speed);
+  position: relative;
 }
 .face-cell:hover { border-color: var(--accent); transform: translateY(-1px); }
+/* the button that registers an unknown face in the list of people */
+.face-add {
+  position: absolute; top: 6px; inset-inline-start: 6px;
+  width: 26px; height: 26px; padding: 0; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--accent); color: #fff;
+  font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+  opacity: .55; transition: opacity var(--speed), transform var(--speed);
+  box-shadow: 0 1px 4px rgba(4, 10, 20, .35);
+}
+.face-add:hover { opacity: 1; transform: scale(1.08); }
 .face-cell img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: var(--bg-inset); }
 .face-cell .cap { padding: 5px 7px 6px; }
 .face-cell .cap .n { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -466,8 +466,10 @@
       const faces = o.faces || [];
       const label = o.source || "قاب ارسالی";
       inboxPane.appendChild(h("div", { class: "muted", style: "font-size:12px;margin-bottom:8px" }, label));
-      inboxPane.appendChild(h("div", { class: "img-box", style: "max-height:260px" },
-        h("img", { src: still, alt: "", style: "width:100%;object-fit:contain" })));
+      // The still is shown as it is: a face crop is small, and stretching it
+      // over the whole box would only make it look blurry.
+      inboxPane.appendChild(h("div", { class: "img-box contain", style: "max-height:220px" },
+        h("img", { src: still, alt: "" })));
       if (faces.length) {
         inboxBadge.style.display = "";
         inboxBadge.textContent = I.num(faces.length);
@@ -501,6 +503,67 @@
       source: info.source || "گزارش‌ها",
       onSaved: info.onSaved,
     });
+  }
+
+  // Register a person from a stored event: the operator points at a face in
+  // the dashboard or in the report and wants it in the list of people.
+  //
+  // The face crop of the event is used, because it is exactly the face the
+  // operator pointed at - and the detector finds that one face in it.  The
+  // stored frame is the fallback, and then the operator picks the face in
+  // the picker.
+  async function registerFromEvent(ev, opts) {
+    opts = opts || {};
+    const camId = (ev && ev.camera_id) || 0;
+    let still = "";
+    let faces = [];
+    let preview = "";
+
+    const asDataUrl = async (url) => {
+      const blob = await (await fetch(url, { credentials: "same-origin" })).blob();
+      return await new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result || ""));
+        r.onerror = () => resolve("");
+        r.readAsDataURL(blob);
+      });
+    };
+
+    // 1. the face crop of the event - the exact face the operator saw
+    if (ev && ev.face_file) {
+      try {
+        const crop = await asDataUrl(window.API.mediaUrl(ev.face_file));
+        const det = await window.API.post("/api/enrolment/detect-b64", { image: crop });
+        if ((det.faces || []).length) {
+          still = crop;
+          faces = det.faces;
+          preview = det.preview || "";
+        }
+      } catch (e) { /* fall back to the stored frame */ }
+    }
+
+    // 2. the stored frame - the operator picks the face in the picker
+    if (!still && ev && ev.frame_file) {
+      try {
+        const frame = await asDataUrl(window.API.mediaUrl(ev.frame_file));
+        const det = await window.API.post("/api/enrolment/detect-b64", { image: frame });
+        still = frame;
+        faces = det.faces || [];
+        preview = det.preview || "";
+      } catch (e) { /* nothing to fall back to */ }
+    }
+    if (!still) { toast("تصویری برای ثبت در دسترس نیست", "warn"); return false; }
+    openEnrolFromEvent(ev, {
+      still,
+      faces,
+      preview,
+      cameraId: camId,
+      title: opts.title || "ثبت شخص از " + (opts.source || "داشبورد"),
+      source: opts.source || "",
+      role: opts.role,
+      onSaved: opts.onSaved,
+    });
+    return true;
   }
 
   function openEnrolFromDetection(info) {
@@ -702,5 +765,5 @@
     root = null;
   }
 
-  window.PagePeople = { mount, unmount, openEnrolment, openPerson, openEnrolFromDetection, openEnrolFromEvent };
+  window.PagePeople = { mount, unmount, openEnrolment, openPerson, openEnrolFromDetection, openEnrolFromEvent, registerFromEvent };
 })();

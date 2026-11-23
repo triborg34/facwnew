@@ -75,6 +75,28 @@ def main() -> int:
         page.screenshot(path=str(SHOTS / "02-dashboard.png"))
         print("dashboard title:", page.title())
 
+        # an unknown face can be registered in the list of people
+        unknown_panel = page.locator('[data-recent="unknown"]')
+        try:
+            page.wait_for_selector('[data-recent="unknown"] .face-cell', timeout=8000)
+        except Exception:
+            pass
+        add_btns = unknown_panel.locator(".face-add")
+        print("register buttons on the unknown faces:", add_btns.count())
+        if add_btns.count():
+            add_btns.first.click()
+            page.wait_for_timeout(1800)
+            if not page.locator(".modal").count():
+                errors.append("the enrolment dialog did not open from an unknown face")
+            else:
+                if not page.locator(".modal .face-chip").count():
+                    errors.append("the enrolment dialog got no face from the unknown one")
+                page.screenshot(path=str(SHOTS / "02b-register-unknown.png"))
+                page.keyboard.press("Escape")
+                page.wait_for_timeout(600)
+        else:
+            print("no unknown face at the moment - nothing to register")
+
         # The report lock must be off before the walk: a locked tab opens the
         # unlock prompt, which would swallow the next click.
         page.request.put(BASE + "/api/settings", data={"report_lock": False})
