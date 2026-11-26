@@ -129,15 +129,22 @@ def main() -> int:
         if chips == 0:
             errors.append("enrolment picker produced no faces")
 
-        # the form asks for a birth date, not for an age, and shows the age
-        # that is derived from it
-        birth = page.locator('.modal input[type="date"]')
+        # the form asks for a birth date in the Persian calendar, not for an
+        # age, and shows the age that is derived from it
+        birth = page.locator('.modal input[readonly]')
         print("birth date fields:", birth.count())
         if birth.count() == 0:
             errors.append("the enrolment form has no birth date field")
         else:
-            birth.first.fill("1990-05-17")
-            page.wait_for_timeout(500)
+            birth.first.click()
+            page.wait_for_timeout(700)
+            # two years back, so the picked date lies in the past
+            for _ in range(2):
+                page.locator(".datepicker:visible .dp-head button").first.click()
+                page.wait_for_timeout(300)
+            page.locator(".datepicker:visible .dp-grid button").filter(has_text="۱۲").first.click()
+            page.wait_for_timeout(700)
+            print("the birth date shows:", birth.first.input_value())
             modal_text = page.locator(".modal").inner_text()
             if "سن" not in modal_text:
                 errors.append("the derived age is not shown next to the birth date")
@@ -249,6 +256,18 @@ def main() -> int:
         page.locator(".datepicker, input[readonly]").first.click()
         page.wait_for_timeout(700)
         page.screenshot(path=str(SHOTS / "06-datepicker.png"))
+        # the calendar has to stay open while the month is walked back
+        head = page.locator(".datepicker:visible .dp-head button")
+        if head.count():
+            before = page.locator(".datepicker:visible .dp-head .title").inner_text()
+            head.first.click()
+            page.wait_for_timeout(500)
+            after = page.locator(".datepicker:visible .dp-head .title").inner_text()
+            print("date picker:", before, "->", after)
+            if before == after:
+                errors.append("the date picker does not move a month")
+            else:
+                page.screenshot(path=str(SHOTS / "06b-datepicker-month.png"))
 
         # narrow viewport: no horizontal overflow
         page.set_viewport_size({"width": 820, "height": 700})

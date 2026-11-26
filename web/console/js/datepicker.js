@@ -33,9 +33,15 @@
       window.UI.clear(popup);
       popup.appendChild(
         h("div", { class: "dp-head" },
-          h("button", { type: "button", class: "btn ghost sm", onclick: () => { view.jm -= 1; if (view.jm < 1) { view.jm = 12; view.jy -= 1; } render(); } }, "\u2039"),
+          h("button", { type: "button", class: "btn ghost sm", title: "\u0633\u0627\u0644 \u0642\u0628\u0644",
+            onclick: () => { view.jy -= 1; render(); } }, "\u00ab"),
+          h("button", { type: "button", class: "btn ghost sm", title: "\u0645\u0627\u0647 \u0642\u0628\u0644",
+            onclick: () => { view.jm -= 1; if (view.jm < 1) { view.jm = 12; view.jy -= 1; } render(); } }, "\u2039"),
           h("div", { class: "title" }, `${I.months[view.jm - 1]} ${I.toFa(view.jy)}`),
-          h("button", { type: "button", class: "btn ghost sm", onclick: () => { view.jm += 1; if (view.jm > 12) { view.jm = 1; view.jy += 1; } render(); } }, "\u203A")
+          h("button", { type: "button", class: "btn ghost sm", title: "\u0645\u0627\u0647 \u0628\u0639\u062f",
+            onclick: () => { view.jm += 1; if (view.jm > 12) { view.jm = 1; view.jy += 1; } render(); } }, "\u203a"),
+          h("button", { type: "button", class: "btn ghost sm", title: "\u0633\u0627\u0644 \u0628\u0639\u062f",
+            onclick: () => { view.jy += 1; render(); } }, "\u00bb")
         )
       );
       const grid = h("div", { class: "dp-grid" });
@@ -95,6 +101,15 @@
       popup.style.display = showing ? "none" : "block";
       if (!showing) render();
     });
+    // A click inside the calendar is not a click outside: without this the
+    // calendar closed itself on every button, so the month could only be
+    // walked one step back.
+    // A click inside the calendar is not a click outside.  The buttons
+    // rebuild the calendar when they are clicked, so the button is
+    // already detached by the time the click reaches the document -
+    // the calendar has to stop the event itself, otherwise it closes on
+    // every button and the month can only be walked one step back.
+    popup.addEventListener("click", (ev) => { ev.stopPropagation(); });
     const closer = () => { popup.style.display = "none"; };
     document.addEventListener("click", closer);
     window.addEventListener("facw:teardown", () => document.removeEventListener("click", closer));

@@ -311,16 +311,18 @@
     // --- identity fields ------------------------------------------------
     // The birth date is the source of truth; the age is derived from it and
     // only shown, never typed - an age entered by hand is wrong tomorrow.
+    // The date is entered in the Persian calendar and kept as an ISO value,
+    // which is what the server stores.
     const ageOut = h("div", { class: "muted", style: "font-size:12px;margin-top:5px" }, "");
-    const birth = h("input", {
-      type: "date",
+    const birth = window.DatePicker({
       value: opts.birth_date || birthDateFromAge(opts.age),
-      onchange: () => refreshAge(),
+      onChange: () => refreshAge(),
     });
     const refreshAge = () => {
       const years = ageFromBirthDate(birth.value);
       ageOut.textContent = years === null ? "" : "سن: " + I.num(years) + " سال";
     };
+    refreshAge();
     const meta = {
       name: h("input", { type: "text", value: opts.name || "" }),
       family_name: h("input", { type: "text", value: opts.family_name || "" }),
@@ -389,7 +391,7 @@
             h("div", { class: "field" }, h("label", {}, "نام *"), meta.name),
             h("div", { class: "field" }, h("label", {}, "نام خانوادگی"), meta.family_name)),
           h("div", { class: "row", style: "margin-top:10px" },
-            h("div", { class: "field" }, h("label", {}, "تاریخ تولد (میلادی)"), meta.birth_date, ageOut),
+            h("div", { class: "field" }, h("label", {}, "تاریخ تولد (شمسی)"), meta.birth_date.el, ageOut),
             h("div", { class: "field" }, h("label", {}, "جنسیت"), meta.gender),
             h("div", { class: "field" }, h("label", {}, "وضعیت مجوز"), meta.role)),
           h("div", { class: "row", style: "margin-top:10px" },
@@ -674,15 +676,19 @@
 
   function openEdit(p) {
     const ageOut = h("div", { class: "muted", style: "font-size:12px;margin-top:5px" }, "");
-    const birth = h("input", {
-      type: "date",
+    // The birth date is picked in the Persian calendar and kept as ISO.
+    const birth = window.DatePicker({
       value: p.birth_date || birthDateFromAge(p.age),
-      onchange: () => {
+      onChange: () => {
         const years = ageFromBirthDate(birth.value);
         ageOut.textContent = years === null ? "" : "سن: " + I.num(years) + " سال";
       },
     });
-    birth.dispatchEvent(new Event("change"));
+    const refreshAge = () => {
+      const years = ageFromBirthDate(birth.value);
+      ageOut.textContent = years === null ? "" : "سن: " + I.num(years) + " سال";
+    };
+    refreshAge();
     const f = {
       name: h("input", { type: "text", value: p.name || "" }),
       family_name: h("input", { type: "text", value: p.family_name || "" }),
@@ -701,7 +707,7 @@
           h("div", { class: "field" }, h("label", {}, "نام"), f.name),
           h("div", { class: "field" }, h("label", {}, "نام خانوادگی"), f.family_name)),
         h("div", { class: "row", style: "margin-top:10px" },
-          h("div", { class: "field" }, h("label", {}, "تاریخ تولد (میلادی)"), f.birth_date, ageOut),
+          h("div", { class: "field" }, h("label", {}, "تاریخ تولد (شمسی)"), f.birth_date.el, ageOut),
           h("div", { class: "field" }, h("label", {}, "جنسیت"), f.gender),
           h("div", { class: "field" }, h("label", {}, "وضعیت مجوز"), f.role)),
         h("div", { class: "row", style: "margin-top:10px" },
